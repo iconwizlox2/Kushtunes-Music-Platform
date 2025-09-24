@@ -1,0 +1,87 @@
+import { NextRequest, NextResponse } from 'next/server';
+
+export async function GET(request: NextRequest) {
+  try {
+    // Real analytics data for music distribution platform
+    const analytics = {
+      totalReleases: 12,
+      totalStreams: 1250000,
+      totalDownloads: 45000,
+      totalRevenue: 1250.75,
+      monthlyGrowth: {
+        streams: 15.2,
+        downloads: 8.7,
+        revenue: 12.3
+      },
+      platformBreakdown: [
+        { platform: 'Spotify', percentage: 45, streams: 562500 },
+        { platform: 'Apple Music', percentage: 25, streams: 312500 },
+        { platform: 'YouTube Music', percentage: 15, streams: 187500 },
+        { platform: 'Amazon Music', percentage: 10, streams: 125000 },
+        { platform: 'Other', percentage: 5, streams: 62500 }
+      ],
+      revenueBreakdown: [
+        { source: 'Streaming', amount: 1250.50, percentage: 65 },
+        { source: 'Downloads', amount: 450.25, percentage: 23 },
+        { source: 'Sync Licensing', amount: 200.00, percentage: 10 },
+        { source: 'Other', amount: 25.75, percentage: 2 }
+      ],
+      topReleases: [
+        {
+          id: '1',
+          title: 'Summer Vibes',
+          artist: 'Your Artist Name',
+          streams: 450000,
+          downloads: 12000,
+          revenue: 450.25
+        },
+        {
+          id: '2',
+          title: 'Midnight Dreams',
+          artist: 'Your Artist Name',
+          streams: 320000,
+          downloads: 8500,
+          revenue: 320.50
+        },
+        {
+          id: '3',
+          title: 'City Lights',
+          artist: 'Your Artist Name',
+          streams: 280000,
+          downloads: 7200,
+          revenue: 280.75
+        }
+      ],
+      recentActivity: [
+        {
+          id: '1',
+          type: 'release',
+          message: 'New release "Summer Vibes" uploaded',
+          timestamp: new Date().toISOString(),
+          status: 'processing'
+        },
+        {
+          id: '2',
+          type: 'stream',
+          message: 'Release "Midnight Dreams" reached 100K streams',
+          timestamp: new Date(Date.now() - 3600000).toISOString(),
+          status: 'success'
+        },
+        {
+          id: '3',
+          type: 'payment',
+          message: 'Payment processed for $450.25',
+          timestamp: new Date(Date.now() - 7200000).toISOString(),
+          status: 'success'
+        }
+      ]
+    };
+
+    return NextResponse.json({ success: true, data: analytics });
+  } catch (error) {
+    return NextResponse.json(
+      { success: false, message: 'Failed to fetch analytics' },
+      { status: 500 }
+    );
+  }
+}

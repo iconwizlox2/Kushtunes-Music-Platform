@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Release {
+  id        String      @id @default(cuid())
+  title     String
+  artist    String
+  type      ReleaseType @default(SINGLE)
+  status    Status      @default(DRAFT)
+  plannedAt DateTime
+  coverUrl  String?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  tracks    Track[]
+}
+
+model Track {
+  id        String   @id @default(cuid())
+  releaseId String
+  title     String
+  isrc      String?
+  audioUrl  String
+  duration  Int?     // seconds
+  createdAt DateTime @default(now())
+  release   Release  @relation(fields: [releaseId], references: [id], onDelete: Cascade)
+}
+
+enum ReleaseType {
+  SINGLE
+  EP
+  ALBUM
+}
+
+enum Status {
+  DRAFT
+  READY
+  PROCESSING
+  LIVE
+}
