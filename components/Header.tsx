@@ -8,8 +8,7 @@ import {
   Cog6ToothIcon,
   Bars3Icon,
   XMarkIcon,
-  UserIcon,
-  ChevronDownIcon
+  UserIcon
 } from '@/components/ui/Icons';
 
 export default function Header() {
