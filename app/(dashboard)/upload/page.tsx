@@ -318,7 +318,7 @@ export default function UploadPage() {
       artworkFile: file,
       fileValidation: {
         ...prev.fileValidation,
-        artwork: validation
+        artwork: validation as { valid: boolean; error?: string; metadata?: any }
       }
     }));
   };
