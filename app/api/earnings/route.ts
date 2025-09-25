@@ -98,11 +98,17 @@ export async function GET(request: NextRequest) {
           ...summary,
           insights
         },
-        payoutHistory: payoutData.map(payout => ({
-          ...payout,
-          statusColor: getPayoutStatusColor(payout.status),
-          statusText: getPayoutStatusText(payout.status)
-        })),
+        payoutHistory: payoutData.map(payout => {
+          const mappedStatus = payout.status === 'APPROVED' ? 'PROCESSING' : 
+                              payout.status === 'PROCESSED' ? 'COMPLETED' : 
+                              payout.status as 'PENDING' | 'FAILED' | 'PROCESSING' | 'COMPLETED';
+          return {
+            ...payout,
+            status: mappedStatus,
+            statusColor: getPayoutStatusColor(mappedStatus),
+            statusText: getPayoutStatusText(mappedStatus)
+          };
+        }),
         releases: releases.map(release => ({
           id: release.id,
           title: release.title,
