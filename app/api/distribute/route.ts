@@ -57,25 +57,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create distribution record in database
-    const distribution = await prisma.dSPDistribution.create({
+    // Create delivery record in database
+    const delivery = await prisma.delivery.create({
       data: {
         releaseId,
-        dsp,
-        dspName: dspConfig.name,
+        store: dspConfig.name,
         status: 'SUBMITTED',
-        submissionId: `${dsp.toLowerCase()}_${Date.now()}`,
-        platformUrls: {
-          platforms: dspConfig.platforms,
-          estimatedTime: dspConfig.estimatedTime,
-          cost: dspConfig.cost
-        },
-        metadata: {
-          successRate: dspConfig.successRate,
-          revenueShare: dspConfig.revenueShare,
-          submittedAt: new Date().toISOString(),
-          releaseData: releaseData || {}
-        }
+        submittedAt: new Date(),
+        notes: `Submitted to ${dspConfig.name} via ${dsp}`
       }
     });
 
@@ -84,25 +73,18 @@ export async function POST(request: NextRequest) {
     
     // Schedule status updates (in real implementation, this would be handled by background jobs)
     setTimeout(async () => {
-      await prisma.dSPDistribution.update({
-        where: { id: distribution.id },
+      await prisma.delivery.update({
+        where: { id: delivery.id },
         data: { status: 'PROCESSING' }
       });
     }, 1000 * 60 * 60 * 24); // 1 day
 
     setTimeout(async () => {
-      await prisma.dSPDistribution.update({
-        where: { id: distribution.id },
+      await prisma.delivery.update({
+        where: { id: delivery.id },
         data: { 
           status: 'LIVE',
-          liveAt: new Date(),
-          platformUrls: {
-            ...distribution.platformUrls as any,
-            spotifyUrl: `https://open.spotify.com/track/${Math.random().toString(36).substr(2, 22)}`,
-            appleMusicUrl: `https://music.apple.com/us/album/${Math.random().toString(36).substr(2, 22)}`,
-            amazonUrl: `https://music.amazon.com/albums/${Math.random().toString(36).substr(2, 22)}`,
-            youtubeUrl: `https://music.youtube.com/watch?v=${Math.random().toString(36).substr(2, 22)}`
-          }
+          notes: `Successfully distributed to ${dspConfig.name}`
         }
       });
     }, 1000 * 60 * 60 * 24 * processingTime); // Processing time
@@ -111,14 +93,13 @@ export async function POST(request: NextRequest) {
       success: true,
       message: 'Distribution initiated successfully',
       data: {
-        id: distribution.id,
-        dsp: dspConfig.name,
+        id: delivery.id,
+        store: dspConfig.name,
         status: 'SUBMITTED',
         platforms: dspConfig.platforms,
         estimatedTime: dspConfig.estimatedTime,
         cost: dspConfig.cost,
-        submissionId: distribution.submissionId,
-        submittedAt: distribution.submittedAt
+        submittedAt: delivery.submittedAt
       }
     });
 
@@ -143,20 +124,14 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const distributions = await prisma.dSPDistribution.findMany({
+    const deliveries = await prisma.delivery.findMany({
       where: { releaseId },
-      include: {
-        analytics: {
-          orderBy: { date: 'desc' },
-          take: 30 // Last 30 days
-        }
-      },
       orderBy: { createdAt: 'desc' }
     });
 
     return NextResponse.json({
       success: true,
-      data: distributions
+      data: deliveries
     });
 
   } catch (error) {
