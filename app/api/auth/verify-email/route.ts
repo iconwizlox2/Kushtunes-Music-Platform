@@ -4,6 +4,9 @@ import { generateEmailVerificationToken } from '@/lib/auth';
 
 const prisma = new PrismaClient();
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 // Send email verification
 export async function POST(request: NextRequest) {
   try {
