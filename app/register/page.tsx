@@ -301,10 +301,10 @@ export default function RegisterPage() {
 
   if (success) {
     return (
-      <ProfessionalLayout>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
         <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
           <div className="max-w-md w-full">
-            <ProfessionalCard className="p-8 text-center">
+            <div className="bg-white rounded-xl shadow-lg p-8 text-center">
               <div className="mx-auto h-12 w-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
                 <CheckCircleIcon className="h-6 w-6 text-green-600" />
               </div>
@@ -312,16 +312,29 @@ export default function RegisterPage() {
               <p className="text-gray-600 mb-6">
                 Your account has been created successfully. Please check your email for verification instructions.
               </p>
-              <LoadingSpinner />
-            </ProfessionalCard>
+              <div className="space-y-3">
+                <Link
+                  href="/login"
+                  className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors inline-block"
+                >
+                  Go to Login
+                </Link>
+                <Link
+                  href="/verify-email"
+                  className="w-full border border-gray-300 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors inline-block"
+                >
+                  Verify Email
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
-      </ProfessionalLayout>
+      </div>
     );
   }
 
   return (
-    <ProfessionalLayout>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
       <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
           {/* Header */}
@@ -336,7 +349,7 @@ export default function RegisterPage() {
           </div>
 
           {/* Registration Form */}
-          <ProfessionalCard className="p-8">
+          <div className="bg-white rounded-xl shadow-lg p-8">
             {/* Google Sign Up Button */}
             <button
               onClick={handleGoogleSignUp}
@@ -645,9 +658,9 @@ export default function RegisterPage() {
                 </Link>
               </p>
             </div>
-          </ProfessionalCard>
+          </div>
         </div>
       </div>
-    </ProfessionalLayout>
+    </div>
   );
 }
