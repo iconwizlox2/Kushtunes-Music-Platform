@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import { verifyToken } from '@/lib/auth';
 import sharp from 'sharp';
 import { randomUUID } from 'crypto';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/db';
 
 // Upload avatar
 export async function POST(request: NextRequest) {

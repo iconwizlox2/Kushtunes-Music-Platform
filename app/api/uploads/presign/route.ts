@@ -4,6 +4,11 @@ function isoNow() {
   return new Date().toISOString().replace(/[:\-]|\.\d{3}/g, "");
 }
 
+function encodeRFC3986(str: string) {
+  return encodeURIComponent(str)
+    .replace(/[!'()*]/g, c => `%${c.charCodeAt(0).toString(16).toUpperCase()}`);
+}
+
 export async function POST(req: Request) {
   try {
     const { filename, contentType } = await req.json();
@@ -13,12 +18,17 @@ export async function POST(req: Request) {
     const endpoint = process.env.S3_ENDPOINT!.replace(/^https?:\/\//, "");
     const accessKey = process.env.S3_ACCESS_KEY_ID!;
     const secretKey = process.env.S3_SECRET_ACCESS_KEY!;
-    const key = `releases/${Date.now()}-${filename}`;
+    // Sanitize filename to avoid path traversal and illegal characters
+    const safeFilename = String(filename || 'file')
+      .replace(/\s+/g, '_')
+      .replace(/[^A-Za-z0-9._-]/g, '_');
+    const key = `releases/${Date.now()}-${safeFilename}`;
 
     // AWS Signature V4 for S3-compatible providers
     const host = `${bucket}.${endpoint}`;
     const method = "PUT";
-    const url = `https://${host}/${key}`;
+    const canonicalUri = `/${key.split('/').map(encodeRFC3986).join('/')}`;
+    const url = `https://${host}${canonicalUri}`;
     const amzDate = isoNow();
     const dateStamp = amzDate.slice(0, 8);
     const service = "s3";
@@ -34,7 +44,7 @@ export async function POST(req: Request) {
       `x-amz-date:${amzDate}\n`;
 
     const canonicalRequest =
-      `${method}\n/${key}\n\n${canonicalHeaders}\n${signedHeaders}\n${payloadHash}`;
+      `${method}\n${canonicalUri}\n\n${canonicalHeaders}\n${signedHeaders}\n${payloadHash}`;
 
     const canonicalHash = crypto.createHash("sha256").update(canonicalRequest).digest("hex");
     const stringToSign =

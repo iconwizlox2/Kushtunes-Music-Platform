@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import { verifyToken } from '@/lib/auth';
-import sharp from 'sharp';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/db';
 
 // Get user profile
 export async function GET(request: NextRequest) {
