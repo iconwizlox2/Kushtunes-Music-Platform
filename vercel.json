@@ -1,5 +1,5 @@
 {
-  "buildCommand": "node build-no-trace.js",
+  "buildCommand": "npm run build:prod",
   "outputDirectory": ".next",
   "framework": "nextjs",
   "installCommand": "npm install",
