@@ -40,7 +40,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     const payout = await prisma.payout.update({
       where: { id },
       data: {
-        status: approved ? 'APPROVED' : 'REJECTED',
+        status: approved ? 'APPROVED' : 'FAILED',
         processedAt: approved ? new Date() : null
       }
     });
@@ -62,10 +62,10 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
     return NextResponse.json({
       success: true,
-      message: `Payout ${approved ? 'approved and processed' : 'rejected'} successfully`,
+      message: `Payout ${approved ? 'approved and processed' : 'failed'} successfully`,
       data: {
         id: payout.id,
-        status: approved ? 'PROCESSED' : 'REJECTED'
+        status: approved ? 'PROCESSED' : 'FAILED'
       }
     });
 
