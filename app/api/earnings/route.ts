@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
       status: payout.status === 'APPROVED' ? 'PROCESSING' : 
               payout.status === 'PROCESSED' ? 'COMPLETED' : 
               payout.status as 'PENDING' | 'FAILED' | 'PROCESSING' | 'COMPLETED',
-      processedAt: payout.processedAt,
+      processedAt: payout.processedAt || undefined,
       reference: payout.reference
     }));
 
@@ -181,7 +181,7 @@ export async function POST(request: NextRequest) {
       status: payout.status === 'APPROVED' ? 'PROCESSING' : 
               payout.status === 'PROCESSED' ? 'COMPLETED' : 
               payout.status as 'PENDING' | 'FAILED' | 'PROCESSING' | 'COMPLETED',
-      processedAt: payout.processedAt,
+      processedAt: payout.processedAt || undefined,
       reference: payout.reference
     }));
 
