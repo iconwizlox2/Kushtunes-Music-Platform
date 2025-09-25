@@ -1,5 +1,5 @@
 {
-  "buildCommand": "./build-custom.sh",
+  "buildCommand": "npm run build",
   "outputDirectory": ".next",
   "framework": "nextjs",
   "installCommand": "npm install",
@@ -9,5 +9,9 @@
     "app/api/**/*.ts": {
       "maxDuration": 30
     }
+  },
+  "env": {
+    "NEXT_DISABLE_BUILD_TRACE": "1",
+    "NEXT_TELEMETRY_DISABLED": "1"
   }
 }
