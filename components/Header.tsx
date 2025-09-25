@@ -79,12 +79,20 @@ export default function Header() {
               <span className="relative z-10">Upload</span>
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </Link>
-            <Link href="/dashboard" className="px-4 py-2 text-gray-700 hover:text-blue-600 font-semibold transition-all duration-300 rounded-xl hover:bg-blue-50 relative group">
+            <Link href="/analytics" className="px-4 py-2 text-gray-700 hover:text-blue-600 font-semibold transition-all duration-300 rounded-xl hover:bg-blue-50 relative group">
               <span className="relative z-10">Analytics</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            </Link>
+            <Link href="/dashboard" className="px-4 py-2 text-gray-700 hover:text-blue-600 font-semibold transition-all duration-300 rounded-xl hover:bg-blue-50 relative group">
+              <span className="relative z-10">Dashboard</span>
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </Link>
             <Link href="/releases" className="px-4 py-2 text-gray-700 hover:text-blue-600 font-semibold transition-all duration-300 rounded-xl hover:bg-blue-50 relative group">
               <span className="relative z-10">Releases</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            </Link>
+            <Link href="/earnings" className="px-4 py-2 text-gray-700 hover:text-blue-600 font-semibold transition-all duration-300 rounded-xl hover:bg-blue-50 relative group">
+              <span className="relative z-10">Earnings</span>
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </Link>
             <Link href="/marketing" className="px-4 py-2 text-gray-700 hover:text-blue-600 font-semibold transition-all duration-300 rounded-xl hover:bg-blue-50 relative group">
@@ -176,7 +184,7 @@ export default function Header() {
                 <span>Upload</span>
               </Link>
               <Link 
-                href="/dashboard" 
+                href="/analytics" 
                 className="px-4 py-3 text-gray-700 hover:text-blue-600 font-semibold transition-all duration-300 rounded-xl hover:bg-blue-50 flex items-center space-x-3"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
@@ -184,6 +192,16 @@ export default function Header() {
                   <MusicalNoteIcon className="h-4 w-4 text-white" />
                 </div>
                 <span>Analytics</span>
+              </Link>
+              <Link 
+                href="/dashboard" 
+                className="px-4 py-3 text-gray-700 hover:text-blue-600 font-semibold transition-all duration-300 rounded-xl hover:bg-blue-50 flex items-center space-x-3"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center">
+                  <MusicalNoteIcon className="h-4 w-4 text-white" />
+                </div>
+                <span>Dashboard</span>
               </Link>
               <Link 
                 href="/releases" 
@@ -194,6 +212,16 @@ export default function Header() {
                   <MusicalNoteIcon className="h-4 w-4 text-white" />
                 </div>
                 <span>Releases</span>
+              </Link>
+              <Link 
+                href="/earnings" 
+                className="px-4 py-3 text-gray-700 hover:text-blue-600 font-semibold transition-all duration-300 rounded-xl hover:bg-blue-50 flex items-center space-x-3"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
+                  <MusicalNoteIcon className="h-4 w-4 text-white" />
+                </div>
+                <span>Earnings</span>
               </Link>
               <Link 
                 href="/marketing" 

@@ -12,7 +12,7 @@ const COOKIE_NAME = "next-auth.session-token";
 const LOGIN_PATH = "/login"; // NextAuth default sign-in page
 
 // Routes to protect (prefix match)
-const PROTECTED_PREFIXES = ["/dashboard", "/releases", "/marketing", "/community"];
+const PROTECTED_PREFIXES = ["/dashboard", "/releases", "/marketing", "/community", "/earnings"];
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -34,5 +34,6 @@ export const config = {
     "/releases/:path*",
     "/marketing/:path*",
     "/community/:path*",
+    "/earnings/:path*",
   ],
 };
