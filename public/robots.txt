@@ -1,0 +1,27 @@
+User-agent: *
+Allow: /
+
+# Disallow admin and private areas
+Disallow: /admin/
+Disallow: /backoffice/
+Disallow: /api/
+Disallow: /_next/
+Disallow: /dashboard/
+Disallow: /releases/
+Disallow: /marketing/
+Disallow: /community/
+Disallow: /upload/
+Disallow: /profile/
+
+# Allow public pages
+Allow: /
+Allow: /login
+Allow: /register
+Allow: /terms
+Allow: /privacy
+Allow: /dmca
+Allow: /analytics
+Allow: /artist/*
+
+# Sitemap location
+Sitemap: https://kushtunes.com/sitemap.xml

@@ -3,13 +3,13 @@ import type { NextRequest } from "next/server";
 
 /**
  * Minimal auth check:
- * - Treat presence of a cookie named "session" as logged in.
- * - If missing, redirect to /login (or /signin, if that's your path).
+ * - Treat presence of a NextAuth session cookie as logged in.
+ * - If missing, redirect to /login.
  *
  * Adjust COOKIE_NAME and LOGIN_PATH if your app differs.
  */
-const COOKIE_NAME = "session";
-const LOGIN_PATH = "/login"; // change to "/signin" if needed
+const COOKIE_NAME = "next-auth.session-token";
+const LOGIN_PATH = "/login"; // NextAuth default sign-in page
 
 // Routes to protect (prefix match)
 const PROTECTED_PREFIXES = ["/dashboard", "/releases", "/marketing", "/community"];
