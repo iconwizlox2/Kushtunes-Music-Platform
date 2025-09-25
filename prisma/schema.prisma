@@ -7,6 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// User authentication (NextAuth compatible)
 model User {
   id              String   @id @default(cuid())
   email           String   @unique
@@ -23,7 +24,6 @@ model User {
   role            UserRole @default(ARTIST)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
-  releases        Release[]
   sessions        Session[]
   accounts        Account[]
   
@@ -59,94 +59,182 @@ model Account {
   @@map("accounts")
 }
 
-model Release {
+// MVP Artist Portal Models
+model Artist {
   id            String      @id @default(cuid())
-  userId        String
-  title         String
-  artist        String
-  type          ReleaseType @default(SINGLE)
-  status        Status      @default(DRAFT)
-  plannedAt     DateTime
-  coverUrl      String?
-  audioUrl      String?
-  genre         String?
-  language      String?
-  releaseDate   DateTime?
-  isrc          String?
-  upc           String?
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tracks        Track[]
-  distributions DSPDistribution[]
+  name          String
+  legalName      String
+  country        String
+  email          String      @unique
+  payoutMethod   String?     // Stripe Connect ID or PayPal email
+  kycStatus      KycStatus   @default(PENDING)
+  kycDocuments   Json?       // Store KYC document URLs
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  releases       Release[]
+  splits         Split[]
+  payouts        Payout[]
+  
+  @@map("artists")
+}
+
+model Release {
+  id              String      @id @default(cuid())
+  upc             String?     @unique // Auto-generated if blank
+  title           String
+  version         String?     // e.g., "Radio Edit", "Extended Mix"
+  label           String?
+  primaryArtistId String
+  releaseDate     DateTime
+  territories     String[]    // Array of country codes
+  status          ReleaseStatus @default(DRAFT)
+  genre           String?
+  subgenre        String?
+  copyrightYear   Int?
+  pLine           String?     // P-line copyright
+  cLine           String?     // C-line copyright
+  coverUrl        String?     // 3000x3000 cover art
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  primaryArtist   Artist      @relation(fields: [primaryArtistId], references: [id], onDelete: Cascade)
+  tracks          Track[]
+  deliveries      Delivery[]
+  
+  @@map("releases")
 }
 
 model Track {
+  id          String      @id @default(cuid())
+  releaseId   String
+  isrc        String?     @unique // Auto-generated if blank
+  title       String
+  version     String?     // Track version
+  trackNumber Int
+  explicit    Boolean     @default(false)
+  language    String      @default("en")
+  duration    Int         // Duration in seconds
+  audioUrl    String      // WAV/FLAC file URL
+  lyrics      String?     // Optional lyrics
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  release     Release     @relation(fields: [releaseId], references: [id], onDelete: Cascade)
+  contributors Contributor[]
+  splits      Split[]
+  
+  @@map("tracks")
+}
+
+model Contributor {
   id        String   @id @default(cuid())
-  releaseId String
-  title     String
-  isrc      String?
-  audioUrl  String
-  duration  Int?     // seconds
+  trackId   String
+  name      String
+  role      String   // e.g., "Producer", "Songwriter", "Performer"
+  ipi       String?  // International Performer Identification
   createdAt DateTime @default(now())
-  release   Release  @relation(fields: [releaseId], references: [id], onDelete: Cascade)
+  updatedAt DateTime @updatedAt
+  track     Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  
+  @@map("contributors")
 }
 
-model DSPDistribution {
+model Split {
   id              String   @id @default(cuid())
-  releaseId       String
-  dsp             String
-  dspName         String
-  status          DistributionStatus @default(PENDING)
-  submittedAt     DateTime @default(now())
-  liveAt          DateTime?
-  rejectedAt      DateTime?
-  rejectionReason String?
-  submissionId    String?  // External DSP submission ID
-  platformUrls    Json?    // Store platform-specific URLs
-  revenue         Float?   @default(0)
-  streams         Int?     @default(0)
-  downloads       Int?     @default(0)
-  lastSyncAt      DateTime?
-  metadata        Json?    // Store DSP-specific metadata
+  trackId         String
+  artistId        String
+  percent         Float    // Percentage (0-100)
+  recoupmentFlag  Boolean  @default(false)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
-  release         Release  @relation(fields: [releaseId], references: [id], onDelete: Cascade)
-  analytics       DistributionAnalytics[]
+  track           Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  artist          Artist   @relation(fields: [artistId], references: [id], onDelete: Cascade)
   
-  @@map("dsp_distributions")
+  @@map("splits")
 }
 
-model DistributionAnalytics {
-  id              String   @id @default(cuid())
-  distributionId  String
-  date            DateTime
-  streams         Int      @default(0)
-  downloads       Int      @default(0)
-  revenue         Float    @default(0)
-  listeners       Int      @default(0)
-  countries       Json?    // Country-wise data
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  distribution    DSPDistribution @relation(fields: [distributionId], references: [id], onDelete: Cascade)
+model Delivery {
+  id          String          @id @default(cuid())
+  releaseId   String
+  store       String          // Store name (Spotify, Apple Music, etc.)
+  status      DeliveryStatus  @default(PENDING)
+  submittedAt DateTime?
+  notes       String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  release     Release         @relation(fields: [releaseId], references: [id], onDelete: Cascade)
   
-  @@map("distribution_analytics")
+  @@map("deliveries")
 }
 
-enum ReleaseType {
-  SINGLE
-  EP
-  ALBUM
+// Backoffice Admin Models
+model Report {
+  id           String      @id @default(cuid())
+  period       String      // YYYY-MM format
+  source       String      // Distributor name
+  fileUrl      String      // URL to uploaded CSV/XLSX
+  importedFlag Boolean     @default(false)
+  importedAt   DateTime?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  earnings     Earning[]
+  
+  @@map("reports")
 }
 
-enum Status {
+model Earning {
+  id        String   @id @default(cuid())
+  trackId   String
+  store     String
+  country   String
+  units     Int      @default(0) // Streams, downloads, etc.
+  revenue   Float    @default(0)
+  period    String   // YYYY-MM format
+  reportId  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  track     Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  report    Report?  @relation(fields: [reportId], references: [id], onDelete: SetNull)
+  
+  @@map("earnings")
+}
+
+model Payout {
+  id        String        @id @default(cuid())
+  artistId  String
+  amount    Float
+  method    String        // Stripe Connect, PayPal, etc.
+  status    PayoutStatus  @default(PENDING)
+  reference String?       // External reference ID
+  processedAt DateTime?
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  artist    Artist       @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  
+  @@map("payouts")
+}
+
+// Enums
+enum UserRole {
+  ARTIST
+  LABEL
+  ADMIN
+}
+
+enum KycStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  UNDER_REVIEW
+}
+
+enum ReleaseStatus {
   DRAFT
-  READY
-  PROCESSING
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
   LIVE
 }
 
-enum DistributionStatus {
+enum DeliveryStatus {
   PENDING
   SUBMITTED
   PROCESSING
@@ -155,8 +243,9 @@ enum DistributionStatus {
   FAILED
 }
 
-enum UserRole {
-  ARTIST
-  LABEL
-  ADMIN
+enum PayoutStatus {
+  PENDING
+  APPROVED
+  PROCESSED
+  FAILED
 }
