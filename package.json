@@ -20,7 +20,7 @@
     "deploy": "./scripts/deploy-production.sh",
     "deploy:vercel": "vercel --prod",
     "deploy:netlify": "netlify deploy --prod --dir=out",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate && ./create-trace-files.sh",
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.10.0",

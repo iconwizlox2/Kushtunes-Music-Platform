@@ -12,6 +12,8 @@ const nextConfig = {
     webpackBuildWorker: false,
     // Disable other experimental features that might cause issues
     serverComponentsExternalPackages: ['micromatch', 'picomatch', 'glob', 'minimatch'],
+    // Disable build trace collection completely
+    outputFileTracing: false,
   },
   
   // Disable all tracing-related features
@@ -62,6 +64,11 @@ const nextConfig = {
   onDemandEntries: {
     maxInactiveAge: 25 * 1000,
     pagesBufferLength: 2,
+  },
+  
+  // Disable build trace collection at the root level
+  generateBuildId: async () => {
+    return 'build-' + Date.now();
   },
 }
 
