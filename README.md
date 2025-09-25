@@ -16,7 +16,12 @@ A professional music distribution platform built with Next.js, TypeScript, and m
 
 ```
 kushtunes-starter/
-├── app/                    # Next.js App Router pages and API routes
+├── app/                    # Next.js App Router with organized route groups
+│   ├── (auth)/            # Authentication pages
+│   ├── (dashboard)/       # User dashboard pages
+│   ├── (admin)/           # Admin pages
+│   ├── (legal)/           # Legal pages
+│   └── api/               # API routes organized by function
 ├── components/            # Reusable React components
 ├── lib/                   # Utility functions and configurations
 ├── prisma/               # Database schema and migrations
