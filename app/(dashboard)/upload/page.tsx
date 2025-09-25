@@ -229,12 +229,12 @@ export default function UploadPage() {
         return (
           <div className="space-y-8">
             {/* Release Type Selection */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                <MusicalNoteIcon className="h-5 w-5 mr-2 text-primary-blue" />
+            <div className="space-y-8">
+              <h3 className="text-2xl font-bold text-white flex items-center">
+                <MusicalNoteIcon className="h-8 w-8 mr-3 text-blue-400" />
                 Release Type
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {[
                   { type: 'SINGLE', label: 'Single', description: '1 track', icon: MusicalNoteIcon },
                   { type: 'EP', label: 'EP', description: '2-6 tracks', icon: GlobeAltIcon },
@@ -242,19 +242,19 @@ export default function UploadPage() {
                 ].map(({ type, label, description, icon: Icon }) => (
                   <div
                     key={type}
-                    className={`p-6 rounded-xl border-2 cursor-pointer transition-all duration-200 hover:shadow-lg ${
+                    className={`p-8 rounded-2xl border-2 cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-2xl ${
                       state.metadata.type === type
-                        ? 'border-primary-blue bg-blue-50'
-                        : 'border-gray-200 bg-white hover:border-gray-300'
+                        ? 'border-blue-400/50 bg-gradient-to-br from-blue-500/20 to-purple-500/20 backdrop-blur-sm shadow-2xl'
+                        : 'border-white/30 bg-white/10 backdrop-blur-sm hover:border-white/50 hover:bg-white/20'
                     }`}
                     onClick={() => handleMetadataChange('type', type)}
                   >
                     <div className="text-center">
-                      <Icon className={`h-8 w-8 mx-auto mb-3 ${
-                        state.metadata.type === type ? 'text-primary-blue' : 'text-gray-400'
+                      <Icon className={`h-12 w-12 mx-auto mb-4 ${
+                        state.metadata.type === type ? 'text-blue-400' : 'text-white/70'
                       }`} />
-                      <h4 className="font-semibold text-gray-900">{label}</h4>
-                      <p className="text-sm text-gray-600">{description}</p>
+                      <h4 className="font-bold text-white text-xl mb-2">{label}</h4>
+                      <p className="text-white/70 text-lg">{description}</p>
                     </div>
                   </div>
                 ))}
@@ -262,17 +262,17 @@ export default function UploadPage() {
             </div>
 
             {/* Tracks Section */}
-            <div className="space-y-4">
+            <div className="space-y-8">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                  <PlayIcon className="h-5 w-5 mr-2 text-primary-blue" />
+                <h3 className="text-2xl font-bold text-white flex items-center">
+                  <PlayIcon className="h-8 w-8 mr-3 text-purple-400" />
                   Tracks ({state.tracks.length})
                 </h3>
                 <button
                   onClick={addTrack}
-                  className="btn-primary flex items-center"
+                  className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center"
                 >
-                  <PlusIcon className="h-4 w-4 mr-1" />
+                  <PlusIcon className="h-5 w-5 mr-2" />
                   Add Track
                 </button>
               </div>
@@ -576,43 +576,60 @@ export default function UploadPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      <div className="max-w-5xl mx-auto p-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl animate-pulse" style={{animationDelay: '0.5s'}}></div>
+      </div>
+      
+      <div className="relative z-10 max-w-6xl mx-auto p-6 pt-32">
         {/* Header */}
-        <div className="mb-10">
-          <Link href="/dashboard" className="inline-flex items-center text-blue-600 hover:text-blue-700 transition-colors mb-6 group">
-            <ArrowLeftIcon className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" />
-            Back to Dashboard
+        <div className="mb-16">
+          <Link href="/dashboard" className="inline-flex items-center text-white/80 hover:text-white transition-colors mb-8 group">
+            <ArrowLeftIcon className="h-5 w-5 mr-3 group-hover:-translate-x-1 transition-transform" />
+            <span className="font-semibold">Back to Dashboard</span>
           </Link>
           <div className="text-center">
-            <h1 className="text-5xl font-bold text-gray-900 mb-4">
-              Upload Your <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Music</span>
+            <h1 className="text-7xl md:text-8xl font-black text-white mb-8 animate-fade-in leading-tight">
+              Upload Your
+              <span className="block bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                Music
+              </span>
             </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">Get your tracks on Spotify, Apple Music, and 200+ platforms worldwide</p>
+            <p className="text-2xl md:text-3xl text-white/80 max-w-4xl mx-auto font-light animate-fade-in">
+              Get your tracks on <span className="font-bold text-white">Spotify, Apple Music</span>, and 200+ platforms worldwide
+            </p>
           </div>
         </div>
 
         {/* Progress Steps */}
-        <div className="flex items-center justify-center space-x-4 mb-12">
+        <div className="flex items-center justify-center space-x-2 md:space-x-6 mb-16 px-4">
           {['Files', 'Metadata', 'Processing', 'Distribution', 'Complete'].map((step, index) => (
             <div key={step} className="flex items-center">
-              <div
-                className={`w-12 h-12 rounded-2xl flex items-center justify-center text-sm font-bold transition-all duration-300 ${
-                  state.step > index + 1
-                    ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg'
-                    : state.step === index + 1
-                      ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg scale-110'
-                      : 'bg-white/80 backdrop-blur-sm text-gray-500 border border-gray-200'
-                }`}
-              >
-                {state.step > index + 1 ? <CheckCircleIcon className="h-6 w-6" /> : index + 1}
+              <div className="relative">
+                <div
+                  className={`w-14 h-14 rounded-2xl flex items-center justify-center text-sm font-bold transition-all duration-300 ${
+                    state.step > index + 1
+                      ? 'bg-gradient-to-r from-green-400 to-emerald-400 text-white shadow-2xl'
+                      : state.step === index + 1
+                        ? 'bg-gradient-to-r from-blue-400 to-purple-400 text-white shadow-2xl scale-110 animate-pulse'
+                        : 'bg-white/20 backdrop-blur-sm text-white/60 border border-white/30'
+                  }`}
+                >
+                  {state.step > index + 1 ? <CheckCircleIcon className="h-7 w-7" /> : index + 1}
+                </div>
+                {state.step === index + 1 && (
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 rounded-2xl blur-md opacity-50 animate-pulse"></div>
+                )}
               </div>
-              <span className={`ml-3 text-sm font-semibold transition-colors ${
-                state.step >= index + 1 ? 'text-gray-900' : 'text-gray-500'
+              <span className={`ml-3 text-sm font-bold transition-colors hidden sm:block ${
+                state.step >= index + 1 ? 'text-white' : 'text-white/60'
               }`}>{step}</span>
               {index < 4 && (
-                <div className={`w-16 h-1 mx-4 rounded-full transition-all duration-300 ${
-                  state.step > index + 1 ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gray-200'
+                <div className={`w-8 md:w-16 h-1 mx-2 md:mx-4 rounded-full transition-all duration-300 ${
+                  state.step > index + 1 ? 'bg-gradient-to-r from-green-400 to-emerald-400' : 'bg-white/30'
                 }`} />
               )}
             </div>
@@ -621,16 +638,16 @@ export default function UploadPage() {
 
         {/* Error Alert */}
         {state.error && (
-          <div className="mb-8 p-6 bg-red-50/80 backdrop-blur-sm border border-red-200 rounded-2xl shadow-lg">
+          <div className="mb-12 p-8 bg-red-500/20 backdrop-blur-md border border-red-400/30 rounded-3xl shadow-2xl animate-fade-in">
             <div className="flex items-center">
-              <ExclamationTriangleIcon className="h-6 w-6 text-red-500 mr-3" />
-              <p className="text-red-700 font-medium">{state.error}</p>
+              <ExclamationTriangleIcon className="h-8 w-8 text-red-400 mr-4" />
+              <p className="text-red-200 font-semibold text-lg">{state.error}</p>
             </div>
           </div>
         )}
 
         {/* Main Content */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 p-8">
+        <div className="bg-white/10 backdrop-blur-md rounded-3xl shadow-2xl border border-white/20 p-12 animate-fade-in">
           {renderStepContent()}
         </div>
       </div>
