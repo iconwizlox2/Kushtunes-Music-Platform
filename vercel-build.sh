@@ -1,18 +1,20 @@
 #!/bin/bash
 
-# Clean build script using minimal configuration
-echo "🚀 Starting clean Vercel build process..."
+echo "🚀 Starting optimized Vercel build process..."
 
-# Generate Prisma client
+# Set environment variables to disable problematic features
+export NODE_OPTIONS="--max-old-space-size=8192"
+export NEXT_DISABLE_BUILD_TRACE=1
+export NEXT_TELEMETRY_DISABLED=1
+export NEXT_PRIVATE_SKIP_MEMORY_WARNING=1
+
+echo "📦 Installing dependencies..."
+npm install --production=false
+
 echo "🗄️ Generating Prisma client..."
 npx prisma generate
 
-# Use clean configuration
-echo "📝 Using clean Next.js configuration..."
-cp next.config.clean.js next.config.js
+echo "🏗️ Building Next.js application..."
+npx next build --no-lint
 
-# Build with clean configuration
-echo "🏗️ Building with clean configuration..."
-NODE_OPTIONS="--max-old-space-size=8192" NEXT_DISABLE_BUILD_TRACE=1 npx next build
-
-echo "✅ Clean build complete!"
+echo "✅ Build completed successfully!"
