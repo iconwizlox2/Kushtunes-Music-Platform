@@ -1,6 +1,26 @@
+import type { Metadata } from "next";
+import { siteUrl } from "@/lib/env";
+import { JsonLd } from "@/components/JsonLd";
+
+export const metadata: Metadata = {
+  title: "Terms of Service",
+  description: "Kushtunes Terms of Service.",
+  alternates: { canonical: `${siteUrl()}/terms` },
+  openGraph: { url: `${siteUrl()}/terms` }
+};
+
 export default function TermsOfService() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: "Terms of Service",
+    url: `${siteUrl()}/terms`
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
+    <>
+      <JsonLd data={jsonLd} />
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="bg-white rounded-lg shadow-lg p-8">
           <h1 className="text-3xl font-bold text-slate-900 mb-8">Terms of Service</h1>
@@ -147,6 +167,7 @@ export default function TermsOfService() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

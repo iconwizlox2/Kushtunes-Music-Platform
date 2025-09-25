@@ -1,6 +1,26 @@
+import type { Metadata } from "next";
+import { siteUrl } from "@/lib/env";
+import { JsonLd } from "@/components/JsonLd";
+
+export const metadata: Metadata = {
+  title: "Privacy Policy",
+  description: "Kushtunes Privacy Policy.",
+  alternates: { canonical: `${siteUrl()}/privacy` },
+  openGraph: { url: `${siteUrl()}/privacy` }
+};
+
 export default function PrivacyPolicy() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: "Privacy Policy",
+    url: `${siteUrl()}/privacy`
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
+    <>
+      <JsonLd data={jsonLd} />
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="bg-white rounded-lg shadow-lg p-8">
           <h1 className="text-3xl font-bold text-slate-900 mb-8">Privacy Policy</h1>
@@ -160,6 +180,7 @@ export default function PrivacyPolicy() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

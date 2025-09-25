@@ -1,21 +1,13 @@
+import type { Metadata } from "next";
+import { siteUrl } from "@/lib/env";
+
 export const dynamic = "force-static";
 
-export const metadata = {
-  title: "Analytics - Kushtunes Music Distribution",
-  description: "Track your music performance with detailed analytics. View streams, revenue, and audience insights across all platforms.",
-  keywords: "music analytics, streaming analytics, music revenue, Spotify analytics, Apple Music analytics",
-  openGraph: {
-    title: "Analytics - Kushtunes Music Distribution",
-    description: "Track your music performance with detailed analytics. View streams, revenue, and audience insights across all platforms.",
-    url: "https://kushtunes.com/analytics",
-    type: "website",
-  },
-  twitter: {
-    card: "summary",
-    title: "Analytics - Kushtunes Music Distribution",
-    description: "Track your music performance with detailed analytics. View streams, revenue, and audience insights across all platforms.",
-  },
-  robots: "index, follow",
+export const metadata: Metadata = {
+  title: "Analytics (Coming Soon)",
+  description: "Streams, playlists, countries, royalties — launching soon.",
+  alternates: { canonical: `${siteUrl()}/analytics` },
+  robots: { index: false, follow: false }
 };
 
 export default function AnalyticsComingSoon() {
