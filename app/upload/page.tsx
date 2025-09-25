@@ -22,12 +22,20 @@ import {
   PauseIcon,
   TrashIcon,
   MusicalNoteIcon,
-  GlobeAltIcon
+  GlobeAltIcon,
+  PlusIcon
 } from '@/components/ui/Icons';
+
+interface Track {
+  id: string;
+  title: string;
+  audioFile: File | null;
+  validation: { valid: boolean; error?: string };
+}
 
 interface UploadState {
   step: number;
-  audioFile: File | null;
+  tracks: Track[];
   artworkFile: File | null;
   metadata: {
     title: string;
@@ -35,6 +43,7 @@ interface UploadState {
     releaseDate: string;
     genre: string;
     language: string;
+    type: 'SINGLE' | 'EP' | 'ALBUM';
   };
   progress: number;
   isProcessing: boolean;
@@ -45,7 +54,6 @@ interface UploadState {
     processing: number;
   };
   fileValidation: {
-    audio: { valid: boolean; error?: string };
     artwork: { valid: boolean; error?: string };
   };
 }
@@ -53,14 +61,20 @@ interface UploadState {
 export default function UploadPage() {
   const [state, setState] = useState<UploadState>({
     step: 1,
-    audioFile: null,
+    tracks: [{
+      id: 'track-1',
+      title: '',
+      audioFile: null,
+      validation: { valid: true }
+    }],
     artworkFile: null,
     metadata: {
       title: '',
       artist: '',
       releaseDate: '',
       genre: '',
-      language: ''
+      language: '',
+      type: 'SINGLE'
     },
     progress: 0,
     isProcessing: false,
@@ -71,13 +85,50 @@ export default function UploadPage() {
       processing: 0,
     },
     fileValidation: {
-      audio: { valid: true },
       artwork: { valid: true },
     },
   });
 
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
+  // Track management functions
+  const addTrack = () => {
+    const newTrack: Track = {
+      id: `track-${Date.now()}`,
+      title: '',
+      audioFile: null,
+      validation: { valid: true }
+    };
+    setState(prev => ({
+      ...prev,
+      tracks: [...prev.tracks, newTrack]
+    }));
+  };
+
+  const removeTrack = (trackId: string) => {
+    if (state.tracks.length <= 1) return; // Don't allow removing the last track
+    setState(prev => ({
+      ...prev,
+      tracks: prev.tracks.filter(track => track.id !== trackId)
+    }));
+  };
+
+  const updateTrack = (trackId: string, field: keyof Track, value: any) => {
+    setState(prev => ({
+      ...prev,
+      tracks: prev.tracks.map(track => 
+        track.id === trackId ? { ...track, [field]: value } : track
+      )
+    }));
+  };
+
+  const handleTrackAudioFile = (trackId: string, file: File) => {
+    const validation = validateAudioFile(file);
+    updateTrack(trackId, 'audioFile', file);
+    updateTrack(trackId, 'validation', validation);
+  };
+
+  const handleTrackTitleChange = (trackId: string, title: string) => {
+    updateTrack(trackId, 'title', title);
+  };
 
   // File validation functions
   const validateAudioFile = (file: File) => {
@@ -110,16 +161,6 @@ export default function UploadPage() {
     return { valid: true };
   };
 
-  const handleAudioFile = (file: File) => {
-    const validation = validateAudioFile(file);
-    setState(prev => ({ 
-      ...prev, 
-      audioFile: file, 
-      error: null,
-      fileValidation: { ...prev.fileValidation, audio: validation }
-    }));
-  };
-
   const handleArtworkFile = (file: File) => {
     const validation = validateImageFile(file);
     setState(prev => ({ 
@@ -137,26 +178,25 @@ export default function UploadPage() {
     }));
   };
 
-  const handlePlayPause = () => {
-    if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
-    }
-  };
-
   const handleUpload = async () => {
     // Validate files
-    if (!state.audioFile || !state.artworkFile) {
-      setState(prev => ({ ...prev, error: 'Please upload both audio and artwork files' }));
+    if (!state.artworkFile) {
+      setState(prev => ({ ...prev, error: 'Please upload artwork file' }));
       return;
     }
 
-    if (!state.fileValidation.audio.valid || !state.fileValidation.artwork.valid) {
-      setState(prev => ({ ...prev, error: 'Please fix file validation errors before uploading' }));
+    if (!state.fileValidation.artwork.valid) {
+      setState(prev => ({ ...prev, error: 'Please fix artwork validation errors before uploading' }));
+      return;
+    }
+
+    // Validate tracks
+    const hasValidTracks = state.tracks.every(track => 
+      track.audioFile && track.validation.valid && track.title.trim()
+    );
+
+    if (!hasValidTracks) {
+      setState(prev => ({ ...prev, error: 'Please upload audio files and add titles for all tracks' }));
       return;
     }
 
@@ -175,14 +215,27 @@ export default function UploadPage() {
 
     try {
       const formData = new FormData();
-      formData.append('audio', state.audioFile);
+      
+      // Add artwork
       formData.append('artwork', state.artworkFile);
+      
+      // Add release metadata
       formData.append('title', state.metadata.title);
       formData.append('artist', state.metadata.artist);
+      formData.append('type', state.metadata.type);
       formData.append('genre', state.metadata.genre);
       formData.append('language', state.metadata.language);
       formData.append('releaseDate', state.metadata.releaseDate);
-      formData.append('releaseType', 'SINGLE');
+      
+      // Add tracks
+      state.tracks.forEach((track, index) => {
+        if (track.audioFile) {
+          formData.append(`track_${index}_audio`, track.audioFile);
+          formData.append(`track_${index}_title`, track.title);
+        }
+      });
+      
+      formData.append('trackCount', state.tracks.length.toString());
 
       // Simulate upload progress
       const progressInterval = setInterval(() => {
@@ -253,59 +306,131 @@ export default function UploadPage() {
               <p className="text-gray-600 mt-2">Get your music distributed to 180+ platforms worldwide</p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Audio Upload */}
+            <div className="space-y-6">
+              {/* Release Type Selection */}
               <ProfessionalCard>
                 <div className="flex items-center mb-4">
-                  <PlayIcon className="h-5 w-5 text-blue-600 mr-2" />
-                  <h3 className="text-lg font-medium text-gray-900">Audio File</h3>
+                  <MusicalNoteIcon className="h-5 w-5 text-blue-600 mr-2" />
+                  <h3 className="text-lg font-medium text-gray-900">Release Type</h3>
                 </div>
-                <FileUpload
-                  onFileSelect={handleAudioFile}
-                  accept=".mp3,.wav,.flac"
-                  maxSize={100}
-                />
-                {!state.fileValidation.audio.valid && (
-                  <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
-                    <div className="flex items-center">
-                      <ExclamationTriangleIcon className="h-4 w-4 text-red-500 mr-2" />
-                      <p className="text-sm text-red-700">{state.fileValidation.audio.error}</p>
-                    </div>
-                  </div>
-                )}
-                {state.audioFile && state.fileValidation.audio.valid && (
-                  <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <MusicalNoteIcon className="h-5 w-5 text-green-600 mr-2" />
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">{state.audioFile.name}</p>
-                          <p className="text-xs text-gray-500">
-                            {(state.audioFile.size / (1024 * 1024)).toFixed(2)} MB
-                          </p>
+                <div className="grid grid-cols-3 gap-4">
+                  {(['SINGLE', 'EP', 'ALBUM'] as const).map((type) => (
+                    <button
+                      key={type}
+                      onClick={() => handleMetadataChange('type', type)}
+                      className={`p-4 rounded-lg border-2 transition-all ${
+                        state.metadata.type === type
+                          ? 'border-blue-500 bg-blue-50 text-blue-700'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="text-center">
+                        <div className="text-2xl mb-2">
+                          {type === 'SINGLE' ? '🎵' : type === 'EP' ? '📀' : '💿'}
+                        </div>
+                        <div className="font-medium">{type}</div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          {type === 'SINGLE' ? '1 track' : type === 'EP' ? '2-6 tracks' : '7+ tracks'}
                         </div>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <ProfessionalButton variant="ghost" size="sm" onClick={handlePlayPause}>
-                          {isPlaying ? <PauseIcon className="h-4 w-4" /> : <PlayIcon className="h-4 w-4" />}
-                        </ProfessionalButton>
-                        <ProfessionalButton
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setState(prev => ({ ...prev, audioFile: null }))}
-                        >
-                          <TrashIcon className="h-4 w-4" />
-                        </ProfessionalButton>
-                      </div>
-                    </div>
-                    <audio
-                      ref={audioRef}
-                      src={state.audioFile ? URL.createObjectURL(state.audioFile) : undefined}
-                      onEnded={() => setIsPlaying(false)}
-                      className="hidden"
-                    />
+                    </button>
+                  ))}
+                </div>
+              </ProfessionalCard>
+
+              {/* Tracks Section */}
+              <ProfessionalCard>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center">
+                    <PlayIcon className="h-5 w-5 text-blue-600 mr-2" />
+                    <h3 className="text-lg font-medium text-gray-900">Tracks ({state.tracks.length})</h3>
                   </div>
-                )}
+                  <ProfessionalButton
+                    variant="outline"
+                    size="sm"
+                    onClick={addTrack}
+                    disabled={state.tracks.length >= 20}
+                  >
+                    <PlusIcon className="h-4 w-4 mr-1" />
+                    Add Track
+                  </ProfessionalButton>
+                </div>
+
+                <div className="space-y-4">
+                  {state.tracks.map((track, index) => (
+                    <div key={track.id} className="p-4 border border-gray-200 rounded-lg">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-medium text-gray-900">Track {index + 1}</h4>
+                        {state.tracks.length > 1 && (
+                          <ProfessionalButton
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeTrack(track.id)}
+                          >
+                            <TrashIcon className="h-4 w-4" />
+                          </ProfessionalButton>
+                        )}
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Track Title *
+                          </label>
+                          <input
+                            type="text"
+                            value={track.title}
+                            onChange={(e) => handleTrackTitleChange(track.id, e.target.value)}
+                            className="form-input"
+                            placeholder="Enter track title"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Audio File *
+                          </label>
+                          <FileUpload
+                            onFileSelect={(file) => handleTrackAudioFile(track.id, file)}
+                            accept=".mp3,.wav,.flac"
+                            maxSize={50}
+                          />
+                        </div>
+                      </div>
+
+                      {!track.validation.valid && (
+                        <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                          <div className="flex items-center">
+                            <ExclamationTriangleIcon className="h-4 w-4 text-red-500 mr-2" />
+                            <p className="text-sm text-red-700">{track.validation.error}</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {track.audioFile && track.validation.valid && (
+                        <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center">
+                              <MusicalNoteIcon className="h-5 w-5 text-green-600 mr-2" />
+                              <div>
+                                <p className="text-sm font-medium text-gray-900">{track.audioFile.name}</p>
+                                <p className="text-xs text-gray-500">
+                                  {(track.audioFile.size / (1024 * 1024)).toFixed(2)} MB
+                                </p>
+                              </div>
+                            </div>
+                            <ProfessionalButton
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => updateTrack(track.id, 'audioFile', null)}
+                            >
+                              <TrashIcon className="h-4 w-4" />
+                            </ProfessionalButton>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </ProfessionalCard>
 
               {/* Artwork Upload */}
@@ -354,7 +479,10 @@ export default function UploadPage() {
                 variant="primary"
                 size="lg"
                 onClick={() => setState(prev => ({ ...prev, step: 2 }))}
-                disabled={!state.audioFile || !state.artworkFile}
+                disabled={
+                  !state.artworkFile || 
+                  !state.tracks.some(track => track.audioFile && track.validation.valid)
+                }
               >
                 Continue to Metadata
               </ProfessionalButton>
@@ -377,14 +505,14 @@ export default function UploadPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Track Title *
+                    Release Title *
                   </label>
                   <input
                     type="text"
                     value={state.metadata.title}
                     onChange={(e) => handleMetadataChange('title', e.target.value)}
                     className="form-input"
-                    placeholder="Enter track title"
+                    placeholder="Enter release title"
                   />
                 </div>
                 <div>
