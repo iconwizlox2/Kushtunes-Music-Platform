@@ -8,7 +8,7 @@ const JWT_EXPIRES_IN = '7d';
 export interface UserPayload {
   id: string;
   email: string;
-  username: string;
+  username: string | null;
   role: string;
 }
 
@@ -124,7 +124,7 @@ export function createAuthResponse(user: any, token: string) {
       user: {
         id: user.id,
         email: user.email,
-        username: user.username,
+        username: user.username || user.email.split('@')[0],
         firstName: user.firstName,
         lastName: user.lastName,
         avatar: user.avatar,

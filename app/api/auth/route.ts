@@ -20,10 +20,10 @@ export async function POST(request: NextRequest) {
   try {
     const { email, username, password, firstName, lastName } = await request.json();
 
-    // Validation
-    if (!email || !username || !password) {
+    // Validation - email and password are required, username is optional
+    if (!email || !password) {
       return NextResponse.json(
-        { success: false, message: 'Email, username, and password are required' },
+        { success: false, message: 'Email and password are required' },
         { status: 400 }
       );
     }
@@ -45,30 +45,41 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate username format
-    const usernameValidation = isValidUsername(username);
-    if (!usernameValidation.valid) {
+    // Validate username format (only if provided)
+    if (username) {
+      const usernameValidation = isValidUsername(username);
+      if (!usernameValidation.valid) {
+        return NextResponse.json(
+          { success: false, message: usernameValidation.message },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Check if user already exists by email
+    const existingUserByEmail = await prisma.user.findUnique({
+      where: { email: email.toLowerCase() }
+    });
+
+    if (existingUserByEmail) {
       return NextResponse.json(
-        { success: false, message: usernameValidation.message },
-        { status: 400 }
+        { success: false, message: 'User with this email already exists' },
+        { status: 409 }
       );
     }
 
-    // Check if user already exists
-    const existingUser = await prisma.user.findFirst({
-      where: {
-        OR: [
-          { email: email.toLowerCase() },
-          { username: username.toLowerCase() }
-        ]
-      }
-    });
+    // Check if username is taken (only if username is provided)
+    if (username) {
+      const existingUserByUsername = await prisma.user.findUnique({
+        where: { username: username.toLowerCase() }
+      });
 
-    if (existingUser) {
-      return NextResponse.json(
-        { success: false, message: 'User with this email or username already exists' },
-        { status: 409 }
-      );
+      if (existingUserByUsername) {
+        return NextResponse.json(
+          { success: false, message: 'Username is already taken' },
+          { status: 409 }
+        );
+      }
     }
 
     // Hash password
@@ -78,7 +89,7 @@ export async function POST(request: NextRequest) {
     const user = await prisma.user.create({
       data: {
         email: email.toLowerCase(),
-        username: username.toLowerCase(),
+        username: username ? username.toLowerCase() : null,
         password: hashedPassword,
         firstName: firstName || null,
         lastName: lastName || null,

@@ -197,9 +197,9 @@ export default function RegisterPage() {
   };
 
   const validateForm = () => {
-    // Check required fields
-    if (!formData.email || !formData.username || !formData.password || !formData.confirmPassword) {
-      setError('All required fields must be filled');
+    // Check required fields (username is now optional)
+    if (!formData.email || !formData.password || !formData.confirmPassword) {
+      setError('Email and password are required');
       return false;
     }
 
@@ -215,8 +215,8 @@ export default function RegisterPage() {
       return false;
     }
 
-    // Check username availability
-    if (usernameAvailable === false) {
+    // Check username availability (only if username is provided)
+    if (formData.username && usernameAvailable === false) {
       setError('Username is already taken');
       return false;
     }
@@ -248,7 +248,7 @@ export default function RegisterPage() {
         },
         body: JSON.stringify({
           email: formData.email,
-          username: formData.username,
+          username: formData.username || null,
           password: formData.password,
           firstName: formData.firstName,
           lastName: formData.lastName
@@ -391,7 +391,7 @@ export default function RegisterPage() {
               {/* Username Field */}
               <div>
                 <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
-                  Username
+                  Username <span className="text-gray-400 text-sm">(Optional)</span>
                 </label>
                 <div className="relative">
                   <input
@@ -399,7 +399,6 @@ export default function RegisterPage() {
                     name="username"
                     type="text"
                     autoComplete="username"
-                    required
                     value={formData.username}
                     onChange={(e) => handleInputChange('username', e.target.value)}
                     className={`form-input pl-10 pr-10 ${validationErrors.username ? 'error border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`}
@@ -421,7 +420,7 @@ export default function RegisterPage() {
                 
                 <div className="mt-1 flex items-center justify-between">
                   <p className="text-xs text-gray-500">
-                    3-20 characters, letters, numbers, and underscores only
+                    Leave blank to use your email as username
                   </p>
                   {usernameAvailable === true && (
                     <span className="text-xs text-green-600 font-medium">Available</span>
