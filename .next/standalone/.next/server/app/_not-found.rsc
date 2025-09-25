@@ -1,11 +1,11 @@
 1:HL["/_next/static/css/12130e99fb2bb0f3.css","style",{"crossOrigin":""}]
-0:["3h4pM9655U-PGwZoPwLFR",[[["",{"children":["__PAGE__",{}]},"$undefined","$undefined",true],"$L2",[[["$","link","0",{"rel":"stylesheet","href":"/_next/static/css/12130e99fb2bb0f3.css","precedence":"next","crossOrigin":""}]],"$L3"]]]]
-4:I[33,["592","static/chunks/common-41a3435fada58d9a.js","185","static/chunks/app/layout-f4cb1607139e6606.js"],"Providers"]
-5:I[653,["592","static/chunks/common-41a3435fada58d9a.js","185","static/chunks/app/layout-f4cb1607139e6606.js"],"AppProvider"]
+0:["build-1758814143637",[[["",{"children":["__PAGE__",{}]},"$undefined","$undefined",true],"$L2",[[["$","link","0",{"rel":"stylesheet","href":"/_next/static/css/12130e99fb2bb0f3.css","precedence":"next","crossOrigin":""}]],"$L3"]]]]
+4:I[33,["749","static/chunks/749-b27ad0027554eccd.js","185","static/chunks/app/layout-e0edca917adfe31a.js"],"Providers"]
+5:I[653,["749","static/chunks/749-b27ad0027554eccd.js","185","static/chunks/app/layout-e0edca917adfe31a.js"],"AppProvider"]
 6:I[6954,[],""]
 7:I[7264,[],""]
-d:I[2868,["592","static/chunks/common-41a3435fada58d9a.js","185","static/chunks/app/layout-f4cb1607139e6606.js"],"ServiceWorkerRegistration"]
-e:I[1590,["592","static/chunks/common-41a3435fada58d9a.js","185","static/chunks/app/layout-f4cb1607139e6606.js"],"NotificationSystem"]
+d:I[2868,["749","static/chunks/749-b27ad0027554eccd.js","185","static/chunks/app/layout-e0edca917adfe31a.js"],"ServiceWorkerRegistration"]
+e:I[1590,["749","static/chunks/749-b27ad0027554eccd.js","185","static/chunks/app/layout-e0edca917adfe31a.js"],"NotificationSystem"]
 9:{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"}
 a:{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"}
 b:{"display":"inline-block"}

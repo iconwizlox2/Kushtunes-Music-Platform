@@ -4,13 +4,29 @@ const nextConfig = {
   images: {
     domains: ['localhost', 'vercel.app'],
   },
+  // Completely disable all experimental features that might cause issues
   experimental: {
-    outputFileTracingRoot: undefined,
-    outputFileTracing: false,
-    serverComponentsExternalPackages: ['critters', 'micromatch', 'picomatch'],
+    serverComponentsExternalPackages: [
+      'critters', 
+      'micromatch', 
+      'picomatch', 
+      'glob', 
+      'minimatch',
+      'braces',
+      'extglob',
+      'fill-range',
+      'is-number',
+      'repeat-element',
+      'snapdragon',
+      'to-regex'
+    ],
+  },
+  // Disable all tracing and telemetry
+  generateBuildId: async () => {
+    return 'build-' + Date.now()
   },
   webpack: (config, { isServer, dev }) => {
-    // Disable problematic modules that cause stack overflow
+    // Completely externalize problematic modules
     if (isServer) {
       config.externals = [
         ...config.externals,
@@ -18,38 +34,28 @@ const nextConfig = {
         'micromatch',
         'picomatch',
         'glob',
-        'minimatch'
+        'minimatch',
+        'braces',
+        'extglob',
+        'fill-range',
+        'is-number',
+        'repeat-element',
+        'snapdragon',
+        'to-regex'
       ];
     }
     
-    // Optimize webpack for production builds
+    // Remove any trace-related plugins
+    config.plugins = config.plugins.filter(plugin => {
+      const name = plugin.constructor.name;
+      return !name.includes('Trace') && 
+             !name.includes('TracePlugin') &&
+             !name.includes('Telemetry');
+    });
+    
+    // Disable source maps to reduce complexity
     if (!dev) {
-      config.optimization = {
-        ...config.optimization,
-        splitChunks: {
-          chunks: 'all',
-          cacheGroups: {
-            default: false,
-            vendors: false,
-            // Create a separate chunk for vendor libraries
-            vendor: {
-              name: 'vendor',
-              chunks: 'all',
-              test: /node_modules/,
-              priority: 20
-            },
-            // Create a separate chunk for common modules
-            common: {
-              name: 'common',
-              minChunks: 2,
-              chunks: 'all',
-              priority: 10,
-              reuseExistingChunk: true,
-              enforce: true
-            }
-          }
-        }
-      };
+      config.devtool = false;
     }
     
     return config;
