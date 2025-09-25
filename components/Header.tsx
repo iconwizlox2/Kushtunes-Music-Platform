@@ -60,10 +60,16 @@ export default function Header() {
               Upload
             </Link>
             <Link href="/dashboard" className="text-gray-600 hover:text-primary-blue font-medium transition-colors">
-              Dashboard
+              Analytics
             </Link>
             <Link href="/releases" className="text-gray-600 hover:text-primary-blue font-medium transition-colors">
               Releases
+            </Link>
+            <Link href="/marketing" className="text-gray-600 hover:text-primary-blue font-medium transition-colors">
+              Marketing
+            </Link>
+            <Link href="/community" className="text-gray-600 hover:text-primary-blue font-medium transition-colors">
+              Community
             </Link>
             {isLoggedIn && user?.role === 'ADMIN' && (
               <Link href="/admin" className="text-gray-600 hover:text-primary-blue font-medium transition-colors">
@@ -128,10 +134,16 @@ export default function Header() {
               Upload
             </Link>
             <Link href="/dashboard" className="text-gray-600 hover:text-primary-blue font-medium transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
-              Dashboard
+              Analytics
             </Link>
             <Link href="/releases" className="text-gray-600 hover:text-primary-blue font-medium transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
               Releases
+            </Link>
+            <Link href="/marketing" className="text-gray-600 hover:text-primary-blue font-medium transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
+              Marketing
+            </Link>
+            <Link href="/community" className="text-gray-600 hover:text-primary-blue font-medium transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
+              Community
             </Link>
             {isLoggedIn && user?.role === 'ADMIN' && (
               <Link href="/admin" className="text-gray-600 hover:text-primary-blue font-medium transition-colors" onClick={() => setIsMobileMenuOpen(false)}>

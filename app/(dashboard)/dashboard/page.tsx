@@ -54,11 +54,47 @@ interface Analytics {
   downloads: number;
   revenue: number;
   listeners: number;
+  countries: CountryData[];
+  demographics: DemographicData;
+  platforms: PlatformData[];
+  playlists: PlaylistData[];
+}
+
+interface CountryData {
+  country: string;
+  countryCode: string;
+  streams: number;
+  revenue: number;
+  listeners: number;
+}
+
+interface DemographicData {
+  ageGroups: { [key: string]: number };
+  gender: { male: number; female: number; other: number };
+  topCities: { city: string; country: string; streams: number }[];
+}
+
+interface PlatformData {
+  platform: string;
+  streams: number;
+  revenue: number;
+  listeners: number;
+  growth: number;
+}
+
+interface PlaylistData {
+  playlistName: string;
+  platform: string;
+  streams: number;
+  followers: number;
+  addedDate: string;
 }
 
 export default function DashboardPage() {
   const [releases, setReleases] = useState<Release[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('overview');
+  const [dateRange, setDateRange] = useState('30d');
   const [stats, setStats] = useState({
     totalReleases: 0,
     totalStreams: 0,
@@ -66,10 +102,18 @@ export default function DashboardPage() {
     liveDistributions: 0,
     pendingDistributions: 0
   });
+  const [analytics, setAnalytics] = useState({
+    countries: [] as CountryData[],
+    demographics: {} as DemographicData,
+    platforms: [] as PlatformData[],
+    playlists: [] as PlaylistData[],
+    trends: [] as { date: string; streams: number; revenue: number }[]
+  });
 
   useEffect(() => {
     fetchReleases();
-  }, []);
+    fetchAnalytics();
+  }, [dateRange]);
 
   const fetchReleases = async () => {
     try {
@@ -84,6 +128,19 @@ export default function DashboardPage() {
       console.error('Error fetching releases:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchAnalytics = async () => {
+    try {
+      const response = await fetch(`/api/analytics?range=${dateRange}`);
+      const result = await response.json();
+      
+      if (result.success) {
+        setAnalytics(result.data);
+      }
+    } catch (error) {
+      console.error('Error fetching analytics:', error);
     }
   };
 
@@ -150,15 +207,53 @@ export default function DashboardPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-            <p className="text-gray-600 mt-1">Manage your music releases and distribution</p>
+            <h1 className="text-3xl font-bold text-gray-900">Advanced Analytics Dashboard</h1>
+            <p className="text-gray-600 mt-1">Comprehensive insights into your music performance</p>
           </div>
-          <ProfessionalButton variant="primary" asChild>
-            <Link href="/upload">
-              <PlusIcon className="h-5 w-5 mr-2" />
-              Upload New Release
-            </Link>
-          </ProfessionalButton>
+          <div className="flex items-center space-x-4">
+            <select
+              value={dateRange}
+              onChange={(e) => setDateRange(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="7d">Last 7 days</option>
+              <option value="30d">Last 30 days</option>
+              <option value="90d">Last 90 days</option>
+              <option value="1y">Last year</option>
+            </select>
+            <ProfessionalButton variant="primary" asChild>
+              <Link href="/upload">
+                <PlusIcon className="h-5 w-5 mr-2" />
+                Upload New Release
+              </Link>
+            </ProfessionalButton>
+          </div>
+        </div>
+
+        {/* Analytics Tabs */}
+        <div className="border-b border-gray-200">
+          <nav className="-mb-px flex space-x-8">
+            {[
+              { id: 'overview', name: 'Overview', icon: ChartBarIcon },
+              { id: 'geographic', name: 'Geographic', icon: GlobeAltIcon },
+              { id: 'demographics', name: 'Demographics', icon: EyeIcon },
+              { id: 'platforms', name: 'Platforms', icon: PlayIcon },
+              { id: 'playlists', name: 'Playlists', icon: MusicalNoteIcon }
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 ${
+                  activeTab === tab.id
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <tab.icon className="h-4 w-4" />
+                <span>{tab.name}</span>
+              </button>
+            ))}
+          </nav>
         </div>
 
         {/* Stats Cards */}
@@ -224,75 +319,183 @@ export default function DashboardPage() {
           </ProfessionalCard>
         </div>
 
-        {/* Releases List */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold text-gray-900">Recent Releases</h2>
-          
-          {releases.length === 0 ? (
-            <ProfessionalCard className="p-12 text-center">
-              <MusicalNoteIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No releases yet</h3>
-              <p className="text-gray-600 mb-6">Upload your first track to get started with distribution</p>
-              <ProfessionalButton variant="primary" asChild>
-                <Link href="/upload">Upload Your First Release</Link>
-              </ProfessionalButton>
+        {/* Tab Content */}
+        {activeTab === 'overview' && (
+          <div className="space-y-6">
+            {/* Performance Trends */}
+            <ProfessionalCard className="p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Performance Trends</h3>
+              <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
+                <p className="text-gray-500">📈 Interactive chart showing streams and revenue trends over time</p>
+              </div>
             </ProfessionalCard>
-          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {releases.map((release) => (
-                <ProfessionalCard key={release.id} className="p-6">
-                  <div className="flex items-start space-x-4">
-                    {release.coverUrl && (
-                      <img
-                        src={release.coverUrl}
-                        alt={release.title}
-                        className="w-16 h-16 rounded-lg object-cover"
-                      />
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-lg font-semibold text-gray-900 truncate">
-                        {release.title}
-                      </h3>
-                      <p className="text-sm text-gray-600">{release.artist}</p>
-                      <div className="mt-2 flex items-center space-x-2">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(release.status)}`}>
-                          {getStatusIcon(release.status)}
-                          <span className="ml-1">{release.status}</span>
-                        </span>
-                        {release.isrc && (
-                          <span className="text-xs text-gray-500">ISRC: {release.isrc}</span>
+
+            {/* Recent Releases */}
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold text-gray-900">Recent Releases</h2>
+              
+              {releases.length === 0 ? (
+                <ProfessionalCard className="p-12 text-center">
+                  <MusicalNoteIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No releases yet</h3>
+                  <p className="text-gray-600 mb-6">Upload your first track to get started with distribution</p>
+                  <ProfessionalButton variant="primary" asChild>
+                    <Link href="/upload">Upload Your First Release</Link>
+                  </ProfessionalButton>
+                </ProfessionalCard>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {releases.slice(0, 4).map((release) => (
+                    <ProfessionalCard key={release.id} className="p-6">
+                      <div className="flex items-start space-x-4">
+                        {release.coverUrl && (
+                          <img
+                            src={release.coverUrl}
+                            alt={release.title}
+                            className="w-16 h-16 rounded-lg object-cover"
+                          />
                         )}
-                      </div>
-                      
-                      {/* Distribution Status */}
-                      {release.distributions.length > 0 && (
-                        <div className="mt-3 space-y-2">
-                          <p className="text-sm font-medium text-gray-700">Distributions:</p>
-                          {release.distributions.map((dist) => (
-                            <div key={dist.id} className="flex items-center justify-between text-sm">
-                              <span className="text-gray-600">{dist.dspName}</span>
-                              <div className="flex items-center space-x-2">
-                                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(dist.status)}`}>
-                                  {getStatusIcon(dist.status)}
-                                  <span className="ml-1">{dist.status}</span>
-                                </span>
-                                {dist.streams && dist.streams > 0 && (
-                                  <span className="text-xs text-gray-500">
-                                    {dist.streams.toLocaleString()} streams
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          ))}
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-lg font-semibold text-gray-900 truncate">
+                            {release.title}
+                          </h3>
+                          <p className="text-sm text-gray-600">{release.artist}</p>
+                          <div className="mt-2 flex items-center space-x-2">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(release.status)}`}>
+                              {getStatusIcon(release.status)}
+                              <span className="ml-1">{release.status}</span>
+                            </span>
+                            {release.isrc && (
+                              <span className="text-xs text-gray-500">ISRC: {release.isrc}</span>
+                            )}
+                          </div>
                         </div>
-                      )}
+                      </div>
+                    </ProfessionalCard>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'geographic' && (
+          <div className="space-y-6">
+            <ProfessionalCard className="p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Geographic Performance</h3>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
+                  <p className="text-gray-500">🗺️ World map showing stream distribution by country</p>
+                </div>
+                <div className="space-y-4">
+                  <h4 className="font-medium text-gray-900">Top Countries</h4>
+                  {analytics.countries.slice(0, 5).map((country, index) => (
+                    <div key={country.countryCode} className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <span className="text-sm font-medium text-gray-500">#{index + 1}</span>
+                        <span className="text-sm font-medium text-gray-900">{country.country}</span>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-medium text-gray-900">{country.streams.toLocaleString()}</p>
+                        <p className="text-xs text-gray-500">${country.revenue.toFixed(2)}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </ProfessionalCard>
+          </div>
+        )}
+
+        {activeTab === 'demographics' && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <ProfessionalCard className="p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Age Distribution</h3>
+                <div className="h-48 bg-gray-50 rounded-lg flex items-center justify-center">
+                  <p className="text-gray-500">📊 Age group breakdown chart</p>
+                </div>
+              </ProfessionalCard>
+              <ProfessionalCard className="p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Gender Distribution</h3>
+                <div className="h-48 bg-gray-50 rounded-lg flex items-center justify-center">
+                  <p className="text-gray-500">👥 Gender breakdown pie chart</p>
+                </div>
+              </ProfessionalCard>
+            </div>
+            <ProfessionalCard className="p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Cities</h3>
+              <div className="space-y-3">
+                {analytics.demographics.topCities?.slice(0, 10).map((city, index) => (
+                  <div key={index} className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <span className="text-sm font-medium text-gray-500">#{index + 1}</span>
+                      <span className="text-sm font-medium text-gray-900">{city.city}, {city.country}</span>
+                    </div>
+                    <span className="text-sm font-medium text-gray-900">{city.streams.toLocaleString()} streams</span>
+                  </div>
+                ))}
+              </div>
+            </ProfessionalCard>
+          </div>
+        )}
+
+        {activeTab === 'platforms' && (
+          <div className="space-y-6">
+            <ProfessionalCard className="p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Platform Performance</h3>
+              <div className="space-y-4">
+                {analytics.platforms.map((platform) => (
+                  <div key={platform.platform} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <PlayIcon className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">{platform.platform}</p>
+                        <p className="text-sm text-gray-500">{platform.listeners.toLocaleString()} listeners</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-medium text-gray-900">{platform.streams.toLocaleString()} streams</p>
+                      <p className="text-sm text-gray-500">${platform.revenue.toFixed(2)}</p>
+                      <p className={`text-xs ${platform.growth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {platform.growth >= 0 ? '+' : ''}{platform.growth.toFixed(1)}%
+                      </p>
                     </div>
                   </div>
-                </ProfessionalCard>
-              ))}
-            </div>
-          )}
-        </div>
+                ))}
+              </div>
+            </ProfessionalCard>
+          </div>
+        )}
+
+        {activeTab === 'playlists' && (
+          <div className="space-y-6">
+            <ProfessionalCard className="p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Playlist Placements</h3>
+              <div className="space-y-4">
+                {analytics.playlists.map((playlist) => (
+                  <div key={playlist.playlistName} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <MusicalNoteIcon className="h-5 w-5 text-purple-600" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">{playlist.playlistName}</p>
+                        <p className="text-sm text-gray-500">{playlist.platform} • {playlist.followers.toLocaleString()} followers</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-medium text-gray-900">{playlist.streams.toLocaleString()} streams</p>
+                      <p className="text-sm text-gray-500">Added {new Date(playlist.addedDate).toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ProfessionalCard>
+          </div>
+        )}
       </div>
     </ProfessionalLayout>
   );
