@@ -716,29 +716,28 @@ export default function UploadPage() {
   };
 
   return (
-    <ProfessionalLayout>
-      <div className="space-y-6">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-4xl mx-auto p-6">
         {/* Header */}
-        <div className="flex items-center">
-          <Link href="/dashboard" className="text-gray-400 hover:text-gray-600 mr-4">
-            <ArrowLeftIcon className="h-5 w-5" />
+        <div className="mb-8">
+          <Link href="/dashboard" className="inline-flex items-center text-primary-blue hover:text-primary-blue/80 transition-colors mb-4">
+            <ArrowLeftIcon className="h-4 w-4 mr-2" />
+            Back to Dashboard
           </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Upload Music</h1>
-            <p className="text-gray-600">Distribute your music to 180+ platforms worldwide</p>
-          </div>
+          <h1 className="heading-lg text-gray-900 mb-2">Upload Your Music</h1>
+          <p className="text-gray-600">Get your tracks on Spotify, Apple Music, and 200+ platforms worldwide</p>
         </div>
 
         {/* Progress Steps */}
-        <div className="flex items-center justify-center space-x-8">
+        <div className="flex items-center justify-center space-x-8 mb-8">
           {['Files', 'Metadata', 'Processing', 'Distribution', 'Complete'].map((step, index) => (
             <div key={step} className="flex items-center">
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
                   state.step > index + 1
-                    ? 'bg-green-600 text-white'
+                    ? 'bg-accent-green text-white'
                     : state.step === index + 1
-                      ? 'bg-blue-600 text-white'
+                      ? 'bg-primary-blue text-white'
                       : 'bg-gray-200 text-gray-600'
                 }`}
               >
@@ -747,7 +746,7 @@ export default function UploadPage() {
               <span className="ml-2 text-sm font-medium text-gray-700">{step}</span>
               {index < 4 && (
                 <div className={`w-16 h-0.5 mx-4 ${
-                  state.step > index + 1 ? 'bg-green-600' : 'bg-gray-200'
+                  state.step > index + 1 ? 'bg-accent-green' : 'bg-gray-200'
                 }`} />
               )}
             </div>
@@ -756,16 +755,19 @@ export default function UploadPage() {
 
         {/* Error Alert */}
         {state.error && (
-          <Alert type="error">
-            {state.error}
-          </Alert>
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex items-center">
+              <ExclamationTriangleIcon className="h-5 w-5 text-red-500 mr-2" />
+              <p className="text-red-700">{state.error}</p>
+            </div>
+          </div>
         )}
 
         {/* Main Content */}
-        <ProfessionalCard className="p-8">
+        <div className="card">
           {renderStepContent()}
-        </ProfessionalCard>
+        </div>
       </div>
-    </ProfessionalLayout>
+    </div>
   );
 }

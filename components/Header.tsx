@@ -1,93 +1,99 @@
-'use client';
+"use client";
 
-import Link from "next/link";
-import { useState, useEffect } from "react";
-import { Logo } from "./Logo";
-import { Button } from "./ui/Button";
-import { 
-  UserIcon, 
-  ArrowRightOnRectangleIcon, 
-  Cog6ToothIcon,
-  Bars3Icon,
-  XMarkIcon,
-  MusicalNoteIcon
-} from "./ui/Icons";
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { Bars3Icon, XMarkIcon, MusicalNoteIcon, UserIcon, ArrowRightOnRectangleIcon, Cog6ToothIcon } from '@/components/ui/Icons';
+import { Button } from '@/components/ui/Button';
 
-export function Header() {
+export default function Header() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState<any>(null);
-  const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem('kushtunes_token');
-    const userData = localStorage.getItem('kushtunes_user');
-    
-    if (token && userData) {
+    if (token) {
       setIsLoggedIn(true);
-      setUser(JSON.parse(userData));
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        setUser(payload);
+      } catch (error) {
+        console.error('Error parsing token:', error);
+        localStorage.removeItem('kushtunes_token');
+        setIsLoggedIn(false);
+      }
     }
   }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('kushtunes_token');
-    localStorage.removeItem('kushtunes_user');
     setIsLoggedIn(false);
     setUser(null);
     window.location.href = '/';
   };
 
   return (
-    <header className="nav-premium fixed top-0 left-0 right-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+    <header className="nav-distrokid sticky top-0 z-50">
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center group">
-            <div className="relative">
-              <MusicalNoteIcon className="h-8 w-8 text-premium-green group-hover:scale-110 transition-transform" />
-              <div className="absolute inset-0 bg-premium-green/20 rounded-full blur-md group-hover:bg-premium-green/30 transition-colors"></div>
+          <Link href="/" className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-primary-blue rounded-lg flex items-center justify-center">
+              <MusicalNoteIcon className="h-5 w-5 text-white" />
             </div>
-            <span className="ml-3 text-xl font-bold text-white group-hover:text-premium-green transition-colors">
-              KUSHTUNES
-            </span>
+            <span className="text-xl font-bold text-gray-900">Kushtunes</span>
           </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <Link href="/upload" className="text-gray-300 hover:text-premium-green transition-colors font-medium">
+            <Link href="/" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+              Home
+            </Link>
+            <Link href="/upload" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
               Upload
             </Link>
-            <Link href="/dashboard" className="text-gray-300 hover:text-premium-green transition-colors font-medium">
+            <Link href="/dashboard" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
               Dashboard
             </Link>
-            <Link href="/releases" className="text-gray-300 hover:text-premium-green transition-colors font-medium">
+            <Link href="/releases" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
               Releases
             </Link>
-            <Link href="/profile" className="text-gray-300 hover:text-premium-green transition-colors font-medium">
-              Profile
-            </Link>
+            {isLoggedIn && (
+              <Link href="/admin" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+                Admin
+              </Link>
+            )}
           </nav>
 
-          {/* User Menu */}
+          {/* User Actions */}
           <div className="hidden md:flex items-center space-x-4">
             {isLoggedIn ? (
               <div className="flex items-center space-x-4">
-                <Link href="/profile" className="flex items-center space-x-2 text-gray-300 hover:text-premium-green transition-colors">
-                  <div className="w-8 h-8 bg-premium-green/20 rounded-full flex items-center justify-center">
-                    <UserIcon className="h-4 w-4 text-premium-green" />
+                <div className="flex items-center space-x-2">
+                  <div className="w-8 h-8 bg-primary-blue rounded-full flex items-center justify-center">
+                    <UserIcon className="h-4 w-4 text-white" />
                   </div>
-                  <span className="font-medium">{user?.firstName || user?.username || 'Profile'}</span>
+                  <span className="text-sm font-medium text-gray-900">
+                    {user?.firstName || user?.username || 'User'}
+                  </span>
+                </div>
+                <Link href="/profile">
+                  <Button intent="ghost" size="sm">
+                    <Cog6ToothIcon className="h-4 w-4 mr-1" />
+                    Profile
+                  </Button>
                 </Link>
-                <Button intent="ghost" size="sm" onClick={handleLogout} className="text-gray-300 hover:text-red-400">
+                <Button intent="ghost" size="sm" onClick={handleLogout}>
                   <ArrowRightOnRectangleIcon className="h-4 w-4 mr-1" />
                   Logout
                 </Button>
               </div>
             ) : (
-              <div className="flex items-center gap-3">
-                <Button intent="ghost" size="sm" asChild className="text-gray-300 hover:text-premium-green">
+              <div className="flex items-center space-x-3">
+                <Button intent="ghost" size="sm" asChild>
                   <Link href="/login">Sign In</Link>
                 </Button>
-                <Button size="sm" asChild className="bg-premium-green hover:bg-accent-green text-black font-semibold">
+                <Button intent="solid" size="sm" asChild>
                   <Link href="/register">Get Started</Link>
                 </Button>
               </div>
@@ -95,83 +101,93 @@ export function Header() {
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden">
-            <Button
-              intent="ghost"
-              size="sm"
-              onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className="text-gray-300"
-            >
-              {showMobileMenu ? (
-                <XMarkIcon className="h-6 w-6" />
-              ) : (
-                <Bars3Icon className="h-6 w-6" />
-              )}
-            </Button>
-          </div>
+          <button
+            className="md:hidden p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            {isMenuOpen ? (
+              <XMarkIcon className="h-6 w-6" />
+            ) : (
+              <Bars3Icon className="h-6 w-6" />
+            )}
+          </button>
         </div>
 
         {/* Mobile Navigation */}
-        {showMobileMenu && (
-          <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 bg-card-bg/95 backdrop-blur-lg border-t border-premium-green/20">
-              <Link
-                href="/upload"
-                className="block px-3 py-2 text-gray-300 hover:text-premium-green transition-colors font-medium"
-                onClick={() => setShowMobileMenu(false)}
+        {isMenuOpen && (
+          <div className="md:hidden border-t border-gray-200 py-4">
+            <nav className="flex flex-col space-y-4">
+              <Link 
+                href="/" 
+                className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
+                onClick={() => setIsMenuOpen(false)}
               >
-                Upload Music
+                Home
               </Link>
-              <Link
-                href="/dashboard"
-                className="block px-3 py-2 text-gray-300 hover:text-premium-green transition-colors font-medium"
-                onClick={() => setShowMobileMenu(false)}
+              <Link 
+                href="/upload" 
+                className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Upload
+              </Link>
+              <Link 
+                href="/dashboard" 
+                className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
+                onClick={() => setIsMenuOpen(false)}
               >
                 Dashboard
               </Link>
-              <Link
-                href="/releases"
-                className="block px-3 py-2 text-gray-300 hover:text-premium-green transition-colors font-medium"
-                onClick={() => setShowMobileMenu(false)}
+              <Link 
+                href="/releases" 
+                className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
+                onClick={() => setIsMenuOpen(false)}
               >
                 Releases
               </Link>
-              <Link
-                href="/profile"
-                className="block px-3 py-2 text-gray-300 hover:text-premium-green transition-colors font-medium"
-                onClick={() => setShowMobileMenu(false)}
-              >
-                Profile
-              </Link>
-              
+              {isLoggedIn && (
+                <Link 
+                  href="/admin" 
+                  className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Admin
+                </Link>
+              )}
+            </nav>
+            
+            <div className="mt-6 pt-6 border-t border-gray-200">
               {isLoggedIn ? (
-                <div className="pt-4 border-t border-gray-700">
-                  <div className="px-3 py-2 text-gray-300 font-medium">
-                    {user?.firstName || user?.username || 'Profile'}
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-primary-blue rounded-full flex items-center justify-center">
+                      <UserIcon className="h-4 w-4 text-white" />
+                    </div>
+                    <span className="text-sm font-medium text-gray-900">
+                      {user?.firstName || user?.username || 'User'}
+                    </span>
                   </div>
-                  <button
-                    onClick={handleLogout}
-                    className="block w-full text-left px-3 py-2 text-red-400 hover:text-red-300 transition-colors font-medium"
-                  >
-                    Logout
-                  </button>
+                  <div className="space-y-2">
+                    <Link href="/profile">
+                      <Button intent="ghost" size="sm" className="w-full justify-start">
+                        <Cog6ToothIcon className="h-4 w-4 mr-2" />
+                        Profile
+                      </Button>
+                    </Link>
+                    <Button intent="ghost" size="sm" onClick={handleLogout} className="w-full justify-start">
+                      <ArrowRightOnRectangleIcon className="h-4 w-4 mr-2" />
+                      Logout
+                    </Button>
+                  </div>
                 </div>
               ) : (
-                <div className="pt-4 border-t border-gray-700 space-y-2">
-                  <Link
-                    href="/login"
-                    className="block px-3 py-2 text-gray-300 hover:text-premium-green transition-colors font-medium"
-                    onClick={() => setShowMobileMenu(false)}
-                  >
-                    Sign In
-                  </Link>
-                  <Link
-                    href="/register"
-                    className="block px-3 py-2 bg-premium-green text-black font-semibold rounded-lg mx-3 text-center"
-                    onClick={() => setShowMobileMenu(false)}
-                  >
-                    Get Started
-                  </Link>
+                <div className="space-y-3">
+                  <Button intent="ghost" size="sm" asChild className="w-full">
+                    <Link href="/login">Sign In</Link>
+                  </Button>
+                  <Button intent="solid" size="sm" asChild className="w-full">
+                    <Link href="/register">Get Started</Link>
+                  </Button>
                 </div>
               )}
             </div>
