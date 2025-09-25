@@ -266,3 +266,4 @@ export function validateUploadProgress(progress: UploadProgress): boolean {
     ['uploading', 'processing', 'completed', 'error'].includes(progress.status)
   );
 }
+

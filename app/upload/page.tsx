@@ -576,37 +576,43 @@ export default function UploadPage() {
   };
 
   return (
-    <div className="min-h-screen clean-bg-gray">
-      <div className="max-w-4xl mx-auto p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+      <div className="max-w-5xl mx-auto p-6">
         {/* Header */}
-        <div className="mb-8">
-          <Link href="/dashboard" className="inline-flex items-center text-primary-blue hover:text-primary-blue-dark transition-colors mb-4">
-            <ArrowLeftIcon className="h-4 w-4 mr-2" />
+        <div className="mb-10">
+          <Link href="/dashboard" className="inline-flex items-center text-blue-600 hover:text-blue-700 transition-colors mb-6 group">
+            <ArrowLeftIcon className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" />
             Back to Dashboard
           </Link>
-          <h1 className="heading-lg text-gray-900 mb-2">Upload Your Music</h1>
-          <p className="text-gray-600">Get your tracks on Spotify, Apple Music, and 200+ platforms worldwide</p>
+          <div className="text-center">
+            <h1 className="text-5xl font-bold text-gray-900 mb-4">
+              Upload Your <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Music</span>
+            </h1>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">Get your tracks on Spotify, Apple Music, and 200+ platforms worldwide</p>
+          </div>
         </div>
 
         {/* Progress Steps */}
-        <div className="flex items-center justify-center space-x-8 mb-8">
+        <div className="flex items-center justify-center space-x-4 mb-12">
           {['Files', 'Metadata', 'Processing', 'Distribution', 'Complete'].map((step, index) => (
             <div key={step} className="flex items-center">
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                className={`w-12 h-12 rounded-2xl flex items-center justify-center text-sm font-bold transition-all duration-300 ${
                   state.step > index + 1
-                    ? 'bg-green-500 text-white'
+                    ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg'
                     : state.step === index + 1
-                      ? 'bg-primary-blue text-white'
-                      : 'bg-gray-200 text-gray-600'
+                      ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg scale-110'
+                      : 'bg-white/80 backdrop-blur-sm text-gray-500 border border-gray-200'
                 }`}
               >
-                {state.step > index + 1 ? <CheckCircleIcon className="h-5 w-5" /> : index + 1}
+                {state.step > index + 1 ? <CheckCircleIcon className="h-6 w-6" /> : index + 1}
               </div>
-              <span className="ml-2 text-sm font-medium text-gray-700">{step}</span>
+              <span className={`ml-3 text-sm font-semibold transition-colors ${
+                state.step >= index + 1 ? 'text-gray-900' : 'text-gray-500'
+              }`}>{step}</span>
               {index < 4 && (
-                <div className={`w-16 h-0.5 mx-4 ${
-                  state.step > index + 1 ? 'bg-green-500' : 'bg-gray-200'
+                <div className={`w-16 h-1 mx-4 rounded-full transition-all duration-300 ${
+                  state.step > index + 1 ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gray-200'
                 }`} />
               )}
             </div>
@@ -615,16 +621,16 @@ export default function UploadPage() {
 
         {/* Error Alert */}
         {state.error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <div className="mb-8 p-6 bg-red-50/80 backdrop-blur-sm border border-red-200 rounded-2xl shadow-lg">
             <div className="flex items-center">
-              <ExclamationTriangleIcon className="h-5 w-5 text-red-500 mr-2" />
-              <p className="text-red-700">{state.error}</p>
+              <ExclamationTriangleIcon className="h-6 w-6 text-red-500 mr-3" />
+              <p className="text-red-700 font-medium">{state.error}</p>
             </div>
           </div>
         )}
 
         {/* Main Content */}
-        <div className="card">
+        <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 p-8">
           {renderStepContent()}
         </div>
       </div>

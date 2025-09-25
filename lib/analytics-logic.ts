@@ -295,3 +295,4 @@ export function getTimeBasedAnalytics(streamData: StreamData[], period: 'daily' 
     .map(([period, data]) => ({ period, ...data }))
     .sort((a, b) => a.period.localeCompare(b.period));
 }
+
