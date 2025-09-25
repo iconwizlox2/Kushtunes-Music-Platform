@@ -43,3 +43,25 @@ export async function requireArtist() {
   });
   return artist; // { id, name, email, ... }
 }
+
+/**
+ * Admin authentication helper
+ * Option A: cookie flag (fast to try); set admin=1 in your own session when needed.
+ * Option B (preferred): role on Artist
+ */
+export async function requireAdmin() {
+  // Option A: cookie flag (fast to try); set admin=1 in your own session when needed.
+  const admin = cookies().get("admin")?.value === "1";
+  if (admin) return true;
+
+  // Option B (preferred): role on Artist
+  try {
+    const artist = await requireArtist();
+    // If your schema has Artist.role: "admin" | "user"
+    // @ts-ignore optional
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    if ((artist as any).role === "admin") return true;
+  } catch { /* ignore */ }
+
+  throw new UnauthorizedError("Admin only");
+}

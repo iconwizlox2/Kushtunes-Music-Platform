@@ -1,5 +1,5 @@
 import { json, onError, requireArtist, BadRequestError } from "@/lib/api";
-import { getArtistBalanceUSD } from "@/lib/balance";
+import { getArtistBalanceUSD, getOpenRecoupUSD } from "@/lib/balance";
 
 export async function GET(req: Request) {
   try {
@@ -7,8 +7,8 @@ export async function GET(req: Request) {
     const url = new URL(req.url);
     const startStr = url.searchParams.get("start");
     const endStr = url.searchParams.get("end");
-
     let start: Date | undefined, end: Date | undefined;
+
     if (startStr) {
       const d = new Date(startStr);
       if (Number.isNaN(d.getTime())) throw new BadRequestError("Invalid start date");
@@ -21,7 +21,14 @@ export async function GET(req: Request) {
     }
 
     const bal = await getArtistBalanceUSD(artist.id, { start, end });
-    return json({ ok: true, ...bal, window: { start: start?.toISOString() ?? null, end: end?.toISOString() ?? null } });
+    const openRecoupUSD = await getOpenRecoupUSD(artist.id);
+
+    return json({
+      ok: true,
+      ...bal,
+      openRecoupUSD,
+      window: { start: start?.toISOString() ?? null, end: end?.toISOString() ?? null }
+    });
   } catch (e) {
     return onError(e);
   }

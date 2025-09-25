@@ -15,6 +15,27 @@ export const payoutMethodSchema = z.object({
   method: z.enum(["STRIPE_CONNECT", "PAYPAL", "REVOLUT", "USDT", "BANK_TRANSFER"]),
 });
 
+// Admin schemas for recoup management
+export const createAdvanceSchema = z.object({
+  artistId: z.string().min(1),
+  amountUSD: z.coerce.number().positive(),
+});
+export const updateAdvanceSchema = z.object({
+  remainingUSD: z.coerce.number().positive().optional(),
+  status: z.enum(["open", "closed"]).optional(),
+});
+
+export const createCostSchema = z.object({
+  artistId: z.string().min(1),
+  description: z.string().min(1),
+  amountUSD: z.coerce.number().positive(),
+  recoupable: z.coerce.boolean(),
+});
+export const updateCostSchema = z.object({
+  remainingUSD: z.coerce.number().positive().optional(),
+  status: z.enum(["open", "closed"]).optional(),
+});
+
 // Utility to parse JSON or FormData with the same schema
 export async function parseJsonOrForm<T extends z.ZodTypeAny>(req: Request, schema: T) {
   const ct = req.headers.get("content-type") || "";

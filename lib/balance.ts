@@ -150,3 +150,10 @@ async function sumOpenRecoupUSD(artistId: string) {
 
   return total;
 }
+
+/**
+ * Export helper for getting open recoup balance
+ */
+export async function getOpenRecoupUSD(artistId: string) {
+  return await sumOpenRecoupUSD(artistId);
+}
