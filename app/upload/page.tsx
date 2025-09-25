@@ -81,11 +81,11 @@ export default function UploadPage() {
 
   // File validation functions
   const validateAudioFile = (file: File) => {
-    const maxSize = 100 * 1024 * 1024; // 100MB
+    const maxSize = 50 * 1024 * 1024; // 50MB (standard limit)
     const allowedTypes = ['audio/mpeg', 'audio/wav', 'audio/flac', 'audio/mp3'];
     
     if (file.size > maxSize) {
-      return { valid: false, error: 'Audio file too large. Maximum size: 100MB' };
+      return { valid: false, error: 'Audio file too large. Maximum size: 50MB' };
     }
     
     if (!allowedTypes.includes(file.type)) {
@@ -96,11 +96,11 @@ export default function UploadPage() {
   };
 
   const validateImageFile = (file: File) => {
-    const maxSize = 10 * 1024 * 1024; // 10MB
+    const maxSize = 5 * 1024 * 1024; // 5MB (standard limit)
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     
     if (file.size > maxSize) {
-      return { valid: false, error: 'Image too large. Maximum size: 10MB' };
+      return { valid: false, error: 'Image too large. Maximum size: 5MB' };
     }
     
     if (!allowedTypes.includes(file.type)) {

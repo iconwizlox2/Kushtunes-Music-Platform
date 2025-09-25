@@ -5,9 +5,9 @@ import sharp from 'sharp';
 
 const prisma = new PrismaClient();
 
-// File size limits (in bytes)
-const MAX_AUDIO_SIZE = 100 * 1024 * 1024; // 100MB
-const MAX_IMAGE_SIZE = 10 * 1024 * 1024;  // 10MB
+// File size limits (in bytes) - Standard industry limits
+const MAX_AUDIO_SIZE = 50 * 1024 * 1024;  // 50MB (reduced from 100MB)
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;   // 5MB (reduced from 10MB)
 
 // Allowed file types
 const ALLOWED_AUDIO_TYPES = ['audio/mpeg', 'audio/wav', 'audio/flac', 'audio/mp3'];
@@ -21,7 +21,7 @@ function validateFile(file: File, type: 'audio' | 'image') {
   if (file.size > maxSize) {
     return {
       valid: false,
-      error: `File too large. Maximum size: ${type === 'audio' ? '100MB' : '10MB'}`
+      error: `File too large. Maximum size: ${type === 'audio' ? '50MB' : '5MB'}`
     };
   }
   
