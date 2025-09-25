@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (user.isVerified) {
+    if (user.isEmailVerified) {
       return NextResponse.json(
         { success: false, message: 'Email is already verified' },
         { status: 400 }
@@ -90,7 +90,7 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    if (user.isVerified) {
+    if (user.isEmailVerified) {
       return NextResponse.json(
         { success: false, message: 'Email is already verified' },
         { status: 400 }
@@ -109,7 +109,7 @@ export async function PUT(request: NextRequest) {
     // Mark email as verified
     await prisma.user.update({
       where: { id: user.id },
-      data: { isVerified: true }
+      data: { isEmailVerified: true }
     });
 
     return NextResponse.json({
@@ -120,7 +120,7 @@ export async function PUT(request: NextRequest) {
           id: user.id,
           email: user.email,
           username: user.username,
-          isVerified: true
+          isEmailVerified: true
         }
       }
     });
