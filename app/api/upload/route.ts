@@ -157,9 +157,7 @@ export async function POST(request: NextRequest) {
           coverUrl: `https://kushtunes-storage.com/artwork/${artworkFileId}.jpg`,
           genre: metadata.genre,
           territories: JSON.stringify(['US']),
-          upc: upc,
-          language: metadata.language,
-          releaseType: metadata.type
+          upc: upc
         }
       });
 
