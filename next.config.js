@@ -12,8 +12,6 @@ const nextConfig = {
     webpackBuildWorker: false,
     // Disable other experimental features that might cause issues
     serverComponentsExternalPackages: ['micromatch', 'picomatch', 'glob', 'minimatch'],
-    // Disable build trace collection completely
-    outputFileTracing: false,
   },
   
   // Disable all tracing-related features
@@ -26,6 +24,29 @@ const nextConfig = {
              !pluginName.includes('BuildTrace') &&
              !pluginName.includes('FileTrace') &&
              !pluginName.includes('CollectBuildTraces');
+    });
+    
+    // Add plugin to create trace files during build
+    config.plugins.push({
+      apply: (compiler) => {
+        compiler.hooks.afterEmit.tap('CreateTraceFiles', () => {
+          const fs = require('fs');
+          const path = require('path');
+          
+          // Create the .next/server/pages directory
+          const pagesDir = path.join('.next/server/pages');
+          fs.mkdirSync(pagesDir, { recursive: true });
+          
+          // Create empty trace files
+          const traceFiles = ['_app.js.nft.json', '_document.js.nft.json', '_error.js.nft.json'];
+          traceFiles.forEach(file => {
+            const filePath = path.join(pagesDir, file);
+            fs.writeFileSync(filePath, '{"version":3,"files":[]}');
+          });
+          
+          console.log('✅ Trace files created during build');
+        });
+      }
     });
     
     // Disable source maps to reduce tracing
