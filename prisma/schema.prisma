@@ -366,8 +366,8 @@ model Advance {
   id           String   @id @default(cuid())
   artistId     String
   artist       Artist   @relation(fields: [artistId], references: [id])
-  amountUSD    Decimal  @db.Decimal(12,2)
-  remainingUSD Decimal  @db.Decimal(12,2)
+  amountUSD    Float
+  remainingUSD Float
   status       String   // "open" | "closed"
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -381,8 +381,8 @@ model Cost {
   artist       Artist   @relation(fields: [artistId], references: [id])
   description  String
   recoupable   Boolean  @default(true)
-  amountUSD    Decimal  @db.Decimal(12,2)
-  remainingUSD Decimal  @db.Decimal(12,2)
+  amountUSD    Float
+  remainingUSD Float
   status       String   // "open" | "closed"
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
