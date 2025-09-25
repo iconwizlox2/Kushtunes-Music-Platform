@@ -27,6 +27,21 @@ interface RegisterFormData {
   lastName: string;
 }
 
+interface ValidationErrors {
+  email?: string;
+  username?: string;
+  password?: string;
+  confirmPassword?: string;
+  firstName?: string;
+  lastName?: string;
+}
+
+interface PasswordStrength {
+  score: number;
+  feedback: string[];
+  isValid: boolean;
+}
+
 export default function RegisterPage() {
   const [formData, setFormData] = useState<RegisterFormData>({
     email: '',
@@ -41,36 +56,174 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
+  const [passwordStrength, setPasswordStrength] = useState<PasswordStrength>({
+    score: 0,
+    feedback: [],
+    isValid: false
+  });
+  const [isCheckingUsername, setIsCheckingUsername] = useState(false);
+  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
+
+  // Password strength checker
+  const checkPasswordStrength = (password: string): PasswordStrength => {
+    const feedback: string[] = [];
+    let score = 0;
+
+    if (password.length >= 8) {
+      score += 1;
+    } else {
+      feedback.push('At least 8 characters');
+    }
+
+    if (/[a-z]/.test(password)) {
+      score += 1;
+    } else {
+      feedback.push('Lowercase letter');
+    }
+
+    if (/[A-Z]/.test(password)) {
+      score += 1;
+    } else {
+      feedback.push('Uppercase letter');
+    }
+
+    if (/\d/.test(password)) {
+      score += 1;
+    } else {
+      feedback.push('Number');
+    }
+
+    if (/[@$!%*?&]/.test(password)) {
+      score += 1;
+    } else {
+      feedback.push('Special character');
+    }
+
+    return {
+      score,
+      feedback,
+      isValid: score >= 4
+    };
+  };
+
+  // Username availability checker
+  const checkUsernameAvailability = async (username: string) => {
+    if (username.length < 3) {
+      setUsernameAvailable(null);
+      return;
+    }
+
+    setIsCheckingUsername(true);
+    try {
+      const response = await fetch(`/api/auth/check-username?username=${encodeURIComponent(username)}`);
+      const result = await response.json();
+      setUsernameAvailable(result.available);
+    } catch (error) {
+      console.error('Username check error:', error);
+      setUsernameAvailable(null);
+    } finally {
+      setIsCheckingUsername(false);
+    }
+  };
+
+  // Real-time validation
+  const validateField = (field: keyof RegisterFormData, value: string) => {
+    const errors: ValidationErrors = { ...validationErrors };
+
+    switch (field) {
+      case 'email':
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (value && !emailRegex.test(value)) {
+          errors.email = 'Invalid email format';
+        } else {
+          delete errors.email;
+        }
+        break;
+
+      case 'username':
+        if (value && value.length < 3) {
+          errors.username = 'Username must be at least 3 characters';
+        } else if (value && !/^[a-zA-Z0-9_]+$/.test(value)) {
+          errors.username = 'Username can only contain letters, numbers, and underscores';
+        } else {
+          delete errors.username;
+          if (value) checkUsernameAvailability(value);
+        }
+        break;
+
+      case 'password':
+        const strength = checkPasswordStrength(value);
+        setPasswordStrength(strength);
+        if (value && !strength.isValid) {
+          errors.password = 'Password does not meet requirements';
+        } else {
+          delete errors.password;
+        }
+        break;
+
+      case 'confirmPassword':
+        if (value && value !== formData.password) {
+          errors.confirmPassword = 'Passwords do not match';
+        } else {
+          delete errors.confirmPassword;
+        }
+        break;
+
+      case 'firstName':
+        if (value && value.length < 2) {
+          errors.firstName = 'First name must be at least 2 characters';
+        } else {
+          delete errors.firstName;
+        }
+        break;
+
+      case 'lastName':
+        if (value && value.length < 2) {
+          errors.lastName = 'Last name must be at least 2 characters';
+        } else {
+          delete errors.lastName;
+        }
+        break;
+    }
+
+    setValidationErrors(errors);
+  };
 
   const handleInputChange = (field: keyof RegisterFormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     setError(null);
+    validateField(field, value);
   };
 
   const validateForm = () => {
-    if (!formData.email || !formData.username || !formData.password) {
-      setError('All fields are required');
+    // Check required fields
+    if (!formData.email || !formData.username || !formData.password || !formData.confirmPassword) {
+      setError('All required fields must be filled');
       return false;
     }
 
+    // Check validation errors
+    if (Object.keys(validationErrors).length > 0) {
+      setError('Please fix the validation errors below');
+      return false;
+    }
+
+    // Check password strength
+    if (!passwordStrength.isValid) {
+      setError('Password does not meet security requirements');
+      return false;
+    }
+
+    // Check username availability
+    if (usernameAvailable === false) {
+      setError('Username is already taken');
+      return false;
+    }
+
+    // Check password match
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
-      return false;
-    }
-
-    if (formData.password.length < 8) {
-      setError('Password must be at least 8 characters long');
-      return false;
-    }
-
-    if (formData.username.length < 3) {
-      setError('Username must be at least 3 characters long');
-      return false;
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      setError('Invalid email format');
       return false;
     }
 
@@ -110,9 +263,22 @@ export default function RegisterPage() {
         localStorage.setItem('kushtunes_token', result.data.token);
         localStorage.setItem('kushtunes_user', JSON.stringify(result.data.user));
         
-        // Redirect to dashboard after 2 seconds
+        // Send verification email
+        try {
+          await fetch('/api/auth/verify-email', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email: formData.email }),
+          });
+        } catch (error) {
+          console.error('Failed to send verification email:', error);
+        }
+        
+        // Redirect to verification page after 2 seconds
         setTimeout(() => {
-          window.location.href = '/dashboard';
+          window.location.href = `/verify-email?token=temp&email=${encodeURIComponent(formData.email)}`;
         }, 2000);
       } else {
         setError(result.message || 'Registration failed');
@@ -136,7 +302,7 @@ export default function RegisterPage() {
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Registration Successful!</h2>
               <p className="text-gray-600 mb-6">
-                Your account has been created successfully. Redirecting to dashboard...
+                Your account has been created successfully. Please check your email for verification instructions.
               </p>
               <LoadingSpinner />
             </ProfessionalCard>
@@ -210,13 +376,16 @@ export default function RegisterPage() {
                     required
                     value={formData.email}
                     onChange={(e) => handleInputChange('email', e.target.value)}
-                    className="form-input pl-10"
+                    className={`form-input pl-10 ${validationErrors.email ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`}
                     placeholder="Enter your email"
                   />
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <MailIcon className="h-5 w-5 text-gray-400" />
                   </div>
                 </div>
+                {validationErrors.email && (
+                  <p className="mt-1 text-xs text-red-600">{validationErrors.email}</p>
+                )}
               </div>
 
               {/* Username Field */}
@@ -233,16 +402,38 @@ export default function RegisterPage() {
                     required
                     value={formData.username}
                     onChange={(e) => handleInputChange('username', e.target.value)}
-                    className="form-input pl-10"
+                    className={`form-input pl-10 pr-10 ${validationErrors.username ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`}
                     placeholder="Choose a username"
                   />
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <UserIcon className="h-5 w-5 text-gray-400" />
                   </div>
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                    {isCheckingUsername ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                    ) : usernameAvailable === true ? (
+                      <CheckCircleIcon className="h-4 w-4 text-green-500" />
+                    ) : usernameAvailable === false ? (
+                      <ExclamationTriangleIcon className="h-4 w-4 text-red-500" />
+                    ) : null}
+                  </div>
                 </div>
-                <p className="mt-1 text-xs text-gray-500">
-                  3-20 characters, letters, numbers, and underscores only
-                </p>
+                
+                <div className="mt-1 flex items-center justify-between">
+                  <p className="text-xs text-gray-500">
+                    3-20 characters, letters, numbers, and underscores only
+                  </p>
+                  {usernameAvailable === true && (
+                    <span className="text-xs text-green-600 font-medium">Available</span>
+                  )}
+                  {usernameAvailable === false && (
+                    <span className="text-xs text-red-600 font-medium">Taken</span>
+                  )}
+                </div>
+                
+                {validationErrors.username && (
+                  <p className="mt-1 text-xs text-red-600">{validationErrors.username}</p>
+                )}
               </div>
 
               {/* Password Field */}
@@ -259,7 +450,7 @@ export default function RegisterPage() {
                     required
                     value={formData.password}
                     onChange={(e) => handleInputChange('password', e.target.value)}
-                    className="form-input pl-10 pr-10"
+                    className={`form-input pl-10 pr-10 ${validationErrors.password ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`}
                     placeholder="Create a password"
                   />
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -277,9 +468,58 @@ export default function RegisterPage() {
                     )}
                   </button>
                 </div>
-                <p className="mt-1 text-xs text-gray-500">
-                  At least 8 characters with uppercase, lowercase, number, and special character
-                </p>
+                
+                {/* Password Strength Indicator */}
+                {formData.password && (
+                  <div className="mt-2">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <div className="flex-1 bg-gray-200 rounded-full h-2">
+                        <div 
+                          className={`h-2 rounded-full transition-all duration-300 ${
+                            passwordStrength.score <= 2 ? 'bg-red-500' :
+                            passwordStrength.score <= 3 ? 'bg-yellow-500' :
+                            passwordStrength.score <= 4 ? 'bg-blue-500' : 'bg-green-500'
+                          }`}
+                          style={{ width: `${(passwordStrength.score / 5) * 100}%` }}
+                        />
+                      </div>
+                      <span className={`text-xs font-medium ${
+                        passwordStrength.score <= 2 ? 'text-red-600' :
+                        passwordStrength.score <= 3 ? 'text-yellow-600' :
+                        passwordStrength.score <= 4 ? 'text-blue-600' : 'text-green-600'
+                      }`}>
+                        {passwordStrength.score <= 2 ? 'Weak' :
+                         passwordStrength.score <= 3 ? 'Fair' :
+                         passwordStrength.score <= 4 ? 'Good' : 'Strong'}
+                      </span>
+                    </div>
+                    
+                    {passwordStrength.feedback.length > 0 && (
+                      <div className="text-xs text-gray-600">
+                        <p className="mb-1">Password requirements:</p>
+                        <ul className="space-y-1">
+                          {passwordStrength.feedback.map((req, index) => (
+                            <li key={index} className="flex items-center">
+                              <span className="text-red-500 mr-1">✗</span>
+                              {req}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {passwordStrength.isValid && (
+                      <div className="text-xs text-green-600 flex items-center">
+                        <CheckCircleIcon className="h-3 w-3 mr-1" />
+                        Password meets all requirements
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {validationErrors.password && (
+                  <p className="mt-1 text-xs text-red-600">{validationErrors.password}</p>
+                )}
               </div>
 
               {/* Confirm Password Field */}
