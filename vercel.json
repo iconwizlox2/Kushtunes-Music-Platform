@@ -1,5 +1,5 @@
 {
-  "buildCommand": "./build-vercel-patched.sh",
+  "buildCommand": "NEXT_DISABLE_BUILD_TRACE=1 NEXT_TELEMETRY_DISABLED=1 NEXT_PRIVATE_DISABLE_TRACE=1 NEXT_PRIVATE_DISABLE_TELEMETRY=1 NODE_OPTIONS='--max-old-space-size=8192' npm run build",
   "outputDirectory": ".next",
   "framework": "nextjs",
   "installCommand": "npm install",

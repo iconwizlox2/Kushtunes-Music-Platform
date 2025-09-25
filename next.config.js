@@ -10,6 +10,8 @@ const nextConfig = {
     },
     // Disable build worker to avoid tracing issues
     webpackBuildWorker: false,
+    // Disable other experimental features that might cause issues
+    serverComponentsExternalPackages: ['micromatch', 'picomatch', 'glob', 'minimatch'],
   },
   
   // Disable all tracing-related features
@@ -20,11 +22,19 @@ const nextConfig = {
       return !pluginName.includes('Trace') && 
              !pluginName.includes('trace') && 
              !pluginName.includes('BuildTrace') &&
-             !pluginName.includes('FileTrace');
+             !pluginName.includes('FileTrace') &&
+             !pluginName.includes('CollectBuildTraces');
     });
     
     // Disable source maps to reduce tracing
     config.devtool = false;
+    
+    // Disable optimization that might cause tracing issues
+    config.optimization = {
+      ...config.optimization,
+      splitChunks: false,
+      minimize: false,
+    };
     
     // Externalize problematic modules
     if (isServer) {
