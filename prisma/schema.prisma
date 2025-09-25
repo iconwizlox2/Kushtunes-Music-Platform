@@ -120,6 +120,7 @@ model Track {
   release     Release     @relation(fields: [releaseId], references: [id], onDelete: Cascade)
   contributors Contributor[]
   splits      Split[]
+  earnings    Earning[]
   
   @@map("tracks")
 }
