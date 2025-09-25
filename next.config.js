@@ -6,10 +6,8 @@ const nextConfig = {
   },
   experimental: {
     optimizePackageImports: ['@prisma/client'],
-    webpackBuildWorker: false,
-    buildTrace: false,
   },
-  // Balanced webpack configuration
+  // Minimal webpack changes - only remove problematic trace plugins
   webpack: (config, { isServer, dev }) => {
     if (!isServer) {
       config.resolve.fallback = {
@@ -20,27 +18,14 @@ const nextConfig = {
       };
     }
 
-    // Remove only problematic trace plugins
+    // Only remove the specific problematic trace plugins
     config.plugins = config.plugins.filter(plugin => {
       const pluginName = plugin.constructor.name;
-      return !pluginName.includes('Trace') &&
-             !pluginName.includes('BuildTrace') &&
-             !pluginName.includes('CollectBuildTraces');
+      return !pluginName.includes('CollectBuildTraces');
     });
-
-    // Keep essential optimizations but disable problematic cache groups
-    if (config.optimization && config.optimization.splitChunks) {
-      config.optimization.splitChunks.cacheGroups = {};
-    }
 
     return config;
   },
-  // Keep essential features
-  swcMinify: true,
-  compress: true,
-  poweredByHeader: false,
-  generateEtags: false,
-  outputFileTracing: false,
 }
 
 module.exports = nextConfig
