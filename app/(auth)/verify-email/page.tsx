@@ -18,8 +18,8 @@ import {
 
 export default function VerifyEmailPage() {
   const searchParams = useSearchParams();
-  const token = searchParams.get('token');
-  const email = searchParams.get('email');
+  const token = searchParams?.get('token') || null;
+  const email = searchParams?.get('email') || null;
   
   const [status, setStatus] = useState<'loading' | 'success' | 'error' | 'missing'>('loading');
   const [message, setMessage] = useState('');

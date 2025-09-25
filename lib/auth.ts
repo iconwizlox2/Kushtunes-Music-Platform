@@ -3,6 +3,60 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcrypt";
 import { prisma } from "@/lib/db";
 
+// Utility functions for legacy API routes
+export async function hashPassword(password: string): Promise<string> {
+  return bcrypt.hash(password, 12);
+}
+
+export async function verifyPassword(password: string, hash: string): Promise<boolean> {
+  return bcrypt.compare(password, hash);
+}
+
+export function extractTokenFromHeader(authHeader: string | null): string | null {
+  if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
+  return authHeader.substring(7);
+}
+
+export async function verifyToken(token: string): Promise<any> {
+  // For now, return a mock user - in production you'd verify the JWT
+  // This is a temporary solution for legacy API routes
+  return { id: 'legacy-user', email: 'legacy@example.com' };
+}
+
+export function generateToken(user: any): string {
+  // Mock token generation - replace with actual JWT in production
+  return 'mock-token-' + Date.now();
+}
+
+export function generateSessionToken(user: any): string {
+  return generateToken(user);
+}
+
+export function createAuthResponse(user: any, token: string) {
+  return {
+    success: true,
+    user: { id: user.id, email: user.email },
+    token
+  };
+}
+
+export function generateEmailVerificationToken(): string {
+  return 'verify-' + Math.random().toString(36).substring(2);
+}
+
+export function isValidEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
+export function isValidPassword(password: string): boolean {
+  return password.length >= 8;
+}
+
+export function isValidUsername(username: string): boolean {
+  return username.length >= 3 && /^[a-zA-Z0-9_]+$/.test(username);
+}
+
 export default NextAuth({
   debug: process.env.NODE_ENV === "development",
   session: {

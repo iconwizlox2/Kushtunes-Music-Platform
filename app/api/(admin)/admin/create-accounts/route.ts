@@ -52,10 +52,7 @@ export async function POST(request: NextRequest) {
       // Check if admin already exists
       const existingAdmin = await prisma.user.findFirst({
         where: {
-          OR: [
-            { email: account.email },
-            { username: account.username }
-          ]
+          email: account.email
         }
       });
 
@@ -75,19 +72,26 @@ export async function POST(request: NextRequest) {
       const admin = await prisma.user.create({
         data: {
           email: account.email,
-          username: account.username,
-          password: hashedPassword,
-          firstName: account.firstName,
-          lastName: account.lastName,
-          role: account.role as any,
-          isEmailVerified: account.isEmailVerified,
-          isActive: account.isActive
+          name: `${account.firstName} ${account.lastName}`,
+          passwordHash: hashedPassword
+        }
+      });
+
+      // Create associated artist with admin role
+      await prisma.artist.create({
+        data: {
+          userId: admin.id,
+          name: `${account.firstName} ${account.lastName}`,
+          legalName: `${account.firstName} ${account.lastName}`,
+          email: account.email,
+          country: "US",
+          role: "admin"
         }
       });
 
       createdAccounts.push({
         email: account.email,
-        username: account.username,
+        name: `${account.firstName} ${account.lastName}`,
         password: account.password,
         status: 'created',
         message: 'Admin account created successfully'
