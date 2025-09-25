@@ -9,15 +9,16 @@ export const metadata: Metadata = {
 
 type Payout = { id: string; amountUSD: number; method: "stripe"|"paypal"|"crypto"; status: "pending"|"paid"|"rejected"; createdAt: string };
 
-async function fetchBalance(): Promise<{ availableUSD: number; minPayoutUSD: number }> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || ""}/api/earnings/available`, {
-    // On server: cookies are forwarded automatically in the same domain;
-    // if you host API separately, add credentials: "include" and pass cookies.
-    cache: "no-store"
-  });
+async function fetchBalance(params?: { start?: string; end?: string }): Promise<{ availableUSD: number; minPayoutUSD: number; window?: { start?: string|null, end?: string|null } }> {
+  const base = process.env.NEXT_PUBLIC_SITE_URL || "";
+  const qs = new URLSearchParams();
+  if (params?.start) qs.set("start", params.start);
+  if (params?.end) qs.set("end", params.end);
+
+  const res = await fetch(`${base}/api/earnings/available${qs.toString() ? `?${qs.toString()}` : ""}`, { cache: "no-store" });
   if (!res.ok) return { availableUSD: 0, minPayoutUSD: 25 };
   const data = await res.json();
-  return { availableUSD: data.availableUSD || 0, minPayoutUSD: 25 };
+  return { availableUSD: data.availableUSD || 0, minPayoutUSD: 25, window: data.window };
 }
 
 async function fetchPayouts(): Promise<Payout[]> {

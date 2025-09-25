@@ -77,6 +77,8 @@ model Artist {
   splits         Split[]
   payouts        Payout[]
   auditLogs      AuditLog[]
+  advances       Advance[]
+  costs          Cost[]
   
   @@map("artists")
 }
@@ -357,4 +359,33 @@ enum ComplianceStatus {
   REJECTED
   UNDER_REVIEW
   RESOLVED
+}
+
+// Recoup models for advance and cost tracking
+model Advance {
+  id           String   @id @default(cuid())
+  artistId     String
+  artist       Artist   @relation(fields: [artistId], references: [id])
+  amountUSD    Decimal  @db.Decimal(12,2)
+  remainingUSD Decimal  @db.Decimal(12,2)
+  status       String   // "open" | "closed"
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  @@map("advances")
+}
+
+model Cost {
+  id           String   @id @default(cuid())
+  artistId     String
+  artist       Artist   @relation(fields: [artistId], references: [id])
+  description  String
+  recoupable   Boolean  @default(true)
+  amountUSD    Decimal  @db.Decimal(12,2)
+  remainingUSD Decimal  @db.Decimal(12,2)
+  status       String   // "open" | "closed"
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  @@map("costs")
 }
