@@ -33,33 +33,33 @@ export default function Header() {
   };
 
   return (
-    <header className="nav-distrokid sticky top-0 z-50 backdrop-blur-xl bg-white/90 border-b border-gray-200/50">
+    <header className="sticky top-0 z-50 backdrop-blur-xl bg-gray-900/90 border-b border-gray-700/50">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2 group">
-            <div className="w-8 h-8 luxury-gradient rounded-lg flex items-center justify-center group-hover:animate-pulse">
+            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center group-hover:animate-pulse">
               <MusicalNoteIcon className="h-5 w-5 text-white" />
             </div>
-            <span className="text-xl font-bold text-gray-900 group-hover:luxury-text-gradient transition-all duration-300">Kushtunes</span>
+            <span className="text-xl font-bold text-white group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-purple-400 group-hover:bg-clip-text group-hover:text-transparent transition-all duration-300">Kushtunes</span>
           </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <Link href="/" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+            <Link href="/" className="text-gray-300 hover:text-blue-400 font-medium transition-colors">
               Home
             </Link>
-            <Link href="/upload" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+            <Link href="/upload" className="text-gray-300 hover:text-blue-400 font-medium transition-colors">
               Upload
             </Link>
-            <Link href="/dashboard" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+            <Link href="/dashboard" className="text-gray-300 hover:text-blue-400 font-medium transition-colors">
               Dashboard
             </Link>
-            <Link href="/releases" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+            <Link href="/releases" className="text-gray-300 hover:text-blue-400 font-medium transition-colors">
               Releases
             </Link>
             {isLoggedIn && (
-              <Link href="/admin" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+              <Link href="/admin" className="text-gray-300 hover:text-blue-400 font-medium transition-colors">
                 Admin
               </Link>
             )}

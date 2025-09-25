@@ -3,23 +3,23 @@
 @tailwind utilities;
 
 :root {
-  /* Premium luxury color palette */
-  --primary-blue: #0066ff; /* DistroKid's signature blue */
-  --primary-blue-dark: #0052cc;
-  --primary-blue-light: #3385ff;
-  --secondary-purple: #6b46c1; /* Complementary purple */
+  /* Premium Classic Gaming Color Palette */
+  --primary-blue: #3b82f6; /* Bright blue */
+  --primary-blue-dark: #1d4ed8;
+  --primary-blue-light: #60a5fa;
+  --secondary-purple: #8b5cf6; /* Purple accent */
   --accent-green: #10b981; /* Success/positive actions */
   --accent-orange: #f59e0b; /* Warning/attention */
   --accent-red: #ef4444; /* Error/delete */
   
-  /* Premium luxury colors */
-  --luxury-gold: #d4af37;
-  --luxury-silver: #c0c0c0;
-  --luxury-platinum: #e5e4e2;
-  --premium-gradient-start: #667eea;
-  --premium-gradient-end: #764ba2;
-  --glass-bg: rgba(255, 255, 255, 0.1);
-  --glass-border: rgba(255, 255, 255, 0.2);
+  /* Gaming Theme Colors */
+  --gaming-gold: #fbbf24;
+  --gaming-silver: #9ca3af;
+  --gaming-copper: #f97316;
+  --premium-gradient-start: #3b82f6;
+  --premium-gradient-end: #8b5cf6;
+  --glass-bg: rgba(31, 41, 55, 0.5);
+  --glass-border: rgba(75, 85, 99, 0.3);
   
   /* Neutral colors */
   --white: #ffffff;
