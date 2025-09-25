@@ -14,9 +14,9 @@ export const authOptions = {
     }),
   ],
   callbacks: {
-    async session({ session, user }: { session: any; user: any }) {
-      if (session.user) {
-        session.user.id = user.id;
+    async session({ session, token }: { session: any; token: any }) {
+      if (session.user && token.sub) {
+        session.user.id = token.sub;
         // Add additional user data to session
         const dbUser = await prisma.user.findUnique({
           where: { email: session.user.email! },
@@ -86,7 +86,7 @@ export const authOptions = {
     signUp: '/register',
   },
   session: {
-    strategy: 'database' as const,
+    strategy: 'jwt' as const,
   },
 };
 
