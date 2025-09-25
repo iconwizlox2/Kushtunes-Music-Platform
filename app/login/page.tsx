@@ -1,210 +1,234 @@
-"use client";
+'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { ModernLayout } from '@/components/ModernLayout';
-import { 
-  LockClosedIcon, 
-  UserIcon, 
-  EyeIcon, 
+import Link from 'next/link';
+import { ProfessionalLayout } from '@/components/ProfessionalLayout';
+import {
+  ProfessionalCard,
+  ProfessionalButton,
+  LoadingSpinner
+} from '@/components/ProfessionalUI';
+import {
+  EyeIcon,
   EyeSlashIcon,
-  CheckCircleIcon,
-  ExclamationTriangleIcon
+  UserIcon,
+  LockClosedIcon,
+  ArrowRightIcon
 } from '@/components/ui/Icons';
 
+interface LoginFormData {
+  email: string;
+  password: string;
+}
+
 export default function LoginPage() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<LoginFormData>({
     email: '',
     password: ''
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+
+  const handleInputChange = (field: keyof LoginFormData, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    setError(null);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError(null);
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
+      const response = await fetch('/api/auth', {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
       });
 
-      const data = await response.json();
+      const result = await response.json();
 
-      if (data.success) {
-        // Store user data in localStorage (in production, use secure storage)
-        localStorage.setItem('user', JSON.stringify(data.user));
-        localStorage.setItem('token', data.token);
+      if (result.success) {
+        // Store token in localStorage
+        localStorage.setItem('kushtunes_token', result.data.token);
+        localStorage.setItem('kushtunes_user', JSON.stringify(result.data.user));
         
-        // Redirect to admin dashboard
-        router.push('/admin');
+        // Redirect to dashboard
+        window.location.href = '/dashboard';
       } else {
-        setError(data.message || 'Login failed');
+        setError(result.message || 'Login failed');
       }
     } catch (error) {
-      setError('Network error. Please try again.');
+      console.error('Login error:', error);
+      setError('Login failed. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
-
   return (
-    <ModernLayout>
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 relative overflow-hidden">
-        {/* Background Effects */}
-        <div className="absolute top-20 left-10 w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full opacity-20 float-animation blur-xl"></div>
-        <div className="absolute top-40 right-20 w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full opacity-20 float-animation-delayed blur-xl"></div>
-        <div className="absolute bottom-20 left-1/4 w-12 h-12 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full opacity-20 float-animation blur-xl"></div>
-
-        <div className="relative flex items-center justify-center min-h-screen py-12 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-md w-full">
-            {/* Header */}
-            <div className="text-center mb-8">
-              <div className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-500/20 to-purple-600/20 border border-blue-500/30 px-4 py-2 text-sm font-medium text-blue-300 backdrop-blur-sm mb-6">
-                <LockClosedIcon className="h-4 w-4" />
-                Admin Access
-              </div>
-              
-              <h1 className="text-4xl font-extrabold tracking-tight mb-4">
-                <span className="bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
-                  Welcome Back
-                </span>
-              </h1>
-              
-              <p className="text-lg text-gray-300">
-                Sign in to access the admin dashboard
-              </p>
+    <ProfessionalLayout>
+      <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8">
+          {/* Header */}
+          <div className="text-center">
+            <div className="mx-auto h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+              <UserIcon className="h-6 w-6 text-blue-600" />
             </div>
-
-            {/* Login Form */}
-            <div className="premium-card rounded-3xl p-8">
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Email Field */}
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
-                    Email Address
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <UserIcon className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input
-                      id="email"
-                      name="email"
-                      type="email"
-                      required
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      className="block w-full pl-10 pr-3 py-3 border border-gray-600 rounded-xl bg-gray-800/50 backdrop-blur-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
-                      placeholder="admin@kushtunes.com"
-                    />
-                  </div>
-                </div>
-
-                {/* Password Field */}
-                <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
-                    Password
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <LockClosedIcon className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input
-                      id="password"
-                      name="password"
-                      type={showPassword ? 'text' : 'password'}
-                      required
-                      value={formData.password}
-                      onChange={handleInputChange}
-                      className="block w-full pl-10 pr-12 py-3 border border-gray-600 rounded-xl bg-gray-800/50 backdrop-blur-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
-                      placeholder="Enter your password"
-                    />
-                    <button
-                      type="button"
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? (
-                        <EyeSlashIcon className="h-5 w-5 text-gray-400 hover:text-gray-300" />
-                      ) : (
-                        <EyeIcon className="h-5 w-5 text-gray-400 hover:text-gray-300" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Error Message */}
-                {error && (
-                  <div className="flex items-center gap-2 p-3 rounded-xl bg-red-500/20 border border-red-500/30">
-                    <ExclamationTriangleIcon className="h-5 w-5 text-red-400" />
-                    <p className="text-red-400 text-sm">{error}</p>
-                  </div>
-                )}
-
-                {/* Submit Button */}
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full relative overflow-hidden rounded-xl font-semibold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:shadow-lg hover:shadow-blue-500/25 focus:ring-blue-500 px-8 py-4 text-lg group disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <span className="relative z-10 flex items-center justify-center gap-2">
-                    {loading ? (
-                      <>
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        Signing in...
-                      </>
-                    ) : (
-                      <>
-                        <LockClosedIcon className="h-5 w-5" />
-                        Sign In
-                      </>
-                    )}
-                  </span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                </button>
-              </form>
-
-              {/* Demo Credentials */}
-              <div className="mt-8 p-4 rounded-xl bg-blue-500/10 border border-blue-500/30">
-                <div className="flex items-center gap-2 mb-3">
-                  <CheckCircleIcon className="h-5 w-5 text-blue-400" />
-                  <h3 className="text-blue-400 font-medium">Demo Credentials</h3>
-                </div>
-                <div className="text-sm text-gray-300 space-y-1">
-                  <p><strong>Email:</strong> admin@kushtunes.com</p>
-                  <p><strong>Password:</strong> admin123</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div className="text-center mt-8">
-              <p className="text-gray-400 text-sm">
-                Don't have an account?{' '}
-                <a href="#" className="text-blue-400 hover:text-blue-300 transition-colors">
-                  Contact Administrator
-                </a>
-              </p>
-            </div>
+            <h2 className="text-3xl font-bold text-gray-900">Welcome Back</h2>
+            <p className="mt-2 text-sm text-gray-600">
+              Sign in to your Kushtunes account
+            </p>
           </div>
+
+          {/* Login Form */}
+          <ProfessionalCard className="p-8">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Email Field */}
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                  Email Address
+                </label>
+                <div className="relative">
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    value={formData.email}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    className="form-input pl-10"
+                    placeholder="Enter your email"
+                  />
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <UserIcon className="h-5 w-5 text-gray-400" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Password Field */}
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                  Password
+                </label>
+                <div className="relative">
+                  <input
+                    id="password"
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    autoComplete="current-password"
+                    required
+                    value={formData.password}
+                    onChange={(e) => handleInputChange('password', e.target.value)}
+                    className="form-input pl-10 pr-10"
+                    placeholder="Enter your password"
+                  />
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <LockClosedIcon className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeSlashIcon className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                    ) : (
+                      <EyeIcon className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Error Message */}
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-md p-3">
+                  <p className="text-sm text-red-600">{error}</p>
+                </div>
+              )}
+
+              {/* Remember Me & Forgot Password */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <input
+                    id="remember-me"
+                    name="remember-me"
+                    type="checkbox"
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
+                    Remember me
+                  </label>
+                </div>
+                <div className="text-sm">
+                  <Link href="/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">
+                    Forgot your password?
+                  </Link>
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <ProfessionalButton
+                variant="primary"
+                size="lg"
+                className="w-full"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <LoadingSpinner className="mr-2" />
+                    Signing in...
+                  </>
+                ) : (
+                  <>
+                    Sign In
+                    <ArrowRightIcon className="ml-2 h-5 w-5" />
+                  </>
+                )}
+              </ProfessionalButton>
+            </form>
+
+            {/* Sign Up Link */}
+            <div className="mt-6 text-center">
+              <p className="text-sm text-gray-600">
+                Don't have an account?{' '}
+                <Link href="/register" className="font-medium text-blue-600 hover:text-blue-500">
+                  Sign up for free
+                </Link>
+              </p>
+            </div>
+          </ProfessionalCard>
+
+          {/* Demo Credentials */}
+          <ProfessionalCard className="p-6 bg-blue-50 border-blue-200">
+            <h3 className="text-sm font-medium text-blue-800 mb-2">Demo Account</h3>
+            <p className="text-xs text-blue-700 mb-2">
+              Use these credentials to test the platform:
+            </p>
+            <div className="text-xs text-blue-600 space-y-1">
+              <p><strong>Email:</strong> demo@kushtunes.com</p>
+              <p><strong>Password:</strong> Demo123!</p>
+            </div>
+            <ProfessionalButton
+              variant="outline"
+              size="sm"
+              className="mt-3 w-full"
+              onClick={() => {
+                setFormData({
+                  email: 'demo@kushtunes.com',
+                  password: 'Demo123!'
+                });
+              }}
+            >
+              Use Demo Credentials
+            </ProfessionalButton>
+          </ProfessionalCard>
         </div>
       </div>
-    </ModernLayout>
+    </ProfessionalLayout>
   );
 }
-

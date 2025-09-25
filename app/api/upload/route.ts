@@ -41,6 +41,7 @@ export async function POST(request: NextRequest) {
     const release = await prisma.release.create({
       data: {
         id: releaseId,
+        userId: 'demo-user-id', // TODO: Get from authenticated user
         title,
         artist,
         type: releaseType as any,
