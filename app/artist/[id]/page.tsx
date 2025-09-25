@@ -96,11 +96,11 @@ export default function ArtistProfilePage() {
         joinedDate: "2022-03-15"
       };
 
-      const mockReleases = [
+      const mockReleases: Release[] = [
         {
           id: "1",
           title: "Midnight Dreams",
-          type: "ALBUM",
+          type: "ALBUM" as const,
           coverUrl: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=400&fit=crop",
           releaseDate: "2024-01-15",
           streams: 125000,
@@ -114,7 +114,7 @@ export default function ArtistProfilePage() {
         {
           id: "2",
           title: "Electric Soul",
-          type: "SINGLE",
+          type: "SINGLE" as const,
           coverUrl: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&h=400&fit=crop",
           releaseDate: "2023-11-20",
           streams: 89000,
