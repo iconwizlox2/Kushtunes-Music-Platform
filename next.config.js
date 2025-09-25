@@ -9,8 +9,8 @@ const nextConfig = {
     // Disable webpack build worker
     webpackBuildWorker: false,
   },
-  // Disable build trace collection to prevent call stack errors
-  webpack: (config, { isServer }) => {
+  // Completely disable build trace collection
+  webpack: (config, { isServer, dev }) => {
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
@@ -19,10 +19,20 @@ const nextConfig = {
         tls: false,
       };
     }
-    // Disable problematic plugins
+    
+    // Remove all trace-related plugins
     config.plugins = config.plugins.filter(plugin => {
-      return !plugin.constructor.name.includes('Trace');
+      const pluginName = plugin.constructor.name;
+      return !pluginName.includes('Trace') && 
+             !pluginName.includes('BuildTrace') &&
+             !pluginName.includes('CollectBuildTraces');
     });
+    
+    // Disable build trace collection at the webpack level
+    if (config.optimization && config.optimization.splitChunks) {
+      config.optimization.splitChunks.cacheGroups = {};
+    }
+    
     return config;
   },
   // Optimize build process

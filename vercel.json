@@ -1,29 +1,10 @@
 {
-  "version": 2,
-  "name": "kushtunes-mobile-app",
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/next"
+  "buildCommand": "./vercel-build.sh",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "functions": {
+    "app/api/**/*.ts": {
+      "runtime": "nodejs18.x"
     }
-  ],
-  "routes": [
-    {
-      "src": "/sw.js",
-      "headers": {
-        "Cache-Control": "public, max-age=0, must-revalidate"
-      }
-    },
-    {
-      "src": "/site.webmanifest",
-      "headers": {
-        "Content-Type": "application/manifest+json"
-      }
-    }
-  ],
-  "env": {
-    "NODE_ENV": "production"
   }
 }
-
-
