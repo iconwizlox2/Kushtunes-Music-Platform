@@ -57,6 +57,12 @@ const nextConfig = {
     
     return config;
   },
+  
+  // Override the build process to skip trace collection
+  onDemandEntries: {
+    maxInactiveAge: 25 * 1000,
+    pagesBufferLength: 2,
+  },
 }
 
 module.exports = nextConfig
