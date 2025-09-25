@@ -14,7 +14,7 @@ export const authOptions = {
     }),
   ],
   callbacks: {
-    async session({ session, user }) {
+    async session({ session, user }: { session: any; user: any }) {
       if (session.user) {
         session.user.id = user.id;
         // Add additional user data to session
@@ -41,7 +41,7 @@ export const authOptions = {
       }
       return session;
     },
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account, profile }: { user: any; account: any; profile?: any }) {
       if (account?.provider === 'google') {
         try {
           // Check if user exists
