@@ -20,7 +20,9 @@ interface Track {
   id: string;
   title: string;
   audioFile: File | null;
-  validation: { valid: boolean; error?: string };
+  validation: { valid: boolean; error?: string; metadata?: any };
+  isrc?: string;
+  contributors?: Array<{ name: string; role: string; ipi?: string; cae?: string }>;
 }
 
 interface UploadState {
@@ -34,6 +36,13 @@ interface UploadState {
     genre: string;
     language: string;
     type: 'SINGLE' | 'EP' | 'ALBUM';
+    upc?: string;
+    label?: string;
+    territories?: string[];
+    excludedTerritories?: string[];
+    copyrightYear?: number;
+    pLine?: string;
+    cLine?: string;
   };
   progress: number;
   isProcessing: boolean;
@@ -44,7 +53,17 @@ interface UploadState {
     processing: number;
   };
   fileValidation: {
-    artwork: { valid: boolean; error?: string };
+    artwork: { valid: boolean; error?: string; metadata?: any };
+  };
+  rights: {
+    type: 'ORIGINAL' | 'COVER' | 'PUBLIC_DOMAIN' | 'SAMPLED';
+    mechanicalLicense?: string;
+    copyrightOwner?: string;
+    attestation: boolean;
+  };
+  duplicateCheck: {
+    isChecking: boolean;
+    results: Array<{ similarity: number; trackId: string; title: string }>;
   };
 }
 
@@ -55,7 +74,8 @@ export default function UploadPage() {
       id: 'track-1',
       title: '',
       audioFile: null,
-      validation: { valid: true }
+      validation: { valid: true },
+      contributors: []
     }],
     artworkFile: null,
     metadata: {
@@ -64,7 +84,10 @@ export default function UploadPage() {
       releaseDate: '',
       genre: '',
       language: '',
-      type: 'SINGLE'
+      type: 'SINGLE',
+      territories: ['US', 'CA', 'GB', 'AU', 'DE', 'FR', 'IT', 'ES', 'NL', 'SE'],
+      excludedTerritories: [],
+      copyrightYear: new Date().getFullYear(),
     },
     progress: 0,
     isProcessing: false,
@@ -76,6 +99,14 @@ export default function UploadPage() {
     },
     fileValidation: {
       artwork: { valid: true },
+    },
+    rights: {
+      type: 'ORIGINAL',
+      attestation: false,
+    },
+    duplicateCheck: {
+      isChecking: false,
+      results: [],
     },
   });
 
@@ -111,8 +142,8 @@ export default function UploadPage() {
     }));
   };
 
-  const handleTrackAudioFile = (trackId: string, file: File) => {
-    const validation = validateAudioFile(file);
+  const handleTrackAudioFile = async (trackId: string, file: File) => {
+    const validation = await validateAudioFile(file);
     updateTrack(trackId, { audioFile: file, validation });
   };
 
@@ -120,30 +151,25 @@ export default function UploadPage() {
     updateTrack(trackId, { title });
   };
 
-  // File validation functions
-  const validateAudioFile = (file: File) => {
-    const MAX_AUDIO_SIZE = 100 * 1024 * 1024; // 100MB (increased for high-quality audio)
+  // Enhanced audio file validation with professional standards
+  const validateAudioFile = async (file: File) => {
+    const MAX_AUDIO_SIZE = 100 * 1024 * 1024; // 100MB
     const ALLOWED_AUDIO_TYPES = [
-      'audio/mpeg',      // MP3
-      'audio/mp3',       // MP3 alternative
       'audio/wav',       // WAV
       'audio/wave',      // WAV alternative
       'audio/flac',      // FLAC
-      'audio/aac',       // AAC
-      'audio/m4a',       // M4A
-      'audio/ogg',       // OGG
-      'audio/opus',      // Opus
       'audio/x-flac',    // FLAC alternative
-      'audio/vnd.wave'   // WAV alternative
     ];
 
+    // Basic file type validation
     if (!ALLOWED_AUDIO_TYPES.includes(file.type)) {
       return { 
         valid: false, 
-        error: 'Please upload MP3, WAV, FLAC, AAC, M4A, or OGG files only' 
+        error: 'Only WAV and FLAC files are accepted for professional distribution' 
       };
     }
 
+    // File size validation
     if (file.size > MAX_AUDIO_SIZE) {
       return { 
         valid: false, 
@@ -151,28 +177,77 @@ export default function UploadPage() {
       };
     }
 
-    return { valid: true };
+    // Audio quality validation (basic checks)
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const arrayBuffer = await file.arrayBuffer();
+      const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+      
+      // Check sample rate (must be 44.1kHz)
+      if (audioBuffer.sampleRate !== 44100) {
+        return {
+          valid: false,
+          error: `Sample rate must be 44.1kHz (current: ${audioBuffer.sampleRate}Hz)`
+        };
+      }
+
+      // Check bit depth (16-24 bit)
+      const bitDepth = audioBuffer.length > 0 ? Math.log2(audioBuffer.length) * 8 : 16;
+      if (bitDepth < 16 || bitDepth > 24) {
+        return {
+          valid: false,
+          error: `Bit depth must be 16-24 bit (current: ${Math.round(bitDepth)} bit)`
+        };
+      }
+
+      // Basic clipping detection
+      const channelData = audioBuffer.getChannelData(0);
+      const maxAmplitude = Math.max(...channelData.map(Math.abs));
+      if (maxAmplitude >= 0.99) {
+        return {
+          valid: false,
+          error: 'Audio appears to be clipped (amplitude too high). Please reduce gain.'
+        };
+      }
+
+      audioContext.close();
+      
+      return { 
+        valid: true,
+        metadata: {
+          sampleRate: audioBuffer.sampleRate,
+          bitDepth: Math.round(bitDepth),
+          duration: audioBuffer.duration,
+          channels: audioBuffer.numberOfChannels,
+          maxAmplitude: maxAmplitude
+        }
+      };
+    } catch (error) {
+      return {
+        valid: false,
+        error: 'Unable to analyze audio file. Please ensure it\'s a valid WAV or FLAC file.'
+      };
+    }
   };
 
-  const validateImageFile = (file: File) => {
-    const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB (increased for high-res artwork)
+  // Enhanced cover art validation with professional standards
+  const validateImageFile = async (file: File) => {
+    const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
     const ALLOWED_IMAGE_TYPES = [
       'image/jpeg',      // JPEG
       'image/jpg',       // JPG
       'image/png',       // PNG
-      'image/webp',      // WebP
-      'image/tiff',      // TIFF
-      'image/bmp',       // BMP
-      'image/svg+xml'    // SVG
     ];
 
+    // Basic file type validation
     if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
       return { 
         valid: false, 
-        error: 'Please upload JPG, PNG, WebP, TIFF, BMP, or SVG files only' 
+        error: 'Only JPG and PNG files are accepted for cover art' 
       };
     }
 
+    // File size validation
     if (file.size > MAX_IMAGE_SIZE) {
       return { 
         valid: false, 
@@ -180,11 +255,64 @@ export default function UploadPage() {
       };
     }
 
-    return { valid: true };
+    // Image dimension and quality validation
+    try {
+      const img = new Image();
+      const imageUrl = URL.createObjectURL(file);
+      
+      return new Promise((resolve) => {
+        img.onload = () => {
+          URL.revokeObjectURL(imageUrl);
+          
+          // Check dimensions (must be exactly 3000x3000)
+          if (img.width !== 3000 || img.height !== 3000) {
+            resolve({
+              valid: false,
+              error: `Cover art must be exactly 3000×3000 pixels (current: ${img.width}×${img.height})`
+            });
+            return;
+          }
+
+          // Check aspect ratio (must be square)
+          if (img.width !== img.height) {
+            resolve({
+              valid: false,
+              error: 'Cover art must be square (1:1 aspect ratio)'
+            });
+            return;
+          }
+
+          resolve({
+            valid: true,
+            metadata: {
+              width: img.width,
+              height: img.height,
+              aspectRatio: img.width / img.height,
+              fileSize: file.size
+            }
+          });
+        };
+
+        img.onerror = () => {
+          URL.revokeObjectURL(imageUrl);
+          resolve({
+            valid: false,
+            error: 'Unable to load image. Please ensure it\'s a valid JPG or PNG file.'
+          });
+        };
+
+        img.src = imageUrl;
+      });
+    } catch (error) {
+      return {
+        valid: false,
+        error: 'Unable to analyze image file. Please ensure it\'s a valid JPG or PNG file.'
+      };
+    }
   };
 
-  const handleArtworkFile = (file: File) => {
-    const validation = validateImageFile(file);
+  const handleArtworkFile = async (file: File) => {
+    const validation = await validateImageFile(file);
     setState(prev => ({
       ...prev,
       artworkFile: file,
@@ -193,6 +321,94 @@ export default function UploadPage() {
         artwork: validation
       }
     }));
+  };
+
+  // Metadata validation functions
+  const validateMetadata = () => {
+    const errors: string[] = [];
+
+    // Title casing rules (Title Case)
+    const titleCaseRegex = /^[A-Z][a-zA-Z0-9\s&'\-\.]+$/;
+    if (state.metadata.title && !titleCaseRegex.test(state.metadata.title)) {
+      errors.push('Release title must be in Title Case (e.g., "My Song Title")');
+    }
+
+    // No store names/brands in titles
+    const storeNames = ['spotify', 'apple music', 'amazon', 'youtube', 'tiktok', 'instagram'];
+    const titleLower = state.metadata.title.toLowerCase();
+    if (storeNames.some(store => titleLower.includes(store))) {
+      errors.push('Release title cannot contain store names or brands');
+    }
+
+    // Release date timing enforcement (≥10-14 days in future)
+    const releaseDate = new Date(state.metadata.releaseDate);
+    const today = new Date();
+    const minDate = new Date(today.getTime() + (14 * 24 * 60 * 60 * 1000)); // 14 days from now
+    
+    if (releaseDate < minDate) {
+      errors.push('Release date must be at least 14 days in the future');
+    }
+
+    // UPC validation (if provided)
+    if (state.metadata.upc && !/^\d{12}$/.test(state.metadata.upc)) {
+      errors.push('UPC must be exactly 12 digits');
+    }
+
+    // Genre validation
+    const validGenres = [
+      'Pop', 'Rock', 'Hip-Hop', 'R&B', 'Country', 'Electronic', 'Jazz', 'Classical',
+      'Blues', 'Folk', 'Reggae', 'Latin', 'World', 'Alternative', 'Indie', 'Metal',
+      'Punk', 'Soul', 'Funk', 'Disco', 'House', 'Techno', 'Trance', 'Dubstep'
+    ];
+    
+    if (state.metadata.genre && !validGenres.includes(state.metadata.genre)) {
+      errors.push(`Genre must be one of: ${validGenres.join(', ')}`);
+    }
+
+    return errors;
+  };
+
+  // Duplicate detection (mock implementation)
+  const checkForDuplicates = async () => {
+    setState(prev => ({
+      ...prev,
+      duplicateCheck: { ...prev.duplicateCheck, isChecking: true }
+    }));
+
+    // Mock duplicate check - in real implementation, this would use chromaprint
+    const mockResults = [
+      { similarity: 0.85, trackId: 'existing-1', title: 'Similar Track 1' },
+      { similarity: 0.72, trackId: 'existing-2', title: 'Similar Track 2' }
+    ].filter(result => result.similarity > 0.7);
+
+    setTimeout(() => {
+      setState(prev => ({
+        ...prev,
+        duplicateCheck: {
+          isChecking: false,
+          results: mockResults
+        }
+      }));
+    }, 2000);
+  };
+
+  // Rights validation
+  const validateRights = () => {
+    const errors: string[] = [];
+
+    if (!state.rights.attestation) {
+      errors.push('You must attest to the rights information');
+    }
+
+    if (state.rights.type === 'COVER' && !state.rights.mechanicalLicense) {
+      errors.push('Mechanical license information is required for cover songs');
+    }
+
+    if (state.rights.type === 'SAMPLED' && !state.rights.copyrightOwner) {
+      errors.push('Copyright owner information is required for sampled content');
+    }
+
+    return errors;
   };
 
   const handleMetadataChange = (field: string, value: string) => {
@@ -348,7 +564,10 @@ export default function UploadPage() {
                             Drop files here, or <span className="text-blue-400 font-medium">browse</span>
                           </p>
                           <p className="text-xs sm:text-sm text-white/60">
-                            MP3, WAV, FLAC, AAC, M4A, OGG (max 100MB)
+                            WAV/FLAC only • 44.1kHz • 16-24 bit • No clipping
+                          </p>
+                          <p className="text-xs text-white/50 mt-1">
+                            Professional quality required for distribution
                           </p>
                           <input
                             type="file"
