@@ -112,18 +112,13 @@ export async function POST(request: NextRequest) {
     const release = await prisma.release.create({
       data: {
         id: releaseId,
-        userId: 'demo-user-id', // TODO: Get from authenticated user
+        primaryArtistId: 'demo-artist-id', // TODO: Get from authenticated user
         title,
-        artist,
-        type: releaseType as any,
-        status: 'READY',
-        plannedAt: releaseDate ? new Date(releaseDate) : new Date(),
-        coverUrl: artworkUrl,
-        audioUrl,
-        genre,
-        language,
         releaseDate: releaseDate ? new Date(releaseDate) : new Date(),
-        isrc,
+        status: 'DRAFT',
+        coverUrl: artworkUrl,
+        genre,
+        territories: ['US'], // Default territory
         upc
       }
     });
@@ -134,9 +129,11 @@ export async function POST(request: NextRequest) {
         id: audioId,
         releaseId,
         title,
+        trackNumber: 1, // Default to track 1
         isrc,
         audioUrl,
-        duration: Math.floor(Math.random() * 300) + 120 // Random duration 2-7 minutes
+        duration: Math.floor(Math.random() * 300) + 120, // Random duration 2-7 minutes
+        language: 'en' // Default language
       }
     });
 
@@ -146,11 +143,8 @@ export async function POST(request: NextRequest) {
       data: {
         releaseId: release.id,
         title: release.title,
-        artist: release.artist,
         status: release.status,
-        audioUrl: release.audioUrl,
         coverUrl: release.coverUrl,
-        isrc: release.isrc,
         upc: release.upc,
         uploadedAt: release.createdAt,
         fileInfo: {
@@ -182,14 +176,7 @@ export async function GET(request: NextRequest) {
         where: { id: releaseId },
         include: {
           tracks: true,
-          distributions: {
-            include: {
-              analytics: {
-                orderBy: { date: 'desc' },
-                take: 30
-              }
-            }
-          }
+          deliveries: true
         }
       });
 
@@ -209,14 +196,7 @@ export async function GET(request: NextRequest) {
       const releases = await prisma.release.findMany({
         include: {
           tracks: true,
-          distributions: {
-            include: {
-              analytics: {
-                orderBy: { date: 'desc' },
-                take: 7
-              }
-            }
-          }
+          deliveries: true
         },
         orderBy: { createdAt: 'desc' }
       });
