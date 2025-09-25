@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
       releaseDate: formData.get('releaseDate') as string,
       genre: formData.get('genre') as string,
       language: formData.get('language') as string,
-      type: (formData.get('type') as string) || 'SINGLE'
+      type: ((formData.get('type') as string) || 'SINGLE') as 'SINGLE' | 'EP' | 'ALBUM'
     };
 
     const artworkFile = formData.get('artwork') as File;
