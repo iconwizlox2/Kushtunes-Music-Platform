@@ -1,9 +1,5 @@
 {
-  "/not-found": "app/not-found.js",
-  "/dashboard/page": "app/dashboard/page.js",
-  "/login/page": "app/login/page.js",
   "/register/page": "app/register/page.js",
-  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
-  "/upload/page": "app/upload/page.js",
-  "/page": "app/page.js"
+  "/login/page": "app/login/page.js",
+  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js"
 }

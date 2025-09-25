@@ -8,10 +8,13 @@ const prisma = new PrismaClient();
 export const authOptions: AuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    }),
+    // Only add Google provider if credentials are available
+    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET ? [
+      GoogleProvider({
+        clientId: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      })
+    ] : []),
   ],
   callbacks: {
     async session({ session, token }: { session: any; token: any }) {
