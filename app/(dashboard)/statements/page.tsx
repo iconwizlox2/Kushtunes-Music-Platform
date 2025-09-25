@@ -12,8 +12,8 @@ type StatementRow = { period: string; csvUrl: string; pdfUrl?: string; totalUSD:
 async function fetchStatements(): Promise<StatementRow[]> {
   // TODO: replace with real API call
   return [
-    { period: "2025-08", csvUrl: "/api/stmt/2025-08.csv", pdfUrl: "/api/stmt/2025-08.pdf", totalUSD: 828.52 },
-    { period: "2025-07", csvUrl: "/api/stmt/2025-07.csv", pdfUrl: "/api/stmt/2025-07.pdf", totalUSD: 612.23 }
+    { period: "2025-08", csvUrl: "/api/stmt/2025-08/csv", pdfUrl: "/api/stmt/2025-08/pdf", totalUSD: 828.52 },
+    { period: "2025-07", csvUrl: "/api/stmt/2025-07/csv", pdfUrl: "/api/stmt/2025-07/pdf", totalUSD: 612.23 }
   ];
 }
 
