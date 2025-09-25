@@ -7,7 +7,6 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['@prisma/client'],
   },
-  output: 'standalone',
 }
 
 module.exports = nextConfig

@@ -537,7 +537,7 @@ export default function UploadPage() {
         return (
           <div className="space-y-6">
             <h3 className="text-xl font-semibold text-gray-900">Distribution</h3>
-            <DSPDistribution />
+            <DSPDistribution releaseId="demo-release-id" />
             <div className="flex justify-end">
               <button
                 onClick={() => setState(prev => ({ ...prev, step: 5 }))}
