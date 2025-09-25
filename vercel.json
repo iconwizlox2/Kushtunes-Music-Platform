@@ -1,9 +1,5 @@
 {
-  "buildCommand": "npm run build:prod",
-  "outputDirectory": ".next",
   "framework": "nextjs",
-  "installCommand": "npm install",
-  "devCommand": "next dev",
   "regions": ["iad1"],
   "env": {
     "NEXT_DISABLE_BUILD_TRACE": "1",

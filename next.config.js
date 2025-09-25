@@ -12,6 +12,9 @@ const nextConfig = {
   generateBuildId: async () => {
     return 'build-' + Date.now();
   },
+  
+  // Disable trace collection completely
+  outputFileTracing: false,
 }
 
 module.exports = nextConfig
