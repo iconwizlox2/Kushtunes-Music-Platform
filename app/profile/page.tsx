@@ -453,7 +453,6 @@ export default function ProfilePage() {
 
               <div className="flex justify-end">
                 <ProfessionalButton
-                  type="submit"
                   variant="primary"
                   disabled={saving}
                 >
@@ -566,7 +565,6 @@ export default function ProfilePage() {
 
               <div className="flex justify-end">
                 <ProfessionalButton
-                  type="submit"
                   variant="primary"
                   disabled={saving}
                 >
