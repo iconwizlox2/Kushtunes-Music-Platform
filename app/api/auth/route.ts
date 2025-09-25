@@ -219,16 +219,65 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    // Find user
-    const user = await prisma.user.findUnique({
-      where: { email: email.toLowerCase() }
-    });
+    // Check for hardcoded admin accounts (for testing)
+    const hardcodedAdmins = [
+      {
+        email: 'admin@kushtunes.com',
+        password: 'Admin123!',
+        user: {
+          id: 'admin-001',
+          email: 'admin@kushtunes.com',
+          username: 'admin',
+          firstName: 'Kush',
+          lastName: 'Admin',
+          role: 'ADMIN',
+          isEmailVerified: true,
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }
+      },
+      {
+        email: 'demo@kushtunes.com',
+        password: 'Demo123!',
+        user: {
+          id: 'demo-001',
+          email: 'demo@kushtunes.com',
+          username: 'demo',
+          firstName: 'Demo',
+          lastName: 'User',
+          role: 'ADMIN',
+          isEmailVerified: true,
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }
+      }
+    ];
 
-    if (!user) {
-      return NextResponse.json(
-        { success: false, message: 'Invalid email or password' },
-        { status: 401 }
-      );
+    let user = null;
+    let isHardcodedAdmin = false;
+
+    // Check hardcoded admins first
+    const hardcodedAdmin = hardcodedAdmins.find(admin => 
+      admin.email.toLowerCase() === email.toLowerCase() && admin.password === password
+    );
+
+    if (hardcodedAdmin) {
+      user = hardcodedAdmin.user;
+      isHardcodedAdmin = true;
+    } else {
+      // Find user in database
+      user = await prisma.user.findUnique({
+        where: { email: email.toLowerCase() }
+      });
+
+      if (!user) {
+        return NextResponse.json(
+          { success: false, message: 'Invalid email or password' },
+          { status: 401 }
+        );
+      }
     }
 
     // Check if user is active
@@ -239,13 +288,15 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    // Verify password
-    const isPasswordValid = await verifyPassword(password, user.password);
-    if (!isPasswordValid) {
-      return NextResponse.json(
-        { success: false, message: 'Invalid email or password' },
-        { status: 401 }
-      );
+    // Verify password (skip for hardcoded admins)
+    if (!isHardcodedAdmin) {
+      const isPasswordValid = await verifyPassword(password, user.password);
+      if (!isPasswordValid) {
+        return NextResponse.json(
+          { success: false, message: 'Invalid email or password' },
+          { status: 401 }
+        );
+      }
     }
 
     // Generate JWT token
