@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { SparklesIcon, MusicalNoteIcon, GlobeAltIcon, ChartBarIcon, ShieldCheckIcon, ArrowRightIcon, TrophyIcon, StarIcon } from '@/components/ui/Icons';
+import { MusicalNoteIcon, GlobeAltIcon, ChartBarIcon, ShieldCheckIcon, ArrowRightIcon, UsersIcon, PhotoIcon } from '@/components/ui/Icons';
 import { useEffect, useState } from 'react';
 
 export default function Home() {
@@ -16,309 +16,255 @@ export default function Home() {
 
   const features = [
     {
-      icon: <MusicalNoteIcon className="h-8 w-8 text-blue-400" />,
-      title: "Upload & Distribute",
-      description: "Get your music on Spotify, Apple Music, and 200+ platforms worldwide.",
-      coins: "100"
+      icon: <MusicalNoteIcon className="h-8 w-8 text-primary-blue" />,
+      title: "Upload Your Tracks",
+      description: "Get your music on all major platforms. Earn +100 KUSHCOINS!",
     },
     {
-      icon: <GlobeAltIcon className="h-8 w-8 text-purple-400" />,
-      title: "Global Reach",
-      description: "Reach fans everywhere with distribution to major streaming platforms.",
-      coins: "150"
+      icon: <GlobeAltIcon className="h-8 w-8 text-primary-blue" />,
+      title: "Global Distribution",
+      description: "Reach fans worldwide on Spotify, Apple Music, and more. Earn +150 KUSHCOINS!",
     },
     {
-      icon: <ChartBarIcon className="h-8 w-8 text-yellow-400" />,
-      title: "Real-time Analytics",
-      description: "Track your streams, downloads, and earnings with detailed analytics.",
-      coins: "200"
+      icon: <ChartBarIcon className="h-8 w-8 text-primary-blue" />,
+      title: "Advanced Analytics",
+      description: "Track your streams and earnings with detailed reports. Earn +200 KUSHCOINS!",
     },
     {
-      icon: <ShieldCheckIcon className="h-8 w-8 text-green-400" />,
-      title: "Keep 100% Rights",
-      description: "You keep all your rights and royalties. No hidden fees.",
-      coins: "300"
+      icon: <ShieldCheckIcon className="h-8 w-8 text-primary-blue" />,
+      title: "Keep 100% Royalties",
+      description: "You keep every penny you earn. No hidden fees. Earn +100 KUSHCOINS!",
     },
     {
-      icon: <SparklesIcon className="h-8 w-8 text-pink-400" />,
-      title: "Premium Features",
-      description: "Access to advanced tools like HyperFollow pages and playlist pitching.",
-      coins: "500"
+      icon: <UsersIcon className="h-8 w-8 text-primary-blue" />,
+      title: "Artist Community",
+      description: "Connect with other artists and grow your network. Earn +150 KUSHCOINS!",
     },
     {
-      icon: <TrophyIcon className="h-8 w-8 text-orange-400" />,
-      title: "Fast Processing",
-      description: "Your music goes live in 24-48 hours on most platforms.",
-      coins: "250"
-    }
+      icon: <PhotoIcon className="h-8 w-8 text-primary-blue" />,
+      title: "Custom Artist Pages",
+      description: "Showcase your music with personalized profiles. Earn +200 KUSHCOINS!",
+    },
   ];
 
   const stats = [
-    { number: "200+", label: "Platforms", icon: "🎵" },
-    { number: "1M+", label: "Artists", icon: "👥" },
-    { number: "50M+", label: "Tracks", icon: "🎶" },
-    { number: "24hrs", label: "Processing", icon: "⚡" }
+    { number: "1M+", label: "Artists" },
+    { number: "50M+", label: "Tracks" },
+    { number: "24hrs", label: "Processing" }
   ];
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      {/* Premium Dark Background with Patterns */}
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 opacity-50"></div>
-      <div className="absolute inset-0" style={{
-        backgroundImage: `radial-gradient(circle at 1px 1px, rgba(59, 130, 246, 0.15) 1px, transparent 0)`,
-        backgroundSize: '20px 20px'
-      }}></div>
-      
-      <div className="relative z-10">
-        {/* Hero Section */}
-        <section className="py-24 px-4 relative overflow-hidden">
-          <div className="container mx-auto text-center">
-            <div className="max-w-4xl mx-auto">
-              {/* Coin Balance Display */}
-              <div className="flex justify-center mb-8">
-                <div className="bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full px-6 py-3 shadow-lg">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-6 h-6 bg-yellow-300 rounded-full flex items-center justify-center">
-                      <span className="text-yellow-800 font-bold text-sm">₵</span>
-                    </div>
-                    <span className="text-yellow-900 font-bold text-lg">1,250 KUSHCOINS</span>
-                  </div>
-                </div>
-              </div>
-
-              <h1 className="text-6xl md:text-8xl font-extrabold mb-6 leading-tight">
-                <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent animate-pulse">
-                  KUSHTUNES
-                </span>
-              </h1>
-              
-              <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 mb-10 shadow-2xl">
-                <h2 className="text-2xl md:text-3xl font-bold mb-4">
-                  Play and Earn KUSHCOINS
-                </h2>
-                <p className="text-xl text-blue-100 mb-6">
-                  Support us by uploading awesome music and earn a lot of coins!
-                </p>
-                <div className="flex flex-col sm:flex-row justify-center gap-4">
-                  <Link href={isLoggedIn ? "/upload" : "/register"} passHref>
-                    <button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold py-4 px-8 rounded-xl text-lg shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center space-x-2">
-                      <span>{isLoggedIn ? "Upload Music" : "Enter Platform"}</span>
-                      <ArrowRightIcon className="h-5 w-5" />
-                    </button>
-                  </Link>
-                  {!isLoggedIn && (
-                    <Link href="/login" passHref>
-                      <button className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-4 px-8 rounded-xl text-lg border border-gray-600 transition-all duration-300">
-                        Sign In
-                      </button>
-                    </Link>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Stats Section */}
-        <section className="py-16 bg-gray-800/50 backdrop-blur-sm">
-          <div className="container mx-auto">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              {stats.map((stat, index) => (
-                <div key={index} className="text-center bg-gray-800/50 rounded-xl p-6 border border-gray-700 hover:border-blue-500 transition-all duration-300">
-                  <div className="text-4xl mb-2">{stat.icon}</div>
-                  <div className="text-3xl font-bold text-blue-400 mb-2">{stat.number}</div>
-                  <div className="text-gray-300 font-medium">{stat.label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Features Section */}
-        <section className="py-20 px-4">
-          <div className="container mx-auto">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                Why Choose Kushtunes?
-              </h2>
-              <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-                The most artist-friendly music distribution platform with transparent pricing and powerful tools.
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {features.map((feature, index) => (
-                <div
-                  key={index}
-                  className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-2xl p-6 hover:border-blue-500 transition-all duration-300 hover:transform hover:scale-105"
-                >
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex justify-center">
-                      {feature.icon}
-                    </div>
-                    <div className="bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full px-3 py-1">
-                      <span className="text-yellow-900 font-bold text-sm">+{feature.coins}</span>
-                    </div>
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-3">
-                    {feature.title}
-                  </h3>
-                  <p className="text-gray-400">
-                    {feature.description}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Pricing Section */}
-        <section className="py-20 bg-gray-800/30">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                Choose Your Level
-              </h2>
-              <p className="text-xl text-gray-400">
-                Level up your music distribution game
-              </p>
-            </div>
-            
-            <div className="max-w-4xl mx-auto grid md:grid-cols-3 gap-8">
-              {/* Free Plan */}
-              <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-2xl p-8 text-center hover:border-green-500 transition-all duration-300">
-                <div className="text-4xl mb-4">🎵</div>
-                <h3 className="text-2xl font-bold text-white mb-4">LEVEL 1</h3>
-                <div className="text-4xl font-bold text-green-400 mb-6">
-                  FREE
-                </div>
-                <ul className="text-left space-y-3 mb-8 text-gray-300">
-                  <li className="flex items-center">
-                    <div className="w-2 h-2 bg-green-400 rounded-full mr-3"></div>
-                    Upload unlimited singles
-                  </li>
-                  <li className="flex items-center">
-                    <div className="w-2 h-2 bg-green-400 rounded-full mr-3"></div>
-                    Keep 100% royalties
-                  </li>
-                  <li className="flex items-center">
-                    <div className="w-2 h-2 bg-green-400 rounded-full mr-3"></div>
-                    Basic analytics
-                  </li>
-                </ul>
-                <button className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl w-full transition-all duration-300">
-                  Start Free
+      {/* Hero Section */}
+      <section className="premium-bg py-24 px-4 relative">
+        <div className="container mx-auto text-center">
+          <div className="max-w-4xl mx-auto">
+            <h1 className="heading-xl text-white mb-6 animate-fade-in">
+              Play and Earn{' '}
+              <span className="luxury-text-gradient animate-glow">KUSHCOINS</span>
+            </h1>
+            <p className="text-xl text-gray-300 mb-10 animate-fade-in">
+              Upload your music, distribute globally, and earn rewards.
+            </p>
+            <div className="flex flex-col sm:flex-row justify-center gap-4 animate-fade-in">
+              <Link href={isLoggedIn ? "/upload" : "/register"} passHref>
+                <button className="btn-primary animate-shimmer">
+                  {isLoggedIn ? "Upload Your Music" : "Get Started - Level 1"}
                 </button>
-              </div>
-
-              {/* Musician Plan */}
-              <div className="bg-gradient-to-br from-blue-600/20 to-purple-600/20 backdrop-blur-sm border-2 border-blue-500 rounded-2xl p-8 text-center relative hover:border-blue-400 transition-all duration-300 transform scale-105">
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full px-4 py-1">
-                  <span className="text-yellow-900 font-bold text-sm">MOST POPULAR</span>
-                </div>
-                <div className="text-4xl mb-4">🎤</div>
-                <h3 className="text-2xl font-bold text-white mb-4">LEVEL 2</h3>
-                <div className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent mb-6">
-                  $20
-                </div>
-                <ul className="text-left space-y-3 mb-8 text-gray-300">
-                  <li className="flex items-center">
-                    <div className="w-2 h-2 bg-blue-400 rounded-full mr-3"></div>
-                    Everything in Level 1
-                  </li>
-                  <li className="flex items-center">
-                    <div className="w-2 h-2 bg-blue-400 rounded-full mr-3"></div>
-                    Upload albums & EPs
-                  </li>
-                  <li className="flex items-center">
-                    <div className="w-2 h-2 bg-blue-400 rounded-full mr-3"></div>
-                    Advanced analytics
-                  </li>
-                  <li className="flex items-center">
-                    <div className="w-2 h-2 bg-blue-400 rounded-full mr-3"></div>
-                    HyperFollow pages
-                  </li>
-                </ul>
-                <button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold py-3 px-6 rounded-xl w-full transition-all duration-300">
-                  Level Up
-                </button>
-              </div>
-
-              {/* Label Plan */}
-              <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-2xl p-8 text-center hover:border-purple-500 transition-all duration-300">
-                <div className="text-4xl mb-4">🏆</div>
-                <h3 className="text-2xl font-bold text-white mb-4">LEVEL 3</h3>
-                <div className="text-4xl font-bold text-purple-400 mb-6">
-                  $80
-                </div>
-                <ul className="text-left space-y-3 mb-8 text-gray-300">
-                  <li className="flex items-center">
-                    <div className="w-2 h-2 bg-purple-400 rounded-full mr-3"></div>
-                    Everything in Level 2
-                  </li>
-                  <li className="flex items-center">
-                    <div className="w-2 h-2 bg-purple-400 rounded-full mr-3"></div>
-                    Up to 100 artists
-                  </li>
-                  <li className="flex items-center">
-                    <div className="w-2 h-2 bg-purple-400 rounded-full mr-3"></div>
-                    Priority support
-                  </li>
-                  <li className="flex items-center">
-                    <div className="w-2 h-2 bg-purple-400 rounded-full mr-3"></div>
-                    Custom label pages
-                  </li>
-                </ul>
-                <button className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-xl w-full transition-all duration-300">
-                  Go Pro
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* CTA Section */}
-        <section className="py-20 px-4">
-          <div className="container mx-auto text-center">
-            <div className="max-w-3xl mx-auto bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-sm border border-gray-700 rounded-3xl p-12">
-              <h2 className="text-4xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                Ready to Level Up?
-              </h2>
-              <p className="text-xl text-gray-400 mb-10">
-                Join over 1 million artists who trust Kushtunes to distribute their music worldwide.
-              </p>
-              <div className="flex flex-col sm:flex-row justify-center gap-4">
-                <Link href={isLoggedIn ? "/upload" : "/register"} passHref>
-                  <button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold py-4 px-8 rounded-xl text-lg shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center space-x-2">
-                    <span>{isLoggedIn ? "Upload Your First Track" : "Start Your Journey"}</span>
-                    <ArrowRightIcon className="h-5 w-5" />
+              </Link>
+              {!isLoggedIn && (
+                <Link href="/login" passHref>
+                  <button className="btn-secondary">
+                    Sign In
                   </button>
                 </Link>
-                <button className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-4 px-8 rounded-xl text-lg border border-gray-600 transition-all duration-300">
-                  Learn More
-                </button>
-              </div>
+              )}
+            </div>
+            <div className="mt-12 text-2xl font-bold text-gaming-gold animate-pulse">
+              1,250 KUSHCOINS
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Footer */}
-        <footer className="py-12 bg-gray-900/50 backdrop-blur-sm border-t border-gray-800">
-          <div className="container mx-auto px-4 text-center">
-            <div className="mb-8">
-              <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Kushtunes</h3>
-              <p className="text-gray-400 max-w-2xl mx-auto">
-                The most artist-friendly music distribution platform. Upload once, distribute everywhere.
-              </p>
+      {/* Features Section */}
+      <section className="py-20 px-4 bg-gray-800 premium-pattern">
+        <div className="container mx-auto text-center">
+          <div className="max-w-3xl mx-auto mb-16">
+            <h2 className="heading-lg text-white mb-4 animate-fade-in">
+              Why Kushtunes is Your Next Level Up
+            </h2>
+            <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+              The most artist-friendly music distribution platform with transparent pricing and powerful tools.
+            </p>
+          </div>
+
+          <div className="grid-features">
+            {features.map((feature, index) => (
+              <div
+                key={index}
+                className={`card hover-lift animate-fade-in ${
+                  index % 2 === 0 ? 'animate-slide-in-left' : 'animate-slide-in-right'
+                }`}
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <div className="mb-4 flex justify-center animate-float">
+                  {feature.icon}
+                </div>
+                <h3 className="heading-sm text-white mb-3 text-center">
+                  {feature.title}
+                </h3>
+                <p className="text-gray-300 text-center">
+                  {feature.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Section (now Levels) */}
+      <section className="py-20 premium-bg premium-pattern">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="heading-lg text-white mb-4 animate-fade-in">
+              Unlock Your Potential: Choose Your Level
+            </h2>
+            <p className="text-xl text-gray-300 animate-fade-in">
+              No hidden fees. No long-term contracts. Just great value.
+            </p>
+          </div>
+
+          <div className="max-w-4xl mx-auto grid md:grid-cols-3 gap-8">
+            {/* Level 1 (Free Plan) */}
+            <div className="card text-center animate-slide-in-left">
+              <h3 className="heading-sm text-white mb-4">Level 1 (Free)</h3>
+              <div className="text-4xl font-bold text-white mb-6">
+                $0<span className="text-lg text-gray-400">/year</span>
+              </div>
+              <ul className="text-left space-y-3 mb-8 text-gray-300">
+                <li className="flex items-center">
+                  <div className="w-2 h-2 bg-primary-blue rounded-full mr-3"></div>
+                  Upload unlimited singles
+                </li>
+                <li className="flex items-center">
+                  <div className="w-2 h-2 bg-primary-blue rounded-full mr-3"></div>
+                  Keep 100% royalties
+                </li>
+                <li className="flex items-center">
+                  <div className="w-2 h-2 bg-primary-blue rounded-full mr-3"></div>
+                  Basic analytics
+                </li>
+              </ul>
+              <button className="btn-secondary w-full">
+                Get Started Free
+              </button>
             </div>
-            <div className="border-t border-gray-800 pt-8">
-              <p className="text-gray-500">
-                &copy; {new Date().getFullYear()} Kushtunes. All rights reserved.
-              </p>
+
+            {/* Level 2 (Musician Plan) */}
+            <div className="card-premium text-center relative animate-fade-in animate-pulse">
+              <div className="badge-primary absolute -top-3 left-1/2 transform -translate-x-1/2 animate-glow">
+                MOST POPULAR
+              </div>
+              <h3 className="heading-sm text-white mb-4">Level 2 (Musician)</h3>
+              <div className="text-4xl font-bold luxury-text-gradient mb-6">
+                $20<span className="text-lg text-gray-400">/year</span>
+              </div>
+              <ul className="text-left space-y-3 mb-8 text-gray-300">
+                <li className="flex items-center">
+                  <div className="w-2 h-2 bg-primary-blue rounded-full mr-3"></div>
+                  Everything in Level 1
+                </li>
+                <li className="flex items-center">
+                  <div className="w-2 h-2 bg-primary-blue rounded-full mr-3"></div>
+                  Upload albums & EPs
+                </li>
+                <li className="flex items-center">
+                  <div className="w-2 h-2 bg-primary-blue rounded-full mr-3"></div>
+                  Advanced analytics
+                </li>
+                <li className="flex items-center">
+                  <div className="w-2 h-2 bg-primary-blue rounded-full mr-3"></div>
+                  HyperFollow pages
+                </li>
+              </ul>
+              <button className="btn-primary w-full animate-shimmer">
+                Choose Level 2
+              </button>
+            </div>
+
+            {/* Level 3 (Label Plan) */}
+            <div className="card text-center animate-slide-in-right">
+              <h3 className="heading-sm text-white mb-4">Level 3 (Label)</h3>
+              <div className="text-4xl font-bold text-white mb-6">
+                $80<span className="text-lg text-gray-400">/year</span>
+              </div>
+              <ul className="text-left space-y-3 mb-8 text-gray-300">
+                <li className="flex items-center">
+                  <div className="w-2 h-2 bg-primary-blue rounded-full mr-3"></div>
+                  Everything in Level 2
+                </li>
+                <li className="flex items-center">
+                  <div className="w-2 h-2 bg-primary-blue rounded-full mr-3"></div>
+                  Up to 100 artists
+                </li>
+                <li className="flex items-center">
+                  <div className="w-2 h-2 bg-primary-blue rounded-full mr-3"></div>
+                  Priority support
+                </li>
+                <li className="flex items-center">
+                  <div className="w-2 h-2 bg-primary-blue rounded-full mr-3"></div>
+                  Custom label pages
+                </li>
+              </ul>
+              <button className="btn-secondary w-full">
+                Choose Level 3
+              </button>
             </div>
           </div>
-        </footer>
-      </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="py-20 px-4 bg-gray-900">
+        <div className="container mx-auto text-center">
+          <h2 className="heading-lg text-white mb-16 animate-fade-in">
+            Kushtunes by the Numbers
+          </h2>
+          <div className="grid-stats">
+            {stats.map((stat, index) => (
+              <div key={index} className="card animate-fade-in" style={{ animationDelay: `${index * 0.15}s` }}>
+                <p className="text-5xl font-extrabold luxury-text-gradient mb-2">{stat.number}</p>
+                <p className="text-xl text-gray-300">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 px-4 premium-bg">
+        <div className="container mx-auto text-center">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="heading-lg text-white mb-6 animate-fade-in">
+              Ready to Level Up Your Music Career?
+            </h2>
+            <p className="text-xl text-gray-300 mb-10 animate-fade-in">
+              Join thousands of artists already earning KUSHCOINS and distributing their sound globally.
+            </p>
+            <Link href={isLoggedIn ? "/upload" : "/register"} passHref>
+              <button className="btn-primary animate-shimmer">
+                {isLoggedIn ? "Start Uploading Now" : "Join Kushtunes Today"}
+              </button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-8 text-center text-gray-500 border-t border-gray-700">
+        <p>&copy; {new Date().getFullYear()} Kushtunes. All rights reserved.</p>
+      </footer>
     </div>
   );
 }
