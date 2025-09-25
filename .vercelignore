@@ -40,4 +40,34 @@ docs/
 scripts/
 deploy.sh
 deploy-vercel.sh
-vercel-build.sh
+
+# Ignore large files that might cause issues
+*.mp3
+*.wav
+*.flac
+*.mov
+*.mp4
+*.avi
+
+# Ignore cache and temp files
+.cache/
+.temp/
+.tmp/
+*.tmp
+*.temp
+
+# Ignore git files
+.git/
+.gitignore
+
+# Ignore package manager files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Ignore TypeScript build info
+*.tsbuildinfo
+
+# Ignore Prisma files that might cause issues
+prisma/dev.db
+prisma/dev.db-journal
