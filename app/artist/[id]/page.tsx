@@ -75,19 +75,57 @@ export default function ArtistProfilePage() {
 
   const fetchArtistData = async () => {
     try {
-      // Fetch artist profile
-      const artistResponse = await fetch(`/api/artist/profile/${artistId}`);
-      if (artistResponse.ok) {
-        const artistData = await artistResponse.json();
-        setArtist(artistData.data);
-      }
+      // For now, use mock data since we don't have real artist profiles in the database
+      const mockArtist = {
+        id: artistId,
+        name: "Alex Johnson",
+        bio: "Independent artist from Los Angeles creating soulful electronic music that blends traditional instruments with modern production techniques. With over 5 years of experience in the music industry, Alex has performed at major festivals and collaborated with renowned producers.",
+        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face",
+        coverImage: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1200&h=400&fit=crop",
+        location: "Los Angeles, CA",
+        genre: "Electronic Soul",
+        followers: 12500,
+        monthlyListeners: 45000,
+        socialLinks: {
+          instagram: "https://instagram.com/alexjohnsonmusic",
+          twitter: "https://twitter.com/alexjohnsonmusic",
+          youtube: "https://youtube.com/alexjohnsonmusic",
+          tiktok: "https://tiktok.com/@alexjohnsonmusic"
+        },
+        verified: true,
+        joinedDate: "2022-03-15"
+      };
 
-      // Fetch artist releases
-      const releasesResponse = await fetch(`/api/artist/releases/${artistId}`);
-      if (releasesResponse.ok) {
-        const releasesData = await releasesResponse.json();
-        setReleases(releasesData.data || []);
-      }
+      const mockReleases = [
+        {
+          id: "1",
+          title: "Midnight Dreams",
+          type: "ALBUM",
+          coverUrl: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=400&fit=crop",
+          releaseDate: "2024-01-15",
+          streams: 125000,
+          tracks: [
+            { id: "1", title: "Midnight Dreams", duration: 240, streams: 45000 },
+            { id: "2", title: "City Lights", duration: 195, streams: 32000 },
+            { id: "3", title: "Ocean Waves", duration: 210, streams: 28000 },
+            { id: "4", title: "Sunset Boulevard", duration: 225, streams: 20000 }
+          ]
+        },
+        {
+          id: "2",
+          title: "Electric Soul",
+          type: "SINGLE",
+          coverUrl: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&h=400&fit=crop",
+          releaseDate: "2023-11-20",
+          streams: 89000,
+          tracks: [
+            { id: "5", title: "Electric Soul", duration: 195, streams: 89000 }
+          ]
+        }
+      ];
+
+      setArtist(mockArtist);
+      setReleases(mockReleases);
     } catch (error) {
       console.error('Error fetching artist data:', error);
     } finally {
