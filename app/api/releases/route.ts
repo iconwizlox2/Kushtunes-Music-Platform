@@ -360,4 +360,3 @@ function generateISRC(): string {
   const designation = Math.floor(Math.random() * 100000).toString().padStart(5, '0');
   return `${countryCode}-${registrant}-${year}-${designation}`;
 }
-}
