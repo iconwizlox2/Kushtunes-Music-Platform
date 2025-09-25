@@ -182,8 +182,8 @@ export async function POST(request: NextRequest) {
     await prisma.session.create({
       data: {
         userId: user.id,
-        token: sessionToken,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
+        sessionToken: sessionToken,
+        expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
       }
     });
 
@@ -329,8 +329,8 @@ export async function PUT(request: NextRequest) {
     await prisma.session.create({
       data: {
         userId: user.id,
-        token: sessionToken,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
+        sessionToken: sessionToken,
+        expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
       }
     });
 
