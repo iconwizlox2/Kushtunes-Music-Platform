@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "NODE_OPTIONS='--max-old-space-size=4096' prisma generate && next build",
+    "build": "NODE_OPTIONS='--max-old-space-size=4096' prisma generate && NEXT_DISABLE_BUILD_TRACE=1 next build",
+    "build:minimal": "NODE_OPTIONS='--max-old-space-size=4096' prisma generate && NEXT_DISABLE_BUILD_TRACE=1 next build",
     "start": "next start",
     "lint": "next lint",
     "export": "next build && next export",

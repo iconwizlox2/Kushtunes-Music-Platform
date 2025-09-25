@@ -6,6 +6,8 @@ const nextConfig = {
   },
   experimental: {
     optimizePackageImports: ['@prisma/client'],
+    // Disable webpack build worker
+    webpackBuildWorker: false,
   },
   // Disable build trace collection to prevent call stack errors
   webpack: (config, { isServer }) => {
@@ -17,6 +19,10 @@ const nextConfig = {
         tls: false,
       };
     }
+    // Disable problematic plugins
+    config.plugins = config.plugins.filter(plugin => {
+      return !plugin.constructor.name.includes('Trace');
+    });
     return config;
   },
   // Optimize build process
