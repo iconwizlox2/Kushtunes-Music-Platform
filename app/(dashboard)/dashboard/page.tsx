@@ -236,14 +236,27 @@ export default function DashboardPage() {
   }
 
   return (
-    <ProfessionalLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Advanced Analytics Dashboard</h1>
-            <p className="text-gray-600 mt-1">Comprehensive insights into your music performance</p>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl animate-pulse" style={{animationDelay: '0.5s'}}></div>
+      </div>
+      
+      <div className="relative z-10 max-w-7xl mx-auto p-6 pt-32">
+        <div className="space-y-8">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-12">
+            <div>
+              <h1 className="text-6xl font-black text-white mb-4">
+                Advanced 
+                <span className="block bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                  Analytics Dashboard
+                </span>
+              </h1>
+              <p className="text-2xl text-white/80 font-light">Comprehensive insights into your music performance</p>
+            </div>
           <div className="flex items-center space-x-4">
             <select
               value={dateRange}
@@ -530,7 +543,8 @@ export default function DashboardPage() {
             </ProfessionalCard>
           </div>
         )}
+        </div>
       </div>
-    </ProfessionalLayout>
+    </div>
   );
 }
