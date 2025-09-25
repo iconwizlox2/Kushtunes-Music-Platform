@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
+      where: { id: decoded.id },
       select: {
         id: true,
         email: true,
@@ -92,7 +92,7 @@ export async function PUT(request: NextRequest) {
       const existingUser = await prisma.user.findFirst({
         where: {
           username: username.toLowerCase(),
-          id: { not: decoded.userId }
+          id: { not: decoded.id }
         }
       });
 
@@ -106,7 +106,7 @@ export async function PUT(request: NextRequest) {
 
     // Update user profile
     const updatedUser = await prisma.user.update({
-      where: { id: decoded.userId },
+      where: { id: decoded.id },
       data: {
         firstName: firstName || null,
         lastName: lastName || null,

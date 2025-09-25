@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
 
     // Update user avatar
     await prisma.user.update({
-      where: { id: decoded.userId },
+      where: { id: decoded.id },
       data: {
         avatar: avatarUrl,
         updatedAt: new Date()
