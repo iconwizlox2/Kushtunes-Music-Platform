@@ -71,6 +71,7 @@ model Artist {
   taxId          String?     // Tax ID number
   kycStatus      KycStatus   @default(PENDING)
   kycDocuments   Json?       // Store KYC document URLs
+  role           String      @default("user") // "admin" | "user"
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
   releases       Release[]
@@ -79,6 +80,8 @@ model Artist {
   auditLogs      AuditLog[]
   advances       Advance[]
   costs          Cost[]
+  ownedLabels    Label[]
+  labelMemberships LabelMember[]
   
   @@map("artists")
 }
@@ -388,4 +391,29 @@ model Cost {
   updatedAt    DateTime @updatedAt
   
   @@map("costs")
+}
+
+model Label {
+  id        String        @id @default(cuid())
+  name      String
+  owner     Artist        @relation(fields: [ownerId], references: [id])
+  ownerId   String
+  members   LabelMember[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  
+  @@map("labels")
+}
+
+model LabelMember {
+  id        String   @id @default(cuid())
+  label     Label    @relation(fields: [labelId], references: [id])
+  labelId   String
+  artist    Artist   @relation(fields: [artistId], references: [id])
+  artistId  String
+  role      String   @default("artist") // "artist" | "manager"
+  createdAt DateTime @default(now())
+
+  @@unique([labelId, artistId])
+  @@map("label_members")
 }

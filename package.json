@@ -24,7 +24,8 @@
     "test:health": "playwright test tests/health.spec.ts --reporter=list",
     "test:health:local": "./scripts/health-check.sh",
     "linkcheck": "tsx scripts/check-links.ts http://localhost:3000",
-    "linkcheck:all": "tsx scripts/check-links.ts http://localhost:3000 --include-external"
+    "linkcheck:all": "tsx scripts/check-links.ts http://localhost:3000 --include-external",
+    "db:seed": "prisma db seed"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.10.0",
@@ -58,6 +59,9 @@
     "p-queue": "^7.4.1",
     "tsx": "^4.19.0",
     "vercel": "^48.1.6"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   },
   "keywords": [
     "music",

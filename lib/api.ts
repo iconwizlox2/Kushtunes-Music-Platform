@@ -65,3 +65,15 @@ export async function requireAdmin() {
 
   throw new UnauthorizedError("Admin only");
 }
+
+/**
+ * Label owner authentication helper
+ */
+export async function requireLabelOwner() {
+  const artist = await requireArtist(); // your cookie→Artist mapping
+  // treat label owner as admin-equivalent for label routes
+  // If you want a stricter flag, store Artist.role = "label" or check Label.ownerId.
+  const label = await prisma.label.findFirst({ where: { ownerId: artist.id }, select: { id: true, name: true } });
+  if (!label) throw new UnauthorizedError("Label owner required");
+  return { artist, label };
+}
