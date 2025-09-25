@@ -247,7 +247,7 @@ function generateMockEarningsData(userId: string, trackIds: string[], dateFilter
   const platforms = ['spotify', 'apple-music', 'youtube-music', 'amazon-music', 'deezer'];
   const countries = ['US', 'GB', 'CA', 'AU', 'DE', 'FR', 'IT', 'ES', 'NL', 'SE'];
   
-  const earningsData = [];
+  const earningsData: any[] = [];
   const startDate = dateFilter.gte || new Date(Date.now() - 90 * 24 * 60 * 60 * 1000); // 90 days ago
   const endDate = dateFilter.lte || new Date();
   
