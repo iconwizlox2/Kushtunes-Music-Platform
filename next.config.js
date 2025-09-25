@@ -6,6 +6,7 @@ const nextConfig = {
   },
   experimental: {
     outputFileTracingRoot: undefined,
+    outputFileTracing: false,
   },
   webpack: (config, { isServer }) => {
     if (isServer) {

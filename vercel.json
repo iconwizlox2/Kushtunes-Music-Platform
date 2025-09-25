@@ -1,5 +1,8 @@
 {
-  "buildCommand": "NODE_OPTIONS='--max-old-space-size=8192' prisma generate && next build",
+  "buildCommand": "NODE_OPTIONS='--max-old-space-size=8192' NEXT_DISABLE_BUILD_TRACE=1 prisma generate && NEXT_DISABLE_BUILD_TRACE=1 next build --no-lint",
+  "outputDirectory": ".next",
+  "framework": "nextjs",
   "installCommand": "npm install",
-  "framework": "nextjs"
+  "devCommand": "next dev",
+  "regions": ["iad1"]
 }
