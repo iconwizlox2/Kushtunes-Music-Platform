@@ -225,7 +225,9 @@ export async function POST(request: NextRequest) {
         amount: formatCurrency(payout.amount, 'USD'),
         fee: formatCurrency(fee, 'USD'),
         netAmount: formatCurrency(netAmount, 'USD'),
-        status: getPayoutStatusText(payout.status),
+        status: getPayoutStatusText(payout.status === 'APPROVED' ? 'PROCESSING' : 
+                                    payout.status === 'PROCESSED' ? 'COMPLETED' : 
+                                    payout.status as 'PENDING' | 'FAILED' | 'PROCESSING' | 'COMPLETED'),
         requestedAt: payout.createdAt,
         estimatedProcessingTime: '3-5 business days'
       }
