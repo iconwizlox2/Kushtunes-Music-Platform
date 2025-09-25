@@ -350,22 +350,36 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
-      <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl animate-pulse" style={{animationDelay: '0.5s'}}></div>
+      </div>
+
+      <div className="relative z-10 min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
           {/* Header */}
           <div className="text-center">
-            <div className="mx-auto h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-              <UserIcon className="h-6 w-6 text-blue-600" />
+            <div className="flex items-center justify-center mb-8">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-2xl">
+                <UserIcon className="h-8 w-8 text-white" />
+              </div>
             </div>
-            <h2 className="text-3xl font-bold text-gray-900">Create Your Account</h2>
-            <p className="mt-2 text-sm text-gray-600">
+            <h1 className="text-5xl font-black text-white mb-4">
+              Create Your
+              <span className="block bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                Account
+              </span>
+            </h1>
+            <p className="text-xl text-white/80 font-light">
               Join Kushtunes and start distributing your music worldwide
             </p>
           </div>
 
           {/* Registration Form */}
-          <div className="bg-white rounded-xl shadow-lg p-8">
+          <div className="bg-white/10 backdrop-blur-md rounded-3xl shadow-2xl border border-white/20 p-8">
             {/* Google Sign Up Button - Only show if Google OAuth is available */}
             {googleAvailable && (
               <button
