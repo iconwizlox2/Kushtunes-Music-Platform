@@ -211,12 +211,9 @@ export async function POST(request: NextRequest) {
       data: {
         artistId: user.id,
         amount: parseFloat(amount),
-        currency,
+        method: paymentMethod,
         status: 'PENDING',
-        requestedAt: new Date(),
-        paymentMethod,
-        fee,
-        netAmount
+        reference: `PAYOUT_${Date.now()}`
       }
     });
 
