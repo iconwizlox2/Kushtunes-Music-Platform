@@ -75,16 +75,34 @@ export default function DSPDistribution({ releaseId, onDistributionComplete }: D
     setDistributing(dsp);
     
     try {
-      const response = await fetch('/api/distribute', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          releaseId,
-          dsp
-        }),
-      });
+      let response;
+      
+      if (dsp === 'APPLE_MUSIC') {
+        // Use Apple Music specific API
+        response = await fetch('/api/apple-music', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'submit',
+            releaseId,
+            // Add track data here
+          }),
+        });
+      } else {
+        // Use general distribution API
+        response = await fetch('/api/distribute', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            releaseId,
+            dsp
+          }),
+        });
+      }
 
       const result = await response.json();
 
@@ -171,10 +189,25 @@ export default function DSPDistribution({ releaseId, onDistributionComplete }: D
             </ul>
           </div>
 
+          <div className="bg-blue-50 p-4 rounded-lg">
+            <h4 className="font-semibold text-blue-800 mb-2">🍎 Apple Music Direct Distribution:</h4>
+            <p className="text-blue-700 mb-2">For direct Apple Music distribution:</p>
+            <ol className="list-decimal list-inside text-blue-700 space-y-1 text-sm">
+              <li>Go to <a href="https://music.apple.com/connect" target="_blank" rel="noopener noreferrer" className="underline">Apple Music Connect</a></li>
+              <li>Sign up as an artist (requires Apple ID)</li>
+              <li>Verify your identity with government ID</li>
+              <li>Upload your music files (audio + artwork)</li>
+              <li>Fill in release metadata</li>
+              <li>Submit for review (1-2 weeks processing)</li>
+              <li>Your music goes live on Apple Music!</li>
+            </ol>
+          </div>
+
           <div className="bg-gray-50 p-4 rounded-lg">
             <h4 className="font-semibold text-gray-800 mb-2">🎯 Pro Tips for Free Distribution:</h4>
             <ul className="list-disc list-inside text-gray-700 space-y-1 text-sm">
               <li>Use <strong>Amuse</strong> for major platforms (Spotify, Apple Music, etc.)</li>
+              <li>Use <strong>Apple Music Connect</strong> for direct Apple Music distribution</li>
               <li>Use <strong>SoundCloud</strong> for community building</li>
               <li>Use <strong>Bandcamp</strong> for direct sales</li>
               <li>Always use high-quality audio files (WAV or FLAC)</li>
