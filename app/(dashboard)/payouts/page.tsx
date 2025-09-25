@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { siteUrl } from "@/lib/env";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Payouts",
   description: "Request a payout and see recent transactions.",
@@ -10,15 +12,21 @@ export const metadata: Metadata = {
 type Payout = { id: string; amountUSD: number; method: "stripe"|"paypal"|"crypto"; status: "pending"|"paid"|"rejected"; createdAt: string };
 
 async function fetchBalance(params?: { start?: string; end?: string }): Promise<{ availableUSD: number; minPayoutUSD: number; window?: { start?: string|null, end?: string|null } }> {
-  const base = process.env.NEXT_PUBLIC_SITE_URL || "";
+  const base = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
   const qs = new URLSearchParams();
   if (params?.start) qs.set("start", params.start);
   if (params?.end) qs.set("end", params.end);
 
-  const res = await fetch(`${base}/api/earnings/available${qs.toString() ? `?${qs.toString()}` : ""}`, { cache: "no-store" });
-  if (!res.ok) return { availableUSD: 0, minPayoutUSD: 25 };
-  const data = await res.json();
-  return { availableUSD: data.availableUSD || 0, minPayoutUSD: 25, window: data.window };
+  try {
+    const res = await fetch(`${base}/api/earnings/available${qs.toString() ? `?${qs.toString()}` : ""}`, { 
+      cache: "no-store"
+    });
+    if (!res.ok) return { availableUSD: 0, minPayoutUSD: 25 };
+    const data = await res.json();
+    return { availableUSD: data.availableUSD || 0, minPayoutUSD: 25, window: data.window };
+  } catch {
+    return { availableUSD: 0, minPayoutUSD: 25 };
+  }
 }
 
 async function fetchPayouts(): Promise<Payout[]> {

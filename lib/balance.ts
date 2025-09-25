@@ -46,10 +46,10 @@ export async function getArtistBalanceUSD(
       trackId: { in: trackIds },
       ...(start || end
         ? {
-            // Interpret Earning.period as a date string or Date; adjust to your schema
+            // Convert dates to YYYY-MM format for string comparison
             period: {
-              ...(start ? { gte: start } : {}),
-              ...(end ? { lte: end } : {}),
+              ...(start ? { gte: formatPeriod(start) } : {}),
+              ...(end ? { lte: formatPeriod(end) } : {}),
             },
           }
         : {}),
@@ -96,6 +96,12 @@ function normalizeWindow(opts?: { start?: Date; end?: Date }) {
   // Ensure valid order if both provided
   if (start && end && start > end) [start, end] = [end, start];
   return { start, end };
+}
+
+function formatPeriod(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  return `${year}-${month}`;
 }
 
 async function sumPayoutsUSD(artistId: string, _start?: Date, end?: Date) {

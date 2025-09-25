@@ -16,8 +16,8 @@ async function fetchRelease(id: string): Promise<Release | null> {
   const r = await prisma.release.findFirst({
     where: { id, primaryArtistId: artist.id },
     include: {
-      Tracks: { select: { trackNumber: true, title: true, isrc: true, explicit: true } },
-      Deliveries: { select: { store: true, status: true, message: true } },
+      tracks: { select: { trackNumber: true, title: true, isrc: true, explicit: true } },
+      deliveries: { select: { store: true, status: true, message: true } },
       primaryArtist: { select: { name: true } },
     },
   });
@@ -30,13 +30,13 @@ async function fetchRelease(id: string): Promise<Release | null> {
     releaseDate: r.releaseDate.toISOString().slice(0,10),
     coverUrl: r.coverUrl,
     status: r.status,
-    tracks: r.Tracks.map(t => ({
+    tracks: r.tracks.map(t => ({
       trackNumber: t.trackNumber,
       title: t.title,
       isrc: t.isrc,
       explicit: t.explicit,
     })),
-    deliveries: r.Deliveries.map(d => ({
+    deliveries: r.deliveries.map(d => ({
       store: d.store, status: d.status as any, message: d.message ?? undefined
     })),
   };

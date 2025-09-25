@@ -9,7 +9,7 @@ export async function POST(req: Request) {
 
     const updated = await prisma.artist.update({
       where: { id: artist.id },
-      data: { name: artistName, email, country: country || null },
+      data: { name: artistName, email, country: country || "US" },
       select: { id: true, name: true, email: true, country: true },
     });
 
