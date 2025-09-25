@@ -11,13 +11,14 @@ type Row = { period: string; store: string; country: string; revenueUSD: number;
 
 async function fetchEarnings(): Promise<{ totalUSD: number; rows: Row[] }> {
   // TODO: replace with your API call, e.g., fetch(`${process.env.NEXT_PUBLIC_API}/earnings`)
-  // Mock data:
+  // For now, return mock data since we don't have earnings/splits set up yet
   return {
-    totalUSD: 1234.56,
+    totalUSD: 0, // Will be calculated from real earnings data
     rows: [
-      { period: "2025-08", store: "Spotify", country: "GB", revenueUSD: 420.12, units: 12000 },
-      { period: "2025-08", store: "Apple Music", country: "US", revenueUSD: 310.00, units: 8500 },
-      { period: "2025-08", store: "YouTube", country: "IN", revenueUSD: 98.40, units: 4000 }
+      // Mock data - replace with real API call
+      { period: "2025-08", store: "Spotify", country: "GB", revenueUSD: 0, units: 0 },
+      { period: "2025-08", store: "Apple Music", country: "US", revenueUSD: 0, units: 0 },
+      { period: "2025-08", store: "YouTube", country: "IN", revenueUSD: 0, units: 0 }
     ]
   };
 }

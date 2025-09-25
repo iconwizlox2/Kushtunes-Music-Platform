@@ -10,8 +10,14 @@ export const metadata: Metadata = {
 type Payout = { id: string; amountUSD: number; method: "stripe"|"paypal"|"crypto"; status: "pending"|"paid"|"rejected"; createdAt: string };
 
 async function fetchBalance(): Promise<{ availableUSD: number; minPayoutUSD: number }> {
-  // TODO: API
-  return { availableUSD: 512.77, minPayoutUSD: 25 };
+  const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || ""}/api/earnings/available`, {
+    // On server: cookies are forwarded automatically in the same domain;
+    // if you host API separately, add credentials: "include" and pass cookies.
+    cache: "no-store"
+  });
+  if (!res.ok) return { availableUSD: 0, minPayoutUSD: 25 };
+  const data = await res.json();
+  return { availableUSD: data.availableUSD || 0, minPayoutUSD: 25 };
 }
 
 async function fetchPayouts(): Promise<Payout[]> {
