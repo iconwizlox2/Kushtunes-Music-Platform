@@ -9,12 +9,12 @@ export interface UserPayload {
   id: string;
   email: string;
   username: string | null;
-  firstName?: string;
-  lastName?: string;
-  bio?: string;
-  website?: string;
-  location?: string;
-  avatar?: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  bio?: string | null;
+  website?: string | null;
+  location?: string | null;
+  avatar?: string | null;
   isEmailVerified: boolean;
   role: string;
 }
