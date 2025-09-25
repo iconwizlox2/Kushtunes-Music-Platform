@@ -11,6 +11,7 @@ import {
   Alert,
   LoadingSpinner
 } from '@/components/ProfessionalUI';
+import DSPDistribution from '@/components/DSPDistribution';
 import {
   CloudArrowUpIcon,
   ArrowLeftIcon,
@@ -20,7 +21,8 @@ import {
   PlayIcon,
   PauseIcon,
   TrashIcon,
-  MusicalNoteIcon
+  MusicalNoteIcon,
+  GlobeAltIcon
 } from '@/components/ui/Icons';
 
 interface UploadState {
@@ -368,13 +370,31 @@ export default function UploadPage() {
 
       case 4:
         return (
+          <div className="space-y-8">
+            <div className="text-center">
+              <div className="mx-auto h-12 w-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                <CheckCircleIcon className="h-6 w-6 text-green-600" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900">Release Uploaded Successfully!</h2>
+              <p className="text-gray-600 mt-2">Now choose how to distribute your music to 100+ platforms</p>
+            </div>
+            
+            <DSPDistribution 
+              releaseId={`release_${Date.now()}`}
+              onDistributionComplete={() => setState(prev => ({ ...prev, step: 5 }))}
+            />
+          </div>
+        );
+
+      case 5:
+        return (
           <div className="text-center space-y-8">
             <div className="mx-auto h-16 w-16 bg-green-100 rounded-full flex items-center justify-center">
-              <CheckCircleIcon className="h-8 w-8 text-green-600" />
+              <GlobeAltIcon className="h-8 w-8 text-green-600" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Release Uploaded Successfully!</h2>
-              <p className="text-gray-600 mt-2">Your music is now being distributed to all platforms</p>
+              <h2 className="text-2xl font-bold text-gray-900">Distribution Complete!</h2>
+              <p className="text-gray-600 mt-2">Your music is now being distributed to all selected platforms</p>
             </div>
             <div className="flex justify-center space-x-4">
               <ProfessionalButton variant="primary" asChild>
@@ -408,7 +428,7 @@ export default function UploadPage() {
 
         {/* Progress Steps */}
         <div className="flex items-center justify-center space-x-8">
-          {['Files', 'Metadata', 'Processing', 'Complete'].map((step, index) => (
+          {['Files', 'Metadata', 'Processing', 'Distribution', 'Complete'].map((step, index) => (
             <div key={step} className="flex items-center">
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
@@ -422,7 +442,7 @@ export default function UploadPage() {
                 {state.step > index + 1 ? <CheckCircleIcon className="h-5 w-5" /> : index + 1}
               </div>
               <span className="ml-2 text-sm font-medium text-gray-700">{step}</span>
-              {index < 3 && (
+              {index < 4 && (
                 <div className={`w-16 h-0.5 mx-4 ${
                   state.step > index + 1 ? 'bg-green-600' : 'bg-gray-200'
                 }`} />
