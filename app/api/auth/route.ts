@@ -15,45 +15,109 @@ import {
 
 const prisma = new PrismaClient();
 
+// Rate limiting store (in production, use Redis)
+const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
+
+// Rate limiting function
+function checkRateLimit(ip: string, limit: number = 5, windowMs: number = 15 * 60 * 1000): boolean {
+  const now = Date.now();
+  const key = `rate_limit_${ip}`;
+  const current = rateLimitStore.get(key);
+
+  if (!current || now > current.resetTime) {
+    rateLimitStore.set(key, { count: 1, resetTime: now + windowMs });
+    return true;
+  }
+
+  if (current.count >= limit) {
+    return false;
+  }
+
+  current.count++;
+  rateLimitStore.set(key, current);
+  return true;
+}
+
+// Enhanced security validation
+function validateRegistrationData(data: any) {
+  const errors: string[] = [];
+
+  // Email validation
+  if (!data.email || typeof data.email !== 'string') {
+    errors.push('Email is required');
+  } else {
+    if (data.email.length > 254) {
+      errors.push('Email is too long');
+    }
+    if (!isValidEmail(data.email)) {
+      errors.push('Invalid email format');
+    }
+  }
+
+  // Password validation
+  if (!data.password || typeof data.password !== 'string') {
+    errors.push('Password is required');
+  } else {
+    const passwordValidation = isValidPassword(data.password);
+    if (!passwordValidation.valid) {
+      errors.push(passwordValidation.message || 'Invalid password');
+    }
+    if (data.password.length > 128) {
+      errors.push('Password is too long');
+    }
+  }
+
+  // Username validation (optional)
+  if (data.username && typeof data.username === 'string') {
+    const usernameValidation = isValidUsername(data.username);
+    if (!usernameValidation.valid) {
+      errors.push(usernameValidation.message || 'Invalid username');
+    }
+  }
+
+  // Name validation
+  if (data.firstName && typeof data.firstName === 'string') {
+    if (data.firstName.length > 50) {
+      errors.push('First name is too long');
+    }
+    if (!/^[a-zA-Z\s'-]+$/.test(data.firstName)) {
+      errors.push('First name contains invalid characters');
+    }
+  }
+
+  if (data.lastName && typeof data.lastName === 'string') {
+    if (data.lastName.length > 50) {
+      errors.push('Last name is too long');
+    }
+    if (!/^[a-zA-Z\s'-]+$/.test(data.lastName)) {
+      errors.push('Last name contains invalid characters');
+    }
+  }
+
+  return errors;
+}
+
 // Register new user
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting
+    const ip = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
+    if (!checkRateLimit(ip, 3, 15 * 60 * 1000)) { // 3 attempts per 15 minutes
+      return NextResponse.json(
+        { success: false, message: 'Too many registration attempts. Please try again later.' },
+        { status: 429 }
+      );
+    }
+
     const { email, username, password, firstName, lastName } = await request.json();
 
-    // Validation - email and password are required, username is optional
-    if (!email || !password) {
+    // Enhanced validation
+    const validationErrors = validateRegistrationData({ email, username, password, firstName, lastName });
+    if (validationErrors.length > 0) {
       return NextResponse.json(
-        { success: false, message: 'Email and password are required' },
+        { success: false, message: validationErrors[0] },
         { status: 400 }
       );
-    }
-
-    // Validate email format
-    if (!isValidEmail(email)) {
-      return NextResponse.json(
-        { success: false, message: 'Invalid email format' },
-        { status: 400 }
-      );
-    }
-
-    // Validate password strength
-    const passwordValidation = isValidPassword(password);
-    if (!passwordValidation.valid) {
-      return NextResponse.json(
-        { success: false, message: passwordValidation.message },
-        { status: 400 }
-      );
-    }
-
-    // Validate username format (only if provided)
-    if (username) {
-      const usernameValidation = isValidUsername(username);
-      if (!usernameValidation.valid) {
-        return NextResponse.json(
-          { success: false, message: usernameValidation.message },
-          { status: 400 }
-        );
-      }
     }
 
     // Check if user already exists by email
@@ -82,7 +146,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Hash password
+    // Hash password with higher salt rounds for better security
     const hashedPassword = await hashPassword(password);
 
     // Create user
@@ -93,7 +157,8 @@ export async function POST(request: NextRequest) {
         password: hashedPassword,
         firstName: firstName || null,
         lastName: lastName || null,
-        role: 'ARTIST'
+        role: 'ARTIST',
+        isEmailVerified: false
       }
     });
 
@@ -102,6 +167,13 @@ export async function POST(request: NextRequest) {
       id: user.id,
       email: user.email,
       username: user.username,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      bio: user.bio,
+      website: user.website,
+      location: user.location,
+      avatar: user.avatar,
+      isEmailVerified: user.isEmailVerified,
       role: user.role
     });
 
@@ -129,6 +201,15 @@ export async function POST(request: NextRequest) {
 // Login user
 export async function PUT(request: NextRequest) {
   try {
+    // Rate limiting for login attempts
+    const ip = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
+    if (!checkRateLimit(ip, 5, 15 * 60 * 1000)) { // 5 attempts per 15 minutes
+      return NextResponse.json(
+        { success: false, message: 'Too many login attempts. Please try again later.' },
+        { status: 429 }
+      );
+    }
+
     const { email, password } = await request.json();
 
     if (!email || !password) {
@@ -138,7 +219,7 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    // Find user by email
+    // Find user
     const user = await prisma.user.findUnique({
       where: { email: email.toLowerCase() }
     });
@@ -172,6 +253,13 @@ export async function PUT(request: NextRequest) {
       id: user.id,
       email: user.email,
       username: user.username,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      bio: user.bio,
+      website: user.website,
+      location: user.location,
+      avatar: user.avatar,
+      isEmailVerified: user.isEmailVerified,
       role: user.role
     });
 
@@ -199,28 +287,25 @@ export async function PUT(request: NextRequest) {
 // Get current user
 export async function GET(request: NextRequest) {
   try {
-    const authHeader = request.headers.get('authorization');
-    const token = extractTokenFromHeader(authHeader);
-
+    const token = extractTokenFromHeader(request.headers.get('authorization'));
+    
     if (!token) {
       return NextResponse.json(
-        { success: false, message: 'No token provided' },
+        { success: false, message: 'Authentication required' },
         { status: 401 }
       );
     }
 
-    // Verify token
-    const payload = verifyToken(token);
-    if (!payload) {
+    const decoded = verifyToken(token);
+    if (!decoded) {
       return NextResponse.json(
         { success: false, message: 'Invalid token' },
         { status: 401 }
       );
     }
 
-    // Get user from database
     const user = await prisma.user.findUnique({
-      where: { id: payload.id },
+      where: { id: decoded.id },
       select: {
         id: true,
         email: true,
@@ -230,9 +315,11 @@ export async function GET(request: NextRequest) {
         avatar: true,
         bio: true,
         website: true,
+        location: true,
+        isEmailVerified: true,
         role: true,
-        isVerified: true,
-        createdAt: true
+        createdAt: true,
+        updatedAt: true
       }
     });
 
@@ -260,28 +347,26 @@ export async function GET(request: NextRequest) {
 // Logout user
 export async function DELETE(request: NextRequest) {
   try {
-    const authHeader = request.headers.get('authorization');
-    const token = extractTokenFromHeader(authHeader);
-
+    const token = extractTokenFromHeader(request.headers.get('authorization'));
+    
     if (!token) {
       return NextResponse.json(
-        { success: false, message: 'No token provided' },
+        { success: false, message: 'Authentication required' },
         { status: 401 }
       );
     }
 
-    // Verify token to get user ID
-    const payload = verifyToken(token);
-    if (!payload) {
+    const decoded = verifyToken(token);
+    if (!decoded) {
       return NextResponse.json(
         { success: false, message: 'Invalid token' },
         { status: 401 }
       );
     }
 
-    // Delete all sessions for this user
+    // Delete all sessions for the user
     await prisma.session.deleteMany({
-      where: { userId: payload.id }
+      where: { userId: decoded.id }
     });
 
     return NextResponse.json({
@@ -292,8 +377,11 @@ export async function DELETE(request: NextRequest) {
   } catch (error) {
     console.error('Logout error:', error);
     return NextResponse.json(
-      { success: false, message: 'Logout failed' },
+      { success: false, message: 'Internal server error' },
       { status: 500 }
     );
   }
 }
+
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';

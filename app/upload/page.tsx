@@ -147,11 +147,11 @@ export default function UploadPage() {
   };
 
   const validateImageFile = (file: File) => {
-    const maxSize = 5 * 1024 * 1024; // 5MB (standard limit)
+    const maxSize = 2 * 1024 * 1024; // 2MB (standard cover art limit)
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     
     if (file.size > maxSize) {
-      return { valid: false, error: 'Image too large. Maximum size: 5MB' };
+      return { valid: false, error: 'Cover art too large. Maximum size: 2MB' };
     }
     
     if (!allowedTypes.includes(file.type)) {
@@ -442,8 +442,17 @@ export default function UploadPage() {
                 <FileUpload
                   onFileSelect={handleArtworkFile}
                   accept=".jpg,.jpeg,.png,.webp"
-                  maxSize={10}
+                  maxSize={2}
                 />
+                <div className="mt-2 text-sm text-gray-500">
+                  <p>📏 <strong>Standard Requirements:</strong></p>
+                  <ul className="mt-1 ml-4 space-y-1">
+                    <li>• Square aspect ratio (1:1)</li>
+                    <li>• Minimum 3000x3000 pixels</li>
+                    <li>• Maximum 2MB file size</li>
+                    <li>• JPEG, PNG, or WebP format</li>
+                  </ul>
+                </div>
                 {!state.fileValidation.artwork.valid && (
                   <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
                     <div className="flex items-center">

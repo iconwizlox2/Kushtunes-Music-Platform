@@ -9,6 +9,13 @@ export interface UserPayload {
   id: string;
   email: string;
   username: string | null;
+  firstName?: string;
+  lastName?: string;
+  bio?: string;
+  website?: string;
+  location?: string;
+  avatar?: string;
+  isEmailVerified: boolean;
   role: string;
 }
 
@@ -130,8 +137,9 @@ export function createAuthResponse(user: any, token: string) {
         avatar: user.avatar,
         bio: user.bio,
         website: user.website,
+        location: user.location,
         role: user.role,
-        isVerified: user.isVerified,
+        isEmailVerified: user.isEmailVerified,
         createdAt: user.createdAt
       },
       token,

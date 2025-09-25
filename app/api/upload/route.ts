@@ -6,8 +6,8 @@ import sharp from 'sharp';
 const prisma = new PrismaClient();
 
 // File size limits (in bytes) - Standard industry limits
-const MAX_AUDIO_SIZE = 50 * 1024 * 1024;  // 50MB (reduced from 100MB)
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024;   // 5MB (reduced from 10MB)
+const MAX_AUDIO_SIZE = 50 * 1024 * 1024;  // 50MB (standard limit)
+const MAX_IMAGE_SIZE = 2 * 1024 * 1024;   // 2MB (standard cover art limit)
 
 // Allowed file types
 const ALLOWED_AUDIO_TYPES = ['audio/mpeg', 'audio/wav', 'audio/flac', 'audio/mp3'];
@@ -21,7 +21,7 @@ function validateFile(file: File, type: 'audio' | 'image') {
   if (file.size > maxSize) {
     return {
       valid: false,
-      error: `File too large. Maximum size: ${type === 'audio' ? '50MB' : '5MB'}`
+      error: `File too large. Maximum size: ${type === 'audio' ? '50MB' : '2MB'}`
     };
   }
   
@@ -35,16 +35,17 @@ function validateFile(file: File, type: 'audio' | 'image') {
   return { valid: true };
 }
 
-// Optimize image
+// Optimize image - Standard cover art dimensions
 async function optimizeImage(buffer: Buffer): Promise<Buffer> {
   return await sharp(buffer)
     .resize(3000, 3000, { 
-      fit: 'inside',
+      fit: 'cover', // Ensure square aspect ratio
       withoutEnlargement: true 
     })
     .jpeg({ 
-      quality: 90,
-      progressive: true 
+      quality: 85, // Reduced for smaller file size
+      progressive: true,
+      mozjpeg: true // Better compression
     })
     .toBuffer();
 }
