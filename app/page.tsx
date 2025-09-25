@@ -87,7 +87,7 @@ export default function Home() {
               </div>
 
               <h1 className="text-6xl md:text-8xl font-extrabold mb-6 leading-tight">
-                <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent animate-pulse">
                   KUSHTUNES
                 </span>
               </h1>
