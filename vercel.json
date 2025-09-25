@@ -1,10 +1,16 @@
 {
-  "buildCommand": "npm run build:prod",
+  "buildCommand": "./build-vercel-patched.sh",
   "outputDirectory": ".next",
   "framework": "nextjs",
   "installCommand": "npm install",
   "devCommand": "next dev",
   "regions": ["iad1"],
+  "env": {
+    "NEXT_DISABLE_BUILD_TRACE": "1",
+    "NEXT_TELEMETRY_DISABLED": "1",
+    "NEXT_PRIVATE_DISABLE_TRACE": "1",
+    "NEXT_PRIVATE_DISABLE_TELEMETRY": "1"
+  },
   "functions": {
     "app/api/**/*.ts": {
       "maxDuration": 30
