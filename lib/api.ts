@@ -1,13 +1,14 @@
-import { cookies } from "next/headers";
-import { prisma } from "./db";
+import { getServerSession } from "next-auth";
+import { prisma } from "@/lib/db";
+import NextAuth from "@/lib/auth";
 
 export class UnauthorizedError extends Error {}
 export class BadRequestError extends Error {}
 export class NotFoundError extends Error {}
 
-export function json(data: any, init: number | ResponseInit = 200) {
-  const status = typeof init === "number" ? init : (init as ResponseInit).status ?? 200;
-  const headers = new Headers(typeof init === "number" ? {} : (init as ResponseInit).headers);
+export function json(data: any, init?: ResponseInit | number) {
+  const status = typeof init === "number" ? init : (init as ResponseInit)?.status ?? 200;
+  const headers = new Headers(typeof init === "number" ? {} : (init as ResponseInit)?.headers);
   if (!headers.has("content-type")) headers.set("content-type", "application/json; charset=utf-8");
   return new Response(JSON.stringify(data), { status, headers });
 }
@@ -21,27 +22,28 @@ export function onError(e: unknown) {
 }
 
 /**
- * Replace with NextAuth/Clerk/etc. This demo:
- * - reads "session" cookie
- * - if present, upserts a demo artist record (so DB writes work right away)
+ * Session-based artist authentication
+ * Replaces the old cookie-based requireArtist()
  */
 export async function requireArtist() {
-  const sid = cookies().get("session")?.value;
-  if (!sid) throw new UnauthorizedError("Missing session");
+  const session = await getServerSession(NextAuth);
+  if (!session?.user?.email) throw new UnauthorizedError("Not signed in");
+  const user = await prisma.user.findUnique({ where: { email: session.user.email } });
+  if (!user) throw new UnauthorizedError("User not found");
 
-  // DEMO: tie the cookie to a deterministic email
-  const email = `artist+${sid}@example.com`;
+  // Ensure artist profile exists
   const artist = await prisma.artist.upsert({
-    where: { email },
+    where: { userId: user.id },
     update: {},
     create: { 
-      name: "Demo Artist", 
-      legalName: "Demo Artist Legal Name",
-      email, 
+      userId: user.id, 
+      name: user.name || session.user.email.split("@")[0], 
+      legalName: user.name || session.user.email.split("@")[0],
+      email: user.email, 
       country: "GB" 
-    },
+    }
   });
-  return artist; // { id, name, email, ... }
+  return artist;
 }
 
 /**
@@ -50,10 +52,6 @@ export async function requireArtist() {
  * Option B (preferred): role on Artist
  */
 export async function requireAdmin() {
-  // Option A: cookie flag (fast to try); set admin=1 in your own session when needed.
-  const admin = cookies().get("admin")?.value === "1";
-  if (admin) return true;
-
   // Option B (preferred): role on Artist
   try {
     const artist = await requireArtist();

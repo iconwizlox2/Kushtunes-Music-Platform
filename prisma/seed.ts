@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcrypt";
 const prisma = new PrismaClient();
 
 type ArtistSpec = {
@@ -25,8 +26,20 @@ type ArtistSpec = {
 
 async function seedArtist(spec: ArtistSpec) {
   const email = `artist+${spec.session}@example.com`;
+  
+  // Create User first
+  const user = await prisma.user.create({
+    data: {
+      email,
+      name: spec.name,
+      passwordHash: await bcrypt.hash("password123", 12), // Default password for demo
+    },
+  });
+
+  // Create Artist linked to User
   const artist = await prisma.artist.create({
     data: {
+      userId: user.id,
       name: spec.name,
       legalName: spec.name,
       email,
@@ -144,6 +157,10 @@ async function main() {
   await prisma.labelMember?.deleteMany?.({}).catch(() => {});
   await prisma.label?.deleteMany?.({}).catch(() => {});
   await prisma.artist.deleteMany({});
+  await prisma.session?.deleteMany?.({}).catch(() => {});
+  await prisma.account?.deleteMany?.({}).catch(() => {});
+  await prisma.verificationToken?.deleteMany?.({}).catch(() => {});
+  await prisma.user.deleteMany({});
 
   const artists: ArtistSpec[] = [
     // A) dev — admin, mixed currencies, some payouts, small recoup open
@@ -233,8 +250,23 @@ async function main() {
   }
 
   // D) collaborator artist (session=collab) — will get a 30% split on a1's Track 2
+  const collabUser = await prisma.user.create({
+    data: { 
+      name: "Guest Feature", 
+      email: "artist+collab@example.com",
+      passwordHash: await bcrypt.hash("password123", 12)
+    }
+  });
   const collab = await prisma.artist.create({
-    data: { name: "Guest Feature", legalName: "Guest Feature", email: "artist+collab@example.com", country: "US", payoutMethod: "stripe", role: "user" }
+    data: { 
+      userId: collabUser.id,
+      name: "Guest Feature", 
+      legalName: "Guest Feature",
+      email: "artist+collab@example.com", 
+      country: "US", 
+      payoutMethod: "stripe", 
+      role: "user" 
+    }
   });
 
   // Give collaborator a 30% split on Indigo Echo's (a1) track 2
