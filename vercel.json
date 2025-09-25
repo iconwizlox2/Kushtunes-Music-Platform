@@ -1,5 +1,5 @@
 {
-  "buildCommand": "./build-optimized.sh",
+  "buildCommand": "NEXT_DISABLE_BUILD_TRACE=1 NEXT_TELEMETRY_DISABLED=1 npm run build",
   "outputDirectory": ".next",
   "framework": "nextjs",
   "installCommand": "npm install",
