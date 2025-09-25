@@ -122,30 +122,62 @@ export default function UploadPage() {
 
   // File validation functions
   const validateAudioFile = (file: File) => {
-    const MAX_AUDIO_SIZE = 50 * 1024 * 1024; // 50MB
-    const ALLOWED_AUDIO_TYPES = ['audio/mpeg', 'audio/wav', 'audio/flac'];
+    const MAX_AUDIO_SIZE = 100 * 1024 * 1024; // 100MB (increased for high-quality audio)
+    const ALLOWED_AUDIO_TYPES = [
+      'audio/mpeg',      // MP3
+      'audio/mp3',       // MP3 alternative
+      'audio/wav',       // WAV
+      'audio/wave',      // WAV alternative
+      'audio/flac',      // FLAC
+      'audio/aac',       // AAC
+      'audio/m4a',       // M4A
+      'audio/ogg',       // OGG
+      'audio/opus',      // Opus
+      'audio/x-flac',    // FLAC alternative
+      'audio/vnd.wave'   // WAV alternative
+    ];
 
     if (!ALLOWED_AUDIO_TYPES.includes(file.type)) {
-      return { valid: false, error: 'Please upload MP3, WAV, or FLAC files only' };
+      return { 
+        valid: false, 
+        error: 'Please upload MP3, WAV, FLAC, AAC, M4A, or OGG files only' 
+      };
     }
 
     if (file.size > MAX_AUDIO_SIZE) {
-      return { valid: false, error: 'File size must be less than 50MB' };
+      return { 
+        valid: false, 
+        error: `File size must be less than ${Math.round(MAX_AUDIO_SIZE / (1024 * 1024))}MB` 
+      };
     }
 
     return { valid: true };
   };
 
   const validateImageFile = (file: File) => {
-    const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB
-    const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB (increased for high-res artwork)
+    const ALLOWED_IMAGE_TYPES = [
+      'image/jpeg',      // JPEG
+      'image/jpg',       // JPG
+      'image/png',       // PNG
+      'image/webp',      // WebP
+      'image/tiff',      // TIFF
+      'image/bmp',       // BMP
+      'image/svg+xml'    // SVG
+    ];
 
     if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
-      return { valid: false, error: 'Please upload JPG, PNG, or WebP files only' };
+      return { 
+        valid: false, 
+        error: 'Please upload JPG, PNG, WebP, TIFF, BMP, or SVG files only' 
+      };
     }
 
     if (file.size > MAX_IMAGE_SIZE) {
-      return { valid: false, error: 'File size must be less than 2MB' };
+      return { 
+        valid: false, 
+        error: `File size must be less than ${Math.round(MAX_IMAGE_SIZE / (1024 * 1024))}MB` 
+      };
     }
 
     return { valid: true };
@@ -234,7 +266,7 @@ export default function UploadPage() {
                 <MusicalNoteIcon className="h-8 w-8 mr-3 text-blue-400" />
                 Release Type
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {[
                   { type: 'SINGLE', label: 'Single', description: '1 track', icon: MusicalNoteIcon },
                   { type: 'EP', label: 'EP', description: '2-6 tracks', icon: GlobeAltIcon },
@@ -242,7 +274,7 @@ export default function UploadPage() {
                 ].map(({ type, label, description, icon: Icon }) => (
                   <div
                     key={type}
-                    className={`p-8 rounded-2xl border-2 cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-2xl ${
+                    className={`p-4 sm:p-6 lg:p-8 rounded-xl sm:rounded-2xl border-2 cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-2xl ${
                       state.metadata.type === type
                         ? 'border-blue-400/50 bg-gradient-to-br from-blue-500/20 to-purple-500/20 backdrop-blur-sm shadow-2xl'
                         : 'border-white/30 bg-white/10 backdrop-blur-sm hover:border-white/50 hover:bg-white/20'
@@ -250,11 +282,11 @@ export default function UploadPage() {
                     onClick={() => handleMetadataChange('type', type)}
                   >
                     <div className="text-center">
-                      <Icon className={`h-12 w-12 mx-auto mb-4 ${
+                      <Icon className={`h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 mx-auto mb-3 sm:mb-4 ${
                         state.metadata.type === type ? 'text-blue-400' : 'text-white/70'
                       }`} />
-                      <h4 className="font-bold text-white text-xl mb-2">{label}</h4>
-                      <p className="text-white/70 text-lg">{description}</p>
+                      <h4 className="font-bold text-white text-lg sm:text-xl mb-2">{label}</h4>
+                      <p className="text-white/70 text-sm sm:text-base lg:text-lg">{description}</p>
                     </div>
                   </div>
                 ))}
@@ -263,29 +295,29 @@ export default function UploadPage() {
 
             {/* Tracks Section */}
             <div className="space-y-8">
-              <div className="flex items-center justify-between">
-                <h3 className="text-2xl font-bold text-white flex items-center">
-                  <PlayIcon className="h-8 w-8 mr-3 text-purple-400" />
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <h3 className="text-xl sm:text-2xl font-bold text-white flex items-center">
+                  <PlayIcon className="h-6 w-6 sm:h-8 sm:w-8 mr-2 sm:mr-3 text-purple-400" />
                   Tracks ({state.tracks.length})
                 </h3>
                 <button
                   onClick={addTrack}
-                  className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center"
+                  className="px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold rounded-lg sm:rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center text-sm sm:text-base"
                 >
-                  <PlusIcon className="h-5 w-5 mr-2" />
+                  <PlusIcon className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                   Add Track
                 </button>
               </div>
 
               <div className="space-y-4">
                 {state.tracks.map((track, index) => (
-                  <div key={track.id} className="card">
+                  <div key={track.id} className="bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl border border-white/20 p-4 sm:p-6 shadow-lg">
                     <div className="flex items-center justify-between mb-4">
-                      <h4 className="font-medium text-gray-900">Track {index + 1}</h4>
+                      <h4 className="font-medium text-white text-sm sm:text-base">Track {index + 1}</h4>
                       {state.tracks.length > 1 && (
                         <button
                           onClick={() => removeTrack(track.id)}
-                          className="text-red-500 hover:text-red-700 p-1"
+                          className="text-red-400 hover:text-red-300 p-1 transition-colors"
                         >
                           <TrashIcon className="h-4 w-4" />
                         </button>
@@ -294,7 +326,7 @@ export default function UploadPage() {
 
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-white/80 mb-2">
                           Track Title *
                         </label>
                         <input
@@ -302,21 +334,21 @@ export default function UploadPage() {
                           value={track.title}
                           onChange={(e) => handleTrackTitleChange(track.id, e.target.value)}
                           placeholder="Enter track title"
-                          className="form-input"
+                          className="form-input bg-white/10 border-white/20 text-white placeholder-white/50 focus:ring-blue-400 focus:border-blue-400 w-full"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-white/80 mb-2">
                           Audio File *
                         </label>
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary-blue transition-colors">
-                          <CloudArrowUpIcon className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                          <p className="text-gray-600 mb-2">
-                            Drop files here, or <span className="text-primary-blue font-medium">browse</span>
+                        <div className="border-2 border-dashed border-white/30 rounded-lg p-4 sm:p-6 lg:p-8 text-center hover:border-blue-400/50 transition-colors bg-white/5">
+                          <CloudArrowUpIcon className="h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 mx-auto mb-3 sm:mb-4 text-white/60" />
+                          <p className="text-white/80 mb-2 text-sm sm:text-base">
+                            Drop files here, or <span className="text-blue-400 font-medium">browse</span>
                           </p>
-                          <p className="text-sm text-gray-500">
-                            .mp3, .wav, .flac (max 50MB)
+                          <p className="text-xs sm:text-sm text-white/60">
+                            MP3, WAV, FLAC, AAC, M4A, OGG (max 100MB)
                           </p>
                           <input
                             type="file"
@@ -584,33 +616,33 @@ export default function UploadPage() {
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl animate-pulse" style={{animationDelay: '0.5s'}}></div>
       </div>
       
-      <div className="relative z-10 max-w-6xl mx-auto p-6 pt-32">
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 pt-20 sm:pt-32 pb-8">
         {/* Header */}
-        <div className="mb-16">
-          <Link href="/dashboard" className="inline-flex items-center text-white/80 hover:text-white transition-colors mb-8 group">
+        <div className="mb-8 sm:mb-16">
+          <Link href="/dashboard" className="inline-flex items-center text-white/80 hover:text-white transition-colors mb-6 sm:mb-8 group">
             <ArrowLeftIcon className="h-5 w-5 mr-3 group-hover:-translate-x-1 transition-transform" />
             <span className="font-semibold">Back to Dashboard</span>
           </Link>
           <div className="text-center">
-            <h1 className="text-7xl md:text-8xl font-black text-white mb-8 animate-fade-in leading-tight">
+            <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white mb-4 sm:mb-8 animate-fade-in leading-tight">
               Upload Your
               <span className="block bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
                 Music
               </span>
             </h1>
-            <p className="text-2xl md:text-3xl text-white/80 max-w-4xl mx-auto font-light animate-fade-in">
+            <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-white/80 max-w-4xl mx-auto font-light animate-fade-in px-4">
               Get your tracks on <span className="font-bold text-white">Spotify, Apple Music</span>, and 200+ platforms worldwide
             </p>
           </div>
         </div>
 
         {/* Progress Steps */}
-        <div className="flex items-center justify-center space-x-2 md:space-x-6 mb-16 px-4">
+        <div className="flex items-center justify-center space-x-1 sm:space-x-2 md:space-x-6 mb-8 sm:mb-16 px-2 sm:px-4">
           {['Files', 'Metadata', 'Processing', 'Distribution', 'Complete'].map((step, index) => (
             <div key={step} className="flex items-center">
               <div className="relative">
                 <div
-                  className={`w-14 h-14 rounded-2xl flex items-center justify-center text-sm font-bold transition-all duration-300 ${
+                  className={`w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center text-xs sm:text-sm font-bold transition-all duration-300 ${
                     state.step > index + 1
                       ? 'bg-gradient-to-r from-green-400 to-emerald-400 text-white shadow-2xl'
                       : state.step === index + 1
@@ -618,17 +650,17 @@ export default function UploadPage() {
                         : 'bg-white/20 backdrop-blur-sm text-white/60 border border-white/30'
                   }`}
                 >
-                  {state.step > index + 1 ? <CheckCircleIcon className="h-7 w-7" /> : index + 1}
+                  {state.step > index + 1 ? <CheckCircleIcon className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7" /> : index + 1}
                 </div>
                 {state.step === index + 1 && (
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 rounded-2xl blur-md opacity-50 animate-pulse"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 rounded-xl sm:rounded-2xl blur-md opacity-50 animate-pulse"></div>
                 )}
               </div>
-              <span className={`ml-3 text-sm font-bold transition-colors hidden sm:block ${
+              <span className={`ml-2 sm:ml-3 text-xs sm:text-sm font-bold transition-colors hidden sm:block ${
                 state.step >= index + 1 ? 'text-white' : 'text-white/60'
               }`}>{step}</span>
               {index < 4 && (
-                <div className={`w-8 md:w-16 h-1 mx-2 md:mx-4 rounded-full transition-all duration-300 ${
+                <div className={`w-4 sm:w-6 md:w-8 lg:w-16 h-1 mx-1 sm:mx-2 md:mx-4 rounded-full transition-all duration-300 ${
                   state.step > index + 1 ? 'bg-gradient-to-r from-green-400 to-emerald-400' : 'bg-white/30'
                 }`} />
               )}
