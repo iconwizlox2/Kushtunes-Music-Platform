@@ -342,7 +342,7 @@ export default function RegisterPage() {
                     type="text"
                     value={formData.firstName}
                     onChange={(e) => handleInputChange('firstName', e.target.value)}
-                    className="form-input"
+                    className={`form-input ${validationErrors.firstName ? 'error border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`}
                     placeholder="First name"
                   />
                 </div>
@@ -356,7 +356,7 @@ export default function RegisterPage() {
                     type="text"
                     value={formData.lastName}
                     onChange={(e) => handleInputChange('lastName', e.target.value)}
-                    className="form-input"
+                    className={`form-input ${validationErrors.lastName ? 'error border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`}
                     placeholder="Last name"
                   />
                 </div>
@@ -376,7 +376,7 @@ export default function RegisterPage() {
                     required
                     value={formData.email}
                     onChange={(e) => handleInputChange('email', e.target.value)}
-                    className={`form-input pl-10 ${validationErrors.email ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`}
+                    className={`form-input pl-10 ${validationErrors.email ? 'error border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`}
                     placeholder="Enter your email"
                   />
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -402,7 +402,7 @@ export default function RegisterPage() {
                     required
                     value={formData.username}
                     onChange={(e) => handleInputChange('username', e.target.value)}
-                    className={`form-input pl-10 pr-10 ${validationErrors.username ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`}
+                    className={`form-input pl-10 pr-10 ${validationErrors.username ? 'error border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`}
                     placeholder="Choose a username"
                   />
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -450,7 +450,7 @@ export default function RegisterPage() {
                     required
                     value={formData.password}
                     onChange={(e) => handleInputChange('password', e.target.value)}
-                    className={`form-input pl-10 pr-10 ${validationErrors.password ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`}
+                    className={`form-input pl-10 pr-10 ${validationErrors.password ? 'error border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`}
                     placeholder="Create a password"
                   />
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -536,7 +536,7 @@ export default function RegisterPage() {
                     required
                     value={formData.confirmPassword}
                     onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-                    className="form-input pl-10 pr-10"
+                    className={`form-input pl-10 pr-10 ${validationErrors.confirmPassword ? 'error border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`}
                     placeholder="Confirm your password"
                   />
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
