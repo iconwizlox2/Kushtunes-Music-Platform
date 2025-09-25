@@ -299,7 +299,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // Verify password (skip for hardcoded admins)
-    if (!isHardcodedAdmin && 'password' in user) {
+    if (!isHardcodedAdmin && 'password' in user && user.password) {
       const isPasswordValid = await verifyPassword(password, user.password);
       if (!isPasswordValid) {
         return NextResponse.json(
