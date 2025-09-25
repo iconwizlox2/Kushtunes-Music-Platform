@@ -629,15 +629,14 @@ export default function RegisterPage() {
               </div>
 
               {/* Submit Button */}
-              <ProfessionalButton
-                variant="primary"
-                size="lg"
-                className="w-full"
+              <button
+                type="submit"
+                className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                 disabled={loading}
               >
                 {loading ? (
                   <>
-                    <LoadingSpinner className="mr-2" />
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
                     Creating Account...
                   </>
                 ) : (
@@ -646,7 +645,7 @@ export default function RegisterPage() {
                     <ArrowRightIcon className="ml-2 h-5 w-5" />
                   </>
                 )}
-              </ProfessionalButton>
+              </button>
             </form>
 
             {/* Sign In Link */}
