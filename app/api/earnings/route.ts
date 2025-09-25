@@ -80,7 +80,9 @@ export async function GET(request: NextRequest) {
       currency: 'USD',
       requestedAt: payout.createdAt,
       paymentMethod: payout.method,
-      status: payout.status,
+      status: payout.status === 'APPROVED' ? 'PROCESSING' : 
+              payout.status === 'PROCESSED' ? 'COMPLETED' : 
+              payout.status as 'PENDING' | 'FAILED' | 'PROCESSING' | 'COMPLETED',
       processedAt: payout.processedAt,
       reference: payout.reference
     }));
@@ -176,7 +178,9 @@ export async function POST(request: NextRequest) {
       currency: 'USD',
       requestedAt: payout.createdAt,
       paymentMethod: payout.method,
-      status: payout.status,
+      status: payout.status === 'APPROVED' ? 'PROCESSING' : 
+              payout.status === 'PROCESSED' ? 'COMPLETED' : 
+              payout.status as 'PENDING' | 'FAILED' | 'PROCESSING' | 'COMPLETED',
       processedAt: payout.processedAt,
       reference: payout.reference
     }));
