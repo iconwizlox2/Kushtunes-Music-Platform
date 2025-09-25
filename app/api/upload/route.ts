@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
         status: 'DRAFT',
         coverUrl: artworkUrl,
         genre,
-        territories: ['US'], // Default territory
+        territories: JSON.stringify(['US']), // Default territory as JSON string
         upc
       }
     });

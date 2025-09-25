@@ -259,7 +259,9 @@ export default function RegisterPage() {
           username: formData.username || null,
           password: formData.password,
           firstName: formData.firstName,
-          lastName: formData.lastName
+          lastName: formData.lastName,
+          country: 'US', // Default country
+          legalName: `${formData.firstName} ${formData.lastName}` // Use full name as legal name
         }),
       });
 
