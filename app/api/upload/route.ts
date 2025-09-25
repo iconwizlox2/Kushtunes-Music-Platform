@@ -2,38 +2,31 @@ import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { randomUUID } from 'crypto';
 import sharp from 'sharp';
+import { 
+  validateAudioFile, 
+  validateImageFile, 
+  generateFileId, 
+  generateSafeFilename,
+  saveUploadedFile,
+  processAudioMetadata,
+  processImageMetadata,
+  generateFileHash,
+  checkFileExists,
+  cleanupTempFiles
+} from '@/lib/upload-logic';
+import { 
+  generateReleaseId, 
+  generateUPC, 
+  generateISRC,
+  validateReleaseMetadata,
+  validateTrack,
+  validateReleaseForDistribution,
+  calculateReleaseDuration,
+  formatDuration
+} from '@/lib/release-logic';
+import { extractTokenFromHeader, verifyToken } from '@/lib/auth';
 
 const prisma = new PrismaClient();
-
-// File size limits (in bytes) - Standard industry limits
-const MAX_AUDIO_SIZE = 50 * 1024 * 1024;  // 50MB (standard limit)
-const MAX_IMAGE_SIZE = 2 * 1024 * 1024;   // 2MB (standard cover art limit)
-
-// Allowed file types
-const ALLOWED_AUDIO_TYPES = ['audio/mpeg', 'audio/wav', 'audio/flac', 'audio/mp3'];
-const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-
-// Validate file type and size
-function validateFile(file: File, type: 'audio' | 'image') {
-  const maxSize = type === 'audio' ? MAX_AUDIO_SIZE : MAX_IMAGE_SIZE;
-  const allowedTypes = type === 'audio' ? ALLOWED_AUDIO_TYPES : ALLOWED_IMAGE_TYPES;
-  
-  if (file.size > maxSize) {
-    return {
-      valid: false,
-      error: `File too large. Maximum size: ${type === 'audio' ? '50MB' : '2MB'}`
-    };
-  }
-  
-  if (!allowedTypes.includes(file.type)) {
-    return {
-      valid: false,
-      error: `Invalid file type. Allowed: ${allowedTypes.join(', ')}`
-    };
-  }
-  
-  return { valid: true };
-}
 
 // Optimize image - Standard cover art dimensions
 async function optimizeImage(buffer: Buffer): Promise<Buffer> {
@@ -52,34 +45,81 @@ async function optimizeImage(buffer: Buffer): Promise<Buffer> {
 
 export async function POST(request: NextRequest) {
   try {
-    const formData = await request.formData();
-    const audioFile = formData.get('audio') as File;
-    const artworkFile = formData.get('artwork') as File;
-    const title = formData.get('title') as string;
-    const artist = formData.get('artist') as string;
-    const genre = formData.get('genre') as string;
-    const language = formData.get('language') as string;
-    const releaseDate = formData.get('releaseDate') as string;
-    const releaseType = formData.get('releaseType') as string || 'SINGLE';
+    // Extract and verify authentication token
+    const authHeader = request.headers.get('authorization');
+    const token = extractTokenFromHeader(authHeader);
+    
+    if (!token) {
+      return NextResponse.json(
+        { success: false, message: 'Authentication required' },
+        { status: 401 }
+      );
+    }
 
-    if (!audioFile || !artworkFile || !title || !artist) {
+    const user = verifyToken(token);
+    if (!user) {
+      return NextResponse.json(
+        { success: false, message: 'Invalid authentication token' },
+        { status: 401 }
+      );
+    }
+
+    const formData = await request.formData();
+    
+    // Extract track data
+    const tracks: Array<{ title: string; audioFile: File }> = [];
+    let trackIndex = 0;
+    while (formData.has(`track_${trackIndex}`)) {
+      const audioFile = formData.get(`track_${trackIndex}`) as File;
+      const title = formData.get(`track_${trackIndex}_title`) as string;
+      
+      if (audioFile && title) {
+        tracks.push({ title, audioFile });
+      }
+      trackIndex++;
+    }
+
+    // Extract metadata
+    const metadata = {
+      title: formData.get('title') as string,
+      artist: formData.get('artist') as string,
+      releaseDate: formData.get('releaseDate') as string,
+      genre: formData.get('genre') as string,
+      language: formData.get('language') as string,
+      type: (formData.get('type') as string) || 'SINGLE'
+    };
+
+    const artworkFile = formData.get('artwork') as File;
+
+    // Validate required fields
+    if (!tracks.length || !metadata.title || !metadata.artist || !artworkFile) {
       return NextResponse.json(
         { success: false, message: 'Missing required fields' },
         { status: 400 }
       );
     }
 
-    // Validate audio file
-    const audioValidation = validateFile(audioFile, 'audio');
-    if (!audioValidation.valid) {
+    // Validate release metadata
+    const metadataValidation = validateReleaseMetadata(metadata);
+    if (!metadataValidation.valid) {
       return NextResponse.json(
-        { success: false, message: audioValidation.error },
+        { success: false, message: metadataValidation.errors.join(', ') },
+        { status: 400 }
+      );
+    }
+
+    // Validate all audio files
+    const audioValidations = tracks.map(track => validateAudioFile(track.audioFile));
+    const invalidAudio = audioValidations.find(v => !v.valid);
+    if (invalidAudio) {
+      return NextResponse.json(
+        { success: false, message: invalidAudio.error },
         { status: 400 }
       );
     }
 
     // Validate artwork file
-    const imageValidation = validateFile(artworkFile, 'image');
+    const imageValidation = validateImageFile(artworkFile);
     if (!imageValidation.valid) {
       return NextResponse.json(
         { success: false, message: imageValidation.error },
@@ -88,73 +128,121 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate unique IDs
-    const releaseId = randomUUID();
-    const audioId = randomUUID();
-    const artworkId = randomUUID();
+    const releaseId = generateReleaseId();
+    const upc = generateUPC();
+    const tempFilePaths: string[] = [];
 
-    // Process and optimize image
-    const imageBuffer = Buffer.from(await artworkFile.arrayBuffer());
-    const optimizedImage = await optimizeImage(imageBuffer);
-    
-    // Convert audio file to buffer
-    const audioBuffer = Buffer.from(await audioFile.arrayBuffer());
+    try {
+      // Process and save artwork
+      const artworkBuffer = Buffer.from(await artworkFile.arrayBuffer());
+      const optimizedImage = await optimizeImage(artworkBuffer);
+      const artworkFileId = generateFileId();
+      const artworkFilename = generateSafeFilename(artworkFile.name, artworkFileId);
+      
+      // Save artwork (in production, upload to cloud storage)
+      const artworkPath = `/uploads/${user.id}/images/${artworkFilename}`;
+      tempFilePaths.push(artworkPath);
 
-    // In production, you would upload to cloud storage here
-    // For now, we'll simulate the upload process with proper URLs
-    const audioUrl = `https://kushtunes-storage.com/audio/${audioId}.${audioFile.name.split('.').pop()}`;
-    const artworkUrl = `https://kushtunes-storage.com/artwork/${artworkId}.jpg`;
+      // Process artwork metadata
+      const artworkMetadata = await processImageMetadata(artworkPath);
 
-    // Generate ISRC and UPC codes
-    const isrc = `USRC${Date.now().toString().slice(-8)}`;
-    const upc = `${Math.floor(Math.random() * 900000000000) + 100000000000}`;
-
-    // Create release in database
-    const release = await prisma.release.create({
-      data: {
-        id: releaseId,
-        primaryArtistId: 'demo-artist-id', // TODO: Get from authenticated user
-        title,
-        releaseDate: releaseDate ? new Date(releaseDate) : new Date(),
-        status: 'DRAFT',
-        coverUrl: artworkUrl,
-        genre,
-        territories: JSON.stringify(['US']), // Default territory as JSON string
-        upc
-      }
-    });
-
-    // Create track record
-    await prisma.track.create({
-      data: {
-        id: audioId,
-        releaseId,
-        title,
-        trackNumber: 1, // Default to track 1
-        isrc,
-        audioUrl,
-        duration: Math.floor(Math.random() * 300) + 120, // Random duration 2-7 minutes
-        language: 'en' // Default language
-      }
-    });
-
-    return NextResponse.json({
-      success: true,
-      message: 'Release uploaded successfully',
-      data: {
-        releaseId: release.id,
-        title: release.title,
-        status: release.status,
-        coverUrl: release.coverUrl,
-        upc: release.upc,
-        uploadedAt: release.createdAt,
-        fileInfo: {
-          audioSize: audioFile.size,
-          imageSize: optimizedImage.length,
-          audioType: audioFile.type,
-          imageType: 'image/jpeg'
+      // Create release in database
+      const release = await prisma.release.create({
+        data: {
+          id: releaseId,
+          primaryArtistId: user.id,
+          title: metadata.title,
+          releaseDate: new Date(metadata.releaseDate),
+          status: 'DRAFT',
+          coverUrl: `https://kushtunes-storage.com/artwork/${artworkFileId}.jpg`,
+          genre: metadata.genre,
+          territories: JSON.stringify(['US']),
+          upc: upc,
+          language: metadata.language,
+          releaseType: metadata.type
         }
+      });
+
+      // Process and save tracks
+      const trackRecords = [];
+      for (let i = 0; i < tracks.length; i++) {
+        const track = tracks[i];
+        const trackId = generateFileId();
+        const isrc = generateISRC();
+        
+        // Save audio file (in production, upload to cloud storage)
+        const audioPath = `/uploads/${user.id}/audio/${generateSafeFilename(track.audioFile.name, trackId)}`;
+        tempFilePaths.push(audioPath);
+        
+        // Process audio metadata
+        const audioMetadata = await processAudioMetadata(audioPath);
+        
+        // Create track record
+        const trackRecord = await prisma.track.create({
+          data: {
+            id: trackId,
+            releaseId,
+            title: track.title,
+            trackNumber: i + 1,
+            isrc,
+            audioUrl: `https://kushtunes-storage.com/audio/${trackId}.${track.audioFile.name.split('.').pop()}`,
+            duration: audioMetadata.duration || 180,
+            language: metadata.language,
+            bitrate: audioMetadata.bitrate,
+            sampleRate: audioMetadata.sampleRate,
+            channels: audioMetadata.channels
+          }
+        });
+        
+        trackRecords.push(trackRecord);
       }
-    });
+
+      // Calculate release duration
+      const totalDuration = calculateReleaseDuration(trackRecords.map(t => ({ duration: t.duration })));
+
+      return NextResponse.json({
+        success: true,
+        message: 'Release uploaded successfully',
+        data: {
+          releaseId: release.id,
+          title: release.title,
+          status: release.status,
+          coverUrl: release.coverUrl,
+          upc: release.upc,
+          uploadedAt: release.createdAt,
+          tracks: trackRecords.map(track => ({
+            id: track.id,
+            title: track.title,
+            trackNumber: track.trackNumber,
+            duration: formatDuration(track.duration),
+            isrc: track.isrc
+          })),
+          summary: {
+            trackCount: trackRecords.length,
+            totalDuration: formatDuration(totalDuration),
+            releaseType: metadata.type
+          },
+          fileInfo: {
+            audioFiles: tracks.map(t => ({
+              name: t.audioFile.name,
+              size: t.audioFile.size,
+              type: t.audioFile.type
+            })),
+            artwork: {
+              name: artworkFile.name,
+              size: optimizedImage.length,
+              type: 'image/jpeg',
+              dimensions: `${artworkMetadata.width}x${artworkMetadata.height}`
+            }
+          }
+        }
+      });
+
+    } catch (error) {
+      // Clean up temporary files on error
+      await cleanupTempFiles(tempFilePaths);
+      throw error;
+    }
 
   } catch (error) {
     console.error('Upload error:', error);
@@ -167,15 +255,39 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
+    // Extract and verify authentication token
+    const authHeader = request.headers.get('authorization');
+    const token = extractTokenFromHeader(authHeader);
+    
+    if (!token) {
+      return NextResponse.json(
+        { success: false, message: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
+    const user = verifyToken(token);
+    if (!user) {
+      return NextResponse.json(
+        { success: false, message: 'Invalid authentication token' },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const releaseId = searchParams.get('releaseId');
 
     if (releaseId) {
-      // Get specific release
-      const release = await prisma.release.findUnique({
-        where: { id: releaseId },
+      // Get specific release for authenticated user
+      const release = await prisma.release.findFirst({
+        where: { 
+          id: releaseId,
+          primaryArtistId: user.id
+        },
         include: {
-          tracks: true,
+          tracks: {
+            orderBy: { trackNumber: 'asc' }
+          },
           deliveries: true
         }
       });
@@ -187,23 +299,61 @@ export async function GET(request: NextRequest) {
         );
       }
 
+      // Calculate release analytics
+      const totalDuration = calculateReleaseDuration(release.tracks.map(t => ({ duration: t.duration })));
+
       return NextResponse.json({
         success: true,
-        data: release
+        data: {
+          ...release,
+          summary: {
+            trackCount: release.tracks.length,
+            totalDuration: formatDuration(totalDuration),
+            releaseType: release.releaseType || 'SINGLE'
+          },
+          tracks: release.tracks.map(track => ({
+            ...track,
+            duration: formatDuration(track.duration)
+          }))
+        }
       });
     } else {
-      // Get all releases
+      // Get all releases for authenticated user
       const releases = await prisma.release.findMany({
+        where: {
+          primaryArtistId: user.id
+        },
         include: {
-          tracks: true,
+          tracks: {
+            orderBy: { trackNumber: 'asc' }
+          },
           deliveries: true
         },
         orderBy: { createdAt: 'desc' }
       });
 
+      // Add summary data to each release
+      const releasesWithSummary = releases.map(release => {
+        const totalDuration = calculateReleaseDuration(release.tracks.map(t => ({ duration: t.duration })));
+        
+        return {
+          ...release,
+          summary: {
+            trackCount: release.tracks.length,
+            totalDuration: formatDuration(totalDuration),
+            releaseType: release.releaseType || 'SINGLE'
+          },
+          tracks: release.tracks.map(track => ({
+            ...track,
+            duration: formatDuration(track.duration)
+          }))
+        };
+      });
+
       return NextResponse.json({
         success: true,
-        data: releases
+        data: releasesWithSummary,
+        count: releases.length
       });
     }
 

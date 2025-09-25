@@ -1,120 +1,248 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { verifyToken } from '@/lib/auth';
+import { extractTokenFromHeader, verifyToken } from '@/lib/auth';
+import { 
+  generateEarningsSummary,
+  calculateStreamEarnings,
+  validatePayoutRequest,
+  calculatePayoutFees,
+  formatCurrency,
+  getPayoutStatusColor,
+  getPayoutStatusText,
+  generateEarningsInsights
+} from '@/lib/payout-logic';
 
 const prisma = new PrismaClient();
 
-// GET /api/earnings - Get earnings for a period
 export async function GET(request: NextRequest) {
   try {
+    // Extract and verify authentication token
     const authHeader = request.headers.get('authorization');
-    if (!authHeader) {
+    const token = extractTokenFromHeader(authHeader);
+    
+    if (!token) {
       return NextResponse.json(
-        { success: false, message: 'Authorization header required' },
+        { success: false, message: 'Authentication required' },
         { status: 401 }
       );
     }
 
-    const token = authHeader.replace('Bearer ', '');
-    const decoded = verifyToken(token);
-    
-    if (!decoded) {
+    const user = verifyToken(token);
+    if (!user) {
       return NextResponse.json(
-        { success: false, message: 'Invalid token' },
+        { success: false, message: 'Invalid authentication token' },
         { status: 401 }
       );
     }
 
     const { searchParams } = new URL(request.url);
-    const period = searchParams.get('period'); // YYYY-MM format
-    const artistId = searchParams.get('artistId');
+    const period = searchParams.get('period') as 'daily' | 'weekly' | 'monthly' || 'monthly';
+    const startDate = searchParams.get('startDate');
+    const endDate = searchParams.get('endDate');
 
-    // Get artist profile
-    const artist = await prisma.artist.findUnique({
-      where: { email: decoded.email }
-    });
-
-    if (!artist) {
-      return NextResponse.json(
-        { success: false, message: 'Artist profile not found' },
-        { status: 404 }
-      );
+    // Build date filter
+    const dateFilter: any = {};
+    if (startDate) {
+      dateFilter.gte = new Date(startDate);
+    }
+    if (endDate) {
+      dateFilter.lte = new Date(endDate);
     }
 
-    // Build query
-    const whereClause: any = {};
-    
-    if (period) {
-      whereClause.period = period;
-    }
-
-    // Get earnings for artist's tracks
-    const earnings = await prisma.earning.findMany({
+    // Get user's releases
+    const releases = await prisma.release.findMany({
       where: {
-        ...whereClause,
-        track: {
-          release: {
-            primaryArtistId: artist.id
-          }
-        }
+        primaryArtistId: user.id
       },
       include: {
-        track: {
-          include: {
-            release: true
-          }
-        }
+        tracks: true
+      }
+    });
+
+    const trackIds = releases.flatMap(r => r.tracks.map(t => t.id));
+
+    // Generate mock earnings data
+    const earningsData = generateMockEarningsData(user.id, trackIds, dateFilter);
+    
+    // Get payout history
+    const payoutData = await prisma.payout.findMany({
+      where: {
+        userId: user.id
       },
-      orderBy: {
-        period: 'desc'
-      }
+      orderBy: { requestedAt: 'desc' }
     });
 
-    // Calculate totals
-    const totals = earnings.reduce((acc, earning) => {
-      acc.totalUnits += earning.units;
-      acc.totalRevenue += earning.revenue;
-      return acc;
-    }, { totalUnits: 0, totalRevenue: 0 });
-
-    // Group by period
-    const earningsByPeriod = earnings.reduce((acc, earning) => {
-      if (!acc[earning.period]) {
-        acc[earning.period] = {
-          period: earning.period,
-          units: 0,
-          revenue: 0,
-          stores: new Set(),
-          countries: new Set()
-        };
-      }
-      acc[earning.period].units += earning.units;
-      acc[earning.period].revenue += earning.revenue;
-      acc[earning.period].stores.add(earning.store);
-      acc[earning.period].countries.add(earning.country);
-      return acc;
-    }, {} as any);
-
-    // Convert sets to arrays
-    Object.values(earningsByPeriod).forEach((period: any) => {
-      period.stores = Array.from(period.stores);
-      period.countries = Array.from(period.countries);
-    });
+    // Generate earnings summary
+    const summary = generateEarningsSummary(earningsData, payoutData);
+    const insights = generateEarningsInsights(summary);
 
     return NextResponse.json({
       success: true,
       data: {
-        earnings: earningsByPeriod,
-        totals,
-        period: period || 'all'
+        summary: {
+          ...summary,
+          insights
+        },
+        payoutHistory: payoutData.map(payout => ({
+          ...payout,
+          statusColor: getPayoutStatusColor(payout.status),
+          statusText: getPayoutStatusText(payout.status)
+        })),
+        releases: releases.map(release => ({
+          id: release.id,
+          title: release.title,
+          trackCount: release.tracks.length,
+          releaseDate: release.releaseDate
+        }))
       }
     });
 
   } catch (error) {
-    console.error('Get earnings error:', error);
+    console.error('Earnings error:', error);
     return NextResponse.json(
-      { success: false, message: 'Internal server error' },
+      { success: false, message: 'Failed to fetch earnings data' },
       { status: 500 }
     );
   }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    // Extract and verify authentication token
+    const authHeader = request.headers.get('authorization');
+    const token = extractTokenFromHeader(authHeader);
+    
+    if (!token) {
+      return NextResponse.json(
+        { success: false, message: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
+    const user = verifyToken(token);
+    if (!user) {
+      return NextResponse.json(
+        { success: false, message: 'Invalid authentication token' },
+        { status: 401 }
+      );
+    }
+
+    const body = await request.json();
+    const { amount, paymentMethod, currency = 'USD' } = body;
+
+    if (!amount || !paymentMethod) {
+      return NextResponse.json(
+        { success: false, message: 'Amount and payment method are required' },
+        { status: 400 }
+      );
+    }
+
+    // Get user's earnings data
+    const releases = await prisma.release.findMany({
+      where: {
+        primaryArtistId: user.id
+      },
+      include: {
+        tracks: true
+      }
+    });
+
+    const trackIds = releases.flatMap(r => r.tracks.map(t => t.id));
+    const earningsData = generateMockEarningsData(user.id, trackIds);
+    const payoutData = await prisma.payout.findMany({
+      where: {
+        userId: user.id
+      }
+    });
+
+    const summary = generateEarningsSummary(earningsData, payoutData);
+    const availableBalance = summary.availableBalance;
+
+    // Validate payout request
+    const validation = validatePayoutRequest(amount, availableBalance);
+    if (!validation.valid) {
+      return NextResponse.json(
+        { success: false, message: validation.error },
+        { status: 400 }
+      );
+    }
+
+    // Calculate fees
+    const { fee, netAmount } = calculatePayoutFees(amount, paymentMethod);
+
+    // Create payout record
+    const payout = await prisma.payout.create({
+      data: {
+        userId: user.id,
+        amount: parseFloat(amount),
+        currency,
+        status: 'PENDING',
+        requestedAt: new Date(),
+        paymentMethod,
+        fee,
+        netAmount
+      }
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: 'Payout request submitted successfully',
+      data: {
+        payoutId: payout.id,
+        amount: formatCurrency(payout.amount, payout.currency),
+        fee: formatCurrency(payout.fee, payout.currency),
+        netAmount: formatCurrency(payout.netAmount, payout.currency),
+        status: getPayoutStatusText(payout.status),
+        requestedAt: payout.requestedAt,
+        estimatedProcessingTime: '3-5 business days'
+      }
+    });
+
+  } catch (error) {
+    console.error('Payout request error:', error);
+    return NextResponse.json(
+      { success: false, message: 'Failed to process payout request' },
+      { status: 500 }
+    );
+  }
+}
+
+// Generate mock earnings data for demonstration
+function generateMockEarningsData(userId: string, trackIds: string[], dateFilter: any = {}) {
+  const platforms = ['spotify', 'apple-music', 'youtube-music', 'amazon-music', 'deezer'];
+  const countries = ['US', 'GB', 'CA', 'AU', 'DE', 'FR', 'IT', 'ES', 'NL', 'SE'];
+  
+  const earningsData = [];
+  const startDate = dateFilter.gte || new Date(Date.now() - 90 * 24 * 60 * 60 * 1000); // 90 days ago
+  const endDate = dateFilter.lte || new Date();
+  
+  // Generate data for each track
+  trackIds.forEach(trackId => {
+    // Generate daily data for the specified period
+    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+      platforms.forEach(platform => {
+        countries.forEach(country => {
+          const streams = Math.floor(Math.random() * 1000) + 100;
+          const earnings = calculateStreamEarnings(platform, country, streams);
+          
+          earningsData.push({
+            id: `${trackId}_${platform}_${country}_${d.toISOString().split('T')[0]}`,
+            userId,
+            releaseId: trackId.split('_')[0],
+            trackId,
+            platform,
+            country,
+            date: new Date(d),
+            streams,
+            revenue: earnings.revenue,
+            currency: 'USD',
+            payoutRate: earnings.rate,
+            netEarnings: earnings.revenue // Assuming 100% royalty rate
+          });
+        });
+      });
+    }
+  });
+  
+  return earningsData;
 }
