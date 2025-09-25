@@ -67,9 +67,9 @@ export async function GET(request: NextRequest) {
     // Get payout history
     const payoutData = await prisma.payout.findMany({
       where: {
-        userId: user.id
+        artistId: user.id
       },
-      orderBy: { requestedAt: 'desc' }
+      orderBy: { createdAt: 'desc' }
     });
 
     // Generate earnings summary
@@ -151,7 +151,7 @@ export async function POST(request: NextRequest) {
     const earningsData = generateMockEarningsData(user.id, trackIds);
     const payoutData = await prisma.payout.findMany({
       where: {
-        userId: user.id
+        artistId: user.id
       }
     });
 
@@ -173,7 +173,7 @@ export async function POST(request: NextRequest) {
     // Create payout record
     const payout = await prisma.payout.create({
       data: {
-        userId: user.id,
+        artistId: user.id,
         amount: parseFloat(amount),
         currency,
         status: 'PENDING',
