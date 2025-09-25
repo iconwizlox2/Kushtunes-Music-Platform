@@ -72,8 +72,21 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: 'desc' }
     });
 
+    // Transform payout data to match expected format
+    const transformedPayoutData = payoutData.map(payout => ({
+      id: payout.id,
+      userId: payout.artistId,
+      amount: payout.amount,
+      currency: 'USD',
+      requestedAt: payout.createdAt,
+      paymentMethod: payout.method,
+      status: payout.status,
+      processedAt: payout.processedAt,
+      reference: payout.reference
+    }));
+
     // Generate earnings summary
-    const summary = generateEarningsSummary(earningsData, payoutData);
+    const summary = generateEarningsSummary(earningsData, transformedPayoutData);
     const insights = generateEarningsInsights(summary);
 
     return NextResponse.json({
@@ -155,7 +168,20 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    const summary = generateEarningsSummary(earningsData, payoutData);
+    // Transform payout data to match expected format
+    const transformedPayoutData = payoutData.map(payout => ({
+      id: payout.id,
+      userId: payout.artistId,
+      amount: payout.amount,
+      currency: 'USD',
+      requestedAt: payout.createdAt,
+      paymentMethod: payout.method,
+      status: payout.status,
+      processedAt: payout.processedAt,
+      reference: payout.reference
+    }));
+
+    const summary = generateEarningsSummary(earningsData, transformedPayoutData);
     const availableBalance = summary.availableBalance;
 
     // Validate payout request
