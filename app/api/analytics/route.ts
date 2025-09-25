@@ -95,8 +95,8 @@ export async function GET(request: NextRequest) {
               totalRevenue: analytics.totalRevenue,
               totalTracks: analytics.trackCount,
               totalReleases: 1,
-              topCountries: analytics.tracks.reduce((acc, track) => [...acc, ...track.topCountries], []),
-              topPlatforms: analytics.tracks.reduce((acc, track) => [...acc, ...track.topPlatforms], []),
+              topCountries: analytics.tracks.reduce((acc: any[], track: any) => [...acc, ...(track.topCountries || [])], []),
+              topPlatforms: analytics.tracks.reduce((acc: any[], track: any) => [...acc, ...(track.topPlatforms || [])], []),
               monthlyGrowth: []
             })
           }
