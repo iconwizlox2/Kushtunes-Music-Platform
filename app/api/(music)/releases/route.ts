@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     }
 
     const token = authHeader.replace('Bearer ', '');
-    const decoded = verifyToken(token);
+    const decoded = await verifyToken(token);
     
     if (!decoded) {
       return NextResponse.json(
@@ -191,7 +191,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     }
 
     const token = authHeader.replace('Bearer ', '');
-    const decoded = verifyToken(token);
+    const decoded = await verifyToken(token);
     
     if (!decoded) {
       return NextResponse.json(
@@ -273,7 +273,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     }
 
     const token = authHeader.replace('Bearer ', '');
-    const decoded = verifyToken(token);
+    const decoded = await verifyToken(token);
     
     if (!decoded) {
       return NextResponse.json(

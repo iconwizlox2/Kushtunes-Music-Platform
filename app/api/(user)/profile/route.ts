@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const decoded = verifyToken(token);
+    const decoded = await verifyToken(token);
     if (!decoded) {
       return NextResponse.json(
         { success: false, message: 'Invalid token' },
@@ -76,7 +76,7 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const decoded = verifyToken(token);
+    const decoded = await verifyToken(token);
     if (!decoded) {
       return NextResponse.json(
         { success: false, message: 'Invalid token' },

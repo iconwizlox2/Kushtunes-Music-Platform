@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     }
 
     const token = authHeader.replace('Bearer ', '');
-    const decoded = verifyToken(token);
+    const decoded = await verifyToken(token);
     
     if (!decoded) {
       return NextResponse.json(
@@ -139,7 +139,7 @@ export async function GET(request: NextRequest) {
     }
 
     const token = authHeader.replace('Bearer ', '');
-    const decoded = verifyToken(token);
+    const decoded = await verifyToken(token);
     
     if (!decoded) {
       return NextResponse.json(
