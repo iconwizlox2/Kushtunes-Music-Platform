@@ -1,11 +1,11 @@
-import NextAuth from 'next-auth';
+import NextAuth, { AuthOptions } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export const authOptions = {
+export const authOptions: AuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     GoogleProvider({
@@ -18,25 +18,29 @@ export const authOptions = {
       if (session.user && token.sub) {
         session.user.id = token.sub;
         // Add additional user data to session
-        const dbUser = await prisma.user.findUnique({
-          where: { email: session.user.email! },
-          select: {
-            id: true,
-            email: true,
-            username: true,
-            firstName: true,
-            lastName: true,
-            role: true,
-            avatar: true,
-            bio: true,
-            website: true,
-            location: true,
-            isEmailVerified: true,
-          },
-        });
-        
-        if (dbUser) {
-          session.user = { ...session.user, ...dbUser };
+        try {
+          const dbUser = await prisma.user.findUnique({
+            where: { email: session.user.email! },
+            select: {
+              id: true,
+              email: true,
+              username: true,
+              firstName: true,
+              lastName: true,
+              role: true,
+              avatar: true,
+              bio: true,
+              website: true,
+              location: true,
+              isEmailVerified: true,
+            },
+          });
+          
+          if (dbUser) {
+            session.user = { ...session.user, ...dbUser };
+          }
+        } catch (error) {
+          console.error('Error fetching user in session callback:', error);
         }
       }
       return session;
@@ -83,11 +87,12 @@ export const authOptions = {
   },
   pages: {
     signIn: '/login',
-    signUp: '/register',
+    error: '/auth/error', // Redirect errors to custom error page
   },
   session: {
     strategy: 'jwt' as const,
   },
+  debug: process.env.NODE_ENV === 'development',
 };
 
 export default NextAuth(authOptions);
