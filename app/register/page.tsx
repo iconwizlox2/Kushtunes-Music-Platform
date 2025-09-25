@@ -15,7 +15,8 @@ import {
   LockClosedIcon,
   MailIcon,
   ArrowRightIcon,
-  CheckCircleIcon
+  CheckCircleIcon,
+  ExclamationTriangleIcon
 } from '@/components/ui/Icons';
 
 interface RegisterFormData {

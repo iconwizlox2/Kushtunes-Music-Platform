@@ -32,9 +32,9 @@ export function Input({
         <input
           className={cn(
             'form-input',
-            leftIcon && 'pl-10',
-            rightIcon && 'pr-10',
-            error && 'error border-red-300 focus:border-red-500 focus:ring-red-500',
+            leftIcon ? 'pl-10' : '',
+            rightIcon ? 'pr-10' : '',
+            error ? 'error border-red-300 focus:border-red-500 focus:ring-red-500' : '',
             className
           )}
           {...props}
