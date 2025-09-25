@@ -41,11 +41,11 @@ export function generateToken(payload: UserPayload): string {
 }
 
 // Verify JWT token
-export function verifyToken(token: string): UserPayload | null {
+export function verifyToken(token: string): UserPayload | undefined {
   try {
     return jwt.verify(token, JWT_SECRET) as UserPayload;
   } catch (error) {
-    return null;
+    return undefined;
   }
 }
 
