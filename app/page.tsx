@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { MusicalNoteIcon, GlobeAltIcon, ChartBarIcon, ShieldCheckIcon, ArrowRightIcon, UsersIcon, PhotoIcon } from '@/components/ui/Icons';
 import { useEffect, useState } from 'react';
+import Header from '@/components/Header';
 
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -13,6 +14,12 @@ export default function Home() {
       setIsLoggedIn(true);
     }
   }, []);
+
+  const handleButtonClick = (action: string) => {
+    // Track button clicks for analytics
+    console.log(`Button clicked: ${action}`);
+    // You can add analytics tracking here
+  };
 
   const features = [
     {
@@ -55,7 +62,9 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+    <>
+      <Header />
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       {/* Hero Section */}
       <section className="relative py-24 px-4 overflow-hidden">
         {/* Background Elements */}
@@ -83,7 +92,10 @@ export default function Home() {
             
             <div className="flex flex-col sm:flex-row justify-center gap-6 animate-fade-in">
               <Link href={isLoggedIn ? "/upload" : "/register"} passHref>
-                <button className="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
+                <button 
+                  onClick={() => handleButtonClick(isLoggedIn ? "upload_music" : "get_started_free")}
+                  className="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
+                >
                   <span className="relative z-10">
                     {isLoggedIn ? "Upload Your Music" : "Get Started Free"}
                   </span>
@@ -93,7 +105,10 @@ export default function Home() {
               </Link>
               {!isLoggedIn && (
                 <Link href="/login" passHref>
-                  <button className="px-8 py-4 bg-white/80 backdrop-blur-sm text-gray-700 font-semibold rounded-xl border border-gray-200 hover:bg-white hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300">
+                  <button 
+                    onClick={() => handleButtonClick("sign_in")}
+                    className="px-8 py-4 bg-white/80 backdrop-blur-sm text-gray-700 font-semibold rounded-xl border border-gray-200 hover:bg-white hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300"
+                  >
                     Sign In
                   </button>
                 </Link>
@@ -188,9 +203,14 @@ export default function Home() {
                   Basic analytics
                 </li>
               </ul>
-              <button className="w-full px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-colors duration-300">
-                Get Started Free
-              </button>
+              <Link href={isLoggedIn ? "/upload" : "/register"} passHref>
+                <button 
+                  onClick={() => handleButtonClick("free_plan")}
+                  className="w-full px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-colors duration-300"
+                >
+                  Get Started Free
+                </button>
+              </Link>
             </div>
 
             {/* Musician Plan */}
@@ -222,9 +242,14 @@ export default function Home() {
                   HyperFollow pages
                 </li>
               </ul>
-              <button className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300">
-                Choose Musician
-              </button>
+              <Link href={isLoggedIn ? "/upload" : "/register"} passHref>
+                <button 
+                  onClick={() => handleButtonClick("musician_plan")}
+                  className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300"
+                >
+                  Choose Musician
+                </button>
+              </Link>
             </div>
 
             {/* Label Plan */}
@@ -251,9 +276,14 @@ export default function Home() {
                   Custom label pages
                 </li>
               </ul>
-              <button className="w-full px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-colors duration-300">
-                Choose Label
-              </button>
+              <Link href={isLoggedIn ? "/upload" : "/register"} passHref>
+                <button 
+                  onClick={() => handleButtonClick("label_plan")}
+                  className="w-full px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-colors duration-300"
+                >
+                  Choose Label
+                </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -297,6 +327,134 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Testimonials Section */}
+      <section className="py-24 px-4 bg-white/50 backdrop-blur-sm">
+        <div className="container mx-auto">
+          <div className="text-center mb-20">
+            <h2 className="text-5xl font-bold text-gray-900 mb-6 animate-fade-in">
+              What Artists <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Say</span>
+            </h2>
+            <p className="text-xl text-gray-600 animate-fade-in">
+              Join thousands of satisfied artists who trust Kushtunes
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in-up">
+              <div className="flex items-center mb-6">
+                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                  A
+                </div>
+                <div className="ml-4">
+                  <h4 className="font-bold text-gray-900">Alex Johnson</h4>
+                  <p className="text-gray-600 text-sm">Independent Artist</p>
+                </div>
+              </div>
+              <p className="text-gray-700 leading-relaxed">
+                "Kushtunes made it incredibly easy to distribute my music globally. The analytics are detailed and the payout process is transparent. I've earned more in 6 months than I did in 2 years with other platforms."
+              </p>
+              <div className="flex text-yellow-400 mt-4">
+                {'★'.repeat(5)}
+              </div>
+            </div>
+            
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+              <div className="flex items-center mb-6">
+                <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-teal-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                  M
+                </div>
+                <div className="ml-4">
+                  <h4 className="font-bold text-gray-900">Maria Santos</h4>
+                  <p className="text-gray-600 text-sm">Electronic Producer</p>
+                </div>
+              </div>
+              <p className="text-gray-700 leading-relaxed">
+                "The upload process is smooth and the platform handles all the technical details. My tracks are now on 180+ platforms worldwide. The customer support is also excellent!"
+              </p>
+              <div className="flex text-yellow-400 mt-4">
+                {'★'.repeat(5)}
+              </div>
+            </div>
+            
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+              <div className="flex items-center mb-6">
+                <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                  D
+                </div>
+                <div className="ml-4">
+                  <h4 className="font-bold text-gray-900">David Chen</h4>
+                  <p className="text-gray-600 text-sm">Hip-Hop Artist</p>
+                </div>
+              </div>
+              <p className="text-gray-700 leading-relaxed">
+                "From the Nile to the World - this platform truly delivers on that promise. My music has reached audiences I never thought possible. The revenue tracking is crystal clear."
+              </p>
+              <div className="flex text-yellow-400 mt-4">
+                {'★'.repeat(5)}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-24 px-4 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+        <div className="container mx-auto">
+          <div className="text-center mb-20">
+            <h2 className="text-5xl font-bold text-gray-900 mb-6 animate-fade-in">
+              Frequently Asked <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Questions</span>
+            </h2>
+            <p className="text-xl text-gray-600 animate-fade-in">
+              Everything you need to know about Kushtunes
+            </p>
+          </div>
+          
+          <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-8">
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg animate-fade-in-up">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">How much does it cost?</h3>
+              <p className="text-gray-600 leading-relaxed">
+                We offer a free plan for unlimited singles, and paid plans starting at $20/year for albums and EPs. No hidden fees, no long-term contracts.
+              </p>
+            </div>
+            
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+              <h3 className="text-xl font-bold text-gray-900 mb-4">How long does distribution take?</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Most platforms receive your music within 24-48 hours. Streaming services typically take 1-2 weeks to go live, while stores may take 2-4 weeks.
+              </p>
+            </div>
+            
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Do I keep my rights?</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Yes! You retain 100% ownership of your music and master recording rights. We only distribute your music, we don't own it.
+              </p>
+            </div>
+            
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+              <h3 className="text-xl font-bold text-gray-900 mb-4">How do I get paid?</h3>
+              <p className="text-gray-600 leading-relaxed">
+                We collect royalties from all platforms and pay you monthly. You can request instant payouts anytime with automatic fee calculations.
+              </p>
+            </div>
+            
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+              <h3 className="text-xl font-bold text-gray-900 mb-4">What file formats do you accept?</h3>
+              <p className="text-gray-600 leading-relaxed">
+                We accept WAV, FLAC, AIFF, and high-quality MP3 files. Cover art should be JPEG or PNG, minimum 3000x3000 pixels.
+              </p>
+            </div>
+            
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Can I distribute covers?</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Yes, but you need proper licensing. We can help you obtain mechanical licenses for cover songs through our licensing partners.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="py-24 px-4 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 relative overflow-hidden">
         {/* Background Elements */}
@@ -313,7 +471,10 @@ export default function Home() {
               Join thousands of artists who trust Kushtunes for their music distribution
             </p>
             <Link href={isLoggedIn ? "/upload" : "/register"} passHref>
-              <button className="group px-10 py-5 bg-white text-gray-900 font-bold rounded-2xl shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300">
+              <button 
+                onClick={() => handleButtonClick(isLoggedIn ? "start_uploading_now" : "join_kushtunes_today")}
+                className="group px-10 py-5 bg-white text-gray-900 font-bold rounded-2xl shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300"
+              >
                 <span className="relative z-10">
                   {isLoggedIn ? "Start Uploading Now" : "Join Kushtunes Today"}
                 </span>
@@ -342,6 +503,7 @@ export default function Home() {
           </div>
         </div>
       </footer>
-    </div>
+      </div>
+    </>
   );
 }

@@ -387,3 +387,5 @@ export function generateEarningsInsights(summary: EarningsSummary): string[] {
   return insights;
 }
 
+
+
