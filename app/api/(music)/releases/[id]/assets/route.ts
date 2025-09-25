@@ -17,7 +17,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     }
 
     const token = authHeader.replace('Bearer ', '');
-    const decoded = verifyToken(token);
+    const decoded = await verifyToken(token);
     
     if (!decoded) {
       return NextResponse.json(
