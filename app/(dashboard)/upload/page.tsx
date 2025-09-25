@@ -202,7 +202,7 @@ export default function UploadPage() {
 
       // Basic clipping detection
       const channelData = audioBuffer.getChannelData(0);
-      const maxAmplitude = Math.max(...channelData.map(Math.abs));
+      const maxAmplitude = Math.max(...Array.from(channelData).map(Math.abs));
       if (maxAmplitude >= 0.99) {
         return {
           valid: false,
