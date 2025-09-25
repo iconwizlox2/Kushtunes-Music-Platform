@@ -70,14 +70,14 @@ export function Header() {
                   <span>{user?.firstName || user?.username || 'Profile'}</span>
                 </Link>
               </div>
-              <Button variant="outline" size="sm" onClick={handleLogout}>
+              <Button intent="ghost" size="sm" onClick={handleLogout}>
                 <ArrowRightOnRectangleIcon className="h-4 w-4 mr-1" />
                 Logout
               </Button>
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" asChild>
+              <Button intent="ghost" size="sm" asChild>
                 <Link href="/login">Sign In</Link>
               </Button>
               <Button size="sm" asChild>
