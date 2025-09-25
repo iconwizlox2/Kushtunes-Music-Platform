@@ -5,14 +5,7 @@ const nextConfig = {
     domains: ['localhost', 'vercel.app'],
   },
   experimental: {
-    outputFileTracingRoot: undefined,
-    outputFileTracing: false,
-  },
-  webpack: (config, { isServer }) => {
-    if (isServer) {
-      config.externals = [...config.externals, 'critters'];
-    }
-    return config;
+    serverComponentsExternalPackages: ['critters'],
   },
 }
 
