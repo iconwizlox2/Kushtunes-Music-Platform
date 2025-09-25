@@ -8,16 +8,23 @@ datasource db {
 }
 
 model Release {
-  id        String      @id @default(cuid())
-  title     String
-  artist    String
-  type      ReleaseType @default(SINGLE)
-  status    Status      @default(DRAFT)
-  plannedAt DateTime
-  coverUrl  String?
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  tracks    Track[]
+  id            String      @id @default(cuid())
+  title         String
+  artist        String
+  type          ReleaseType @default(SINGLE)
+  status        Status      @default(DRAFT)
+  plannedAt     DateTime
+  coverUrl      String?
+  audioUrl      String?
+  genre         String?
+  language      String?
+  releaseDate   DateTime?
+  isrc          String?
+  upc           String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  tracks        Track[]
+  distributions DSPDistribution[]
 }
 
 model Track {
@@ -31,6 +38,47 @@ model Track {
   release   Release  @relation(fields: [releaseId], references: [id], onDelete: Cascade)
 }
 
+model DSPDistribution {
+  id              String   @id @default(cuid())
+  releaseId       String
+  dsp             String
+  dspName         String
+  status          DistributionStatus @default(PENDING)
+  submittedAt     DateTime @default(now())
+  liveAt          DateTime?
+  rejectedAt      DateTime?
+  rejectionReason String?
+  submissionId    String?  // External DSP submission ID
+  platformUrls    Json?    // Store platform-specific URLs
+  revenue         Float?   @default(0)
+  streams         Int?     @default(0)
+  downloads       Int?     @default(0)
+  lastSyncAt      DateTime?
+  metadata        Json?    // Store DSP-specific metadata
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  release         Release  @relation(fields: [releaseId], references: [id], onDelete: Cascade)
+  analytics       DistributionAnalytics[]
+  
+  @@map("dsp_distributions")
+}
+
+model DistributionAnalytics {
+  id              String   @id @default(cuid())
+  distributionId  String
+  date            DateTime
+  streams         Int      @default(0)
+  downloads       Int      @default(0)
+  revenue         Float    @default(0)
+  listeners       Int      @default(0)
+  countries       Json?    // Country-wise data
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  distribution    DSPDistribution @relation(fields: [distributionId], references: [id], onDelete: Cascade)
+  
+  @@map("distribution_analytics")
+}
+
 enum ReleaseType {
   SINGLE
   EP
@@ -42,4 +90,13 @@ enum Status {
   READY
   PROCESSING
   LIVE
+}
+
+enum DistributionStatus {
+  PENDING
+  SUBMITTED
+  PROCESSING
+  LIVE
+  REJECTED
+  FAILED
 }

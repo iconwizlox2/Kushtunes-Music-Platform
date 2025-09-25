@@ -1,55 +1,159 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
+import { randomUUID } from 'crypto';
+
+const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
-    const file = formData.get('file') as File;
-    const type = formData.get('type') as string; // 'audio' or 'artwork'
+    const audioFile = formData.get('audio') as File;
+    const artworkFile = formData.get('artwork') as File;
+    const title = formData.get('title') as string;
+    const artist = formData.get('artist') as string;
+    const genre = formData.get('genre') as string;
+    const language = formData.get('language') as string;
+    const releaseDate = formData.get('releaseDate') as string;
+    const releaseType = formData.get('releaseType') as string || 'SINGLE';
 
-    if (!file) {
+    if (!audioFile || !artworkFile || !title || !artist) {
       return NextResponse.json(
-        { success: false, message: 'No file provided' },
+        { success: false, message: 'Missing required fields' },
         { status: 400 }
       );
     }
 
-    // Mock file validation
-    const maxSize = type === 'audio' ? 500 * 1024 * 1024 : 10 * 1024 * 1024; // 500MB for audio, 10MB for artwork
-    const allowedTypes = type === 'audio' 
-      ? ['audio/wav', 'audio/flac', 'audio/mpeg'] 
-      : ['image/jpeg', 'image/png'];
+    // Generate unique IDs
+    const releaseId = randomUUID();
+    const audioId = randomUUID();
+    const artworkId = randomUUID();
 
-    if (file.size > maxSize) {
-      return NextResponse.json(
-        { success: false, message: `File too large. Maximum size: ${type === 'audio' ? '500MB' : '10MB'}` },
-        { status: 400 }
-      );
-    }
+    // In a real implementation, you would upload to S3/Backblaze here
+    // For now, we'll simulate the upload process
+    const audioUrl = `https://kushtunes-storage.com/audio/${audioId}.${audioFile.name.split('.').pop()}`;
+    const artworkUrl = `https://kushtunes-storage.com/artwork/${artworkId}.${artworkFile.name.split('.').pop()}`;
 
-    if (!allowedTypes.includes(file.type)) {
-      return NextResponse.json(
-        { success: false, message: `Invalid file type. Allowed: ${allowedTypes.join(', ')}` },
-        { status: 400 }
-      );
-    }
+    // Generate ISRC and UPC codes
+    const isrc = `USRC${Date.now().toString().slice(-8)}`;
+    const upc = `${Math.floor(Math.random() * 900000000000) + 100000000000}`;
 
-    // Mock file upload - in production, upload to cloud storage
-    const fileId = `file_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const uploadResult = {
-      id: fileId,
-      filename: file.name,
-      size: file.size,
-      type: file.type,
-      url: `https://storage.kushtunes.com/${fileId}`,
-      uploadedAt: new Date().toISOString()
-    };
+    // Create release in database
+    const release = await prisma.release.create({
+      data: {
+        id: releaseId,
+        title,
+        artist,
+        type: releaseType as any,
+        status: 'READY',
+        plannedAt: releaseDate ? new Date(releaseDate) : new Date(),
+        coverUrl: artworkUrl,
+        audioUrl,
+        genre,
+        language,
+        releaseDate: releaseDate ? new Date(releaseDate) : new Date(),
+        isrc,
+        upc
+      }
+    });
 
-    return NextResponse.json({ success: true, data: uploadResult });
+    // Create track record
+    await prisma.track.create({
+      data: {
+        id: audioId,
+        releaseId,
+        title,
+        isrc,
+        audioUrl,
+        duration: Math.floor(Math.random() * 300) + 120 // Random duration 2-7 minutes
+      }
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: 'Release uploaded successfully',
+      data: {
+        releaseId: release.id,
+        title: release.title,
+        artist: release.artist,
+        status: release.status,
+        audioUrl: release.audioUrl,
+        coverUrl: release.coverUrl,
+        isrc: release.isrc,
+        upc: release.upc,
+        uploadedAt: release.createdAt
+      }
+    });
+
   } catch (error) {
+    console.error('Upload error:', error);
     return NextResponse.json(
-      { success: false, message: 'File upload failed' },
+      { success: false, message: 'Upload failed. Please try again.' },
       { status: 500 }
     );
   }
 }
 
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const releaseId = searchParams.get('releaseId');
+
+    if (releaseId) {
+      // Get specific release
+      const release = await prisma.release.findUnique({
+        where: { id: releaseId },
+        include: {
+          tracks: true,
+          distributions: {
+            include: {
+              analytics: {
+                orderBy: { date: 'desc' },
+                take: 30
+              }
+            }
+          }
+        }
+      });
+
+      if (!release) {
+        return NextResponse.json(
+          { success: false, message: 'Release not found' },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json({
+        success: true,
+        data: release
+      });
+    } else {
+      // Get all releases
+      const releases = await prisma.release.findMany({
+        include: {
+          tracks: true,
+          distributions: {
+            include: {
+              analytics: {
+                orderBy: { date: 'desc' },
+                take: 7
+              }
+            }
+          }
+        },
+        orderBy: { createdAt: 'desc' }
+      });
+
+      return NextResponse.json({
+        success: true,
+        data: releases
+      });
+    }
+
+  } catch (error) {
+    console.error('Release fetch error:', error);
+    return NextResponse.json(
+      { success: false, message: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
