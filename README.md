@@ -223,7 +223,10 @@ For questions or support:
 ---
 
 **Built with ❤️ for music creators worldwide**  
-*From the Nile to the World* 🌍# Kushtunes-Music-Platform
-# Kushtunes-Music-Platform
-# Kushtunes-Music-Platform
-# Kushtunes-Music-Platform
+*From the Nile to the World* 🌍
+
+## 🔐 Google OAuth Integration
+- ✅ Google Sign-In enabled
+- ✅ NextAuth.js configured
+- ✅ Environment variables set
+- 🚀 Ready for deployment!
