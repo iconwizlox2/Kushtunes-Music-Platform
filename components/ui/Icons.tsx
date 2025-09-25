@@ -297,3 +297,11 @@ export function Cog6ToothIcon(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
+export function CalendarIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" {...props}>
+      <path fill="currentColor" d="M8 2a1 1 0 0 1 1 1v1h6V3a1 1 0 1 1 2 0v1h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2V3a1 1 0 0 1 1-1zM4 8v10h16V8H4z" />
+    </svg>
+  );
+}
+

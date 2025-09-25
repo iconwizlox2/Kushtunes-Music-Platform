@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { verifyToken, comparePassword, hashPassword } from '@/lib/auth';
+import { verifyToken, verifyPassword, hashPassword } from '@/lib/auth';
 import sharp from 'sharp';
 
 const prisma = new PrismaClient();
@@ -49,7 +49,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // Verify current password
-    const isCurrentPasswordValid = await comparePassword(currentPassword, user.password);
+    const isCurrentPasswordValid = await verifyPassword(currentPassword, user.password);
     if (!isCurrentPasswordValid) {
       return NextResponse.json(
         { success: false, message: 'Current password is incorrect' },
