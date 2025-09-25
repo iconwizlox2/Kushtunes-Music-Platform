@@ -1,12 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { ProfessionalLayout } from '@/components/ProfessionalLayout';
-import {
-  ProfessionalCard,
-  ProfessionalButton,
-  StatsCard
-} from '@/components/ProfessionalUI';
+import { useState, useEffect } from 'react';
 import {
   CloudArrowUpIcon,
   ChartBarIcon,
@@ -15,189 +10,204 @@ import {
   TrendingUpIcon,
   GlobeAltIcon,
   ShieldCheckIcon,
-  ClockIcon
+  ClockIcon,
+  SparklesIcon,
+  RocketLaunchIcon,
+  ArrowRightIcon
 } from '@/components/ui/Icons';
 
 export default function Home() {
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    setIsLoaded(true);
+  }, []);
+
   const features = [
     {
-      icon: <CloudArrowUpIcon className="h-8 w-8 text-blue-600" />,
-      title: "Easy Upload",
-      description: "Upload your music in minutes with our intuitive interface"
+      icon: <CloudArrowUpIcon className="h-8 w-8 text-premium-green" />,
+      title: "Lightning Upload",
+      description: "Upload your music in seconds with our AI-powered interface"
     },
     {
-      icon: <GlobeAltIcon className="h-8 w-8 text-green-600" />,
-      title: "Global Distribution",
-      description: "Reach 180+ platforms worldwide including Spotify, Apple Music, and more"
+      icon: <GlobeAltIcon className="h-8 w-8 text-premium-green" />,
+      title: "Global Reach",
+      description: "Distribute to 200+ platforms worldwide including Spotify, Apple Music, TikTok"
     },
     {
-      icon: <ChartBarIcon className="h-8 w-8 text-purple-600" />,
-      title: "Real-time Analytics",
-      description: "Track your streams, downloads, and revenue with detailed analytics"
+      icon: <ChartBarIcon className="h-8 w-8 text-premium-green" />,
+      title: "Smart Analytics",
+      description: "Real-time insights and AI-powered recommendations for your music"
     },
     {
-      icon: <ShieldCheckIcon className="h-8 w-8 text-red-600" />,
-      title: "Secure & Reliable",
-      description: "Your music is protected with industry-standard security measures"
+      icon: <ShieldCheckIcon className="h-8 w-8 text-premium-green" />,
+      title: "Blockchain Security",
+      description: "Your music is protected with cutting-edge blockchain technology"
     }
   ];
 
   const stats = [
-    { label: "Artists", value: "50,000+", icon: <MusicalNoteIcon className="h-6 w-6 text-blue-600" /> },
-    { label: "Releases", value: "1M+", icon: <PlayIcon className="h-6 w-6 text-green-600" /> },
-    { label: "Platforms", value: "180+", icon: <GlobeAltIcon className="h-6 w-6 text-purple-600" /> },
-    { label: "Countries", value: "200+", icon: <TrendingUpIcon className="h-6 w-6 text-orange-600" /> }
+    { label: "Artists", value: "100K+", icon: <MusicalNoteIcon className="h-6 w-6 text-premium-green" /> },
+    { label: "Releases", value: "2M+", icon: <PlayIcon className="h-6 w-6 text-premium-green" /> },
+    { label: "Platforms", value: "200+", icon: <GlobeAltIcon className="h-6 w-6 text-premium-green" /> },
+    { label: "Revenue", value: "$50M+", icon: <TrendingUpIcon className="h-6 w-6 text-premium-green" /> }
   ];
 
   return (
-    <ProfessionalLayout>
-      <div className="space-y-16">
-        {/* Hero Section */}
-        <div className="text-center py-16">
-          <div className="max-w-4xl mx-auto">
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-              Distribute Your Music
-              <span className="block text-blue-600">Worldwide</span>
-            </h1>
-            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-              Get your music on Spotify, Apple Music, and 180+ other platforms. 
-              Track your success with real-time analytics and get paid for every stream.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <ProfessionalButton variant="primary" size="lg" asChild>
-                <Link href="/upload">
-                  <CloudArrowUpIcon className="h-5 w-5 mr-2" />
-                  Start Uploading
-                </Link>
-              </ProfessionalButton>
-              <ProfessionalButton variant="outline" size="lg" asChild>
-                <Link href="/dashboard">
-                  <ChartBarIcon className="h-5 w-5 mr-2" />
-                  View Dashboard
-                </Link>
-              </ProfessionalButton>
+    <div className="min-h-screen bg-dark-bg text-white">
+      {/* Premium Hero Section */}
+      <section className="hero-premium relative min-h-screen flex items-center justify-center overflow-hidden">
+        <div className="container mx-auto px-6 py-20 text-center relative z-10">
+          <div className={`animate-fade-in ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
+            {/* Main Branding */}
+            <div className="mb-8">
+              <h1 className="text-6xl md:text-8xl font-bold mb-4 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                KUSHTUNES
+              </h1>
+              <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-2xl mx-auto">
+                Music meets the blockchain. Upload, distribute & earn with premium quality.
+              </p>
+            </div>
+
+            {/* Hero Visual */}
+            <div className="mb-12 relative">
+              <div className="w-32 h-32 mx-auto mb-8 relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-premium-green to-accent-green rounded-full opacity-20 blur-xl"></div>
+                <div className="relative z-10 w-full h-full bg-gradient-to-r from-premium-green to-accent-green rounded-full flex items-center justify-center">
+                  <MusicalNoteIcon className="h-16 w-16 text-black" />
+                </div>
+              </div>
+            </div>
+
+            {/* Call to Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
+              <Link href="/upload">
+                <button className="btn-premium px-8 py-4 text-lg font-semibold flex items-center gap-2">
+                  <CloudArrowUpIcon className="h-5 w-5" />
+                  Upload Music
+                </button>
+              </Link>
+              <Link href="/register">
+                <button className="btn-premium-outline px-8 py-4 text-lg font-semibold flex items-center gap-2">
+                  <SparklesIcon className="h-5 w-5" />
+                  Get Started
+                </button>
+              </Link>
+            </div>
+
+            {/* Learn More */}
+            <div className="mb-8">
+              <Link href="#features">
+                <button className="text-gray-400 hover:text-premium-green transition-colors flex items-center gap-2 mx-auto">
+                  <span>Learn How It Works</span>
+                  <ArrowRightIcon className="h-4 w-4" />
+                </button>
+              </Link>
             </div>
           </div>
         </div>
+      </section>
 
-        {/* Stats Section */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {stats.map((stat, index) => (
-            <StatsCard
-              key={index}
-              title={stat.label}
-              value={stat.value}
-              icon={stat.icon}
-            />
-          ))}
-        </div>
-
-        {/* Features Section */}
-        <div className="py-16">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Why Choose Kushtunes?
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              We provide everything you need to succeed in the music industry
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {features.map((feature, index) => (
-              <ProfessionalCard key={index} className="text-center">
-                <div className="flex justify-center mb-4">
-                  {feature.icon}
+      {/* Premium Stats Section */}
+      <section className="py-20 bg-gradient-to-b from-transparent to-card-bg">
+        <div className="container mx-auto px-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {stats.map((stat, index) => (
+              <div 
+                key={index}
+                className={`stats-premium text-center animate-fade-in ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <div className="flex justify-center mb-3">
+                  {stat.icon}
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  {feature.title}
-                </h3>
-                <p className="text-gray-600">
-                  {feature.description}
-                </p>
-              </ProfessionalCard>
+                <div className="text-3xl font-bold text-premium-green mb-1">{stat.value}</div>
+                <div className="text-gray-400 text-sm">{stat.label}</div>
+              </div>
             ))}
           </div>
         </div>
+      </section>
 
-        {/* How It Works */}
-        <div className="py-16 bg-gray-50 rounded-lg">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              How It Works
+      {/* Premium Features Section */}
+      <section id="features" className="py-20">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+              Why Choose <span className="text-premium-green">Kushtunes</span>?
             </h2>
-            <p className="text-lg text-gray-600">
-              Get your music distributed in just a few simple steps
+            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+              Experience the future of music distribution with our premium platform
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="mx-auto w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                <span className="text-xl font-bold text-blue-600">1</span>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {features.map((feature, index) => (
+              <div 
+                key={index}
+                className={`premium-card p-8 text-center animate-fade-in ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <div className="flex justify-center mb-6">
+                  {feature.icon}
+                </div>
+                <h3 className="text-xl font-semibold mb-4">{feature.title}</h3>
+                <p className="text-gray-400">{feature.description}</p>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Upload Your Music</h3>
-              <p className="text-gray-600">
-                Upload your audio files and cover art through our secure platform
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="mx-auto w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                <span className="text-xl font-bold text-blue-600">2</span>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">We Distribute</h3>
-              <p className="text-gray-600">
-                We send your music to all major streaming platforms and stores
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="mx-auto w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                <span className="text-xl font-bold text-blue-600">3</span>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Track & Get Paid</h3>
-              <p className="text-gray-600">
-                Monitor your success and receive payments for your streams
-              </p>
-            </div>
+            ))}
           </div>
         </div>
+      </section>
 
-        {/* CTA Section */}
-        <div className="text-center py-16">
-          <ProfessionalCard className="max-w-2xl mx-auto">
-            <div className="p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                Ready to Get Started?
-              </h2>
-              <p className="text-gray-600 mb-6">
-                Join thousands of artists who trust Kushtunes for their music distribution
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <ProfessionalButton variant="primary" size="lg" asChild>
-                  <Link href="/upload">
-                    <CloudArrowUpIcon className="h-5 w-5 mr-2" />
-                    Upload Your First Track
-                  </Link>
-                </ProfessionalButton>
-                <ProfessionalButton variant="outline" size="lg" asChild>
-                  <Link href="/dashboard">
-                    <ChartBarIcon className="h-5 w-5 mr-2" />
-                    View Analytics
-                  </Link>
-                </ProfessionalButton>
-              </div>
-            </div>
-          </ProfessionalCard>
-        </div>
-
-        {/* Footer */}
-        <div className="border-t border-gray-200 py-8">
-          <div className="text-center text-gray-600">
-            <p>&copy; 2024 Kushtunes. All rights reserved.</p>
-            <p className="mt-2 text-sm">
-              Professional music distribution platform for artists worldwide
+      {/* Premium CTA Section */}
+      <section className="py-20 bg-gradient-to-r from-premium-green/10 to-accent-green/10">
+        <div className="container mx-auto px-6 text-center">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+              Ready to <span className="text-premium-green">Launch</span> Your Music?
+            </h2>
+            <p className="text-xl text-gray-300 mb-12">
+              Join thousands of artists who trust Kushtunes for their music distribution
             </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/register">
+                <button className="btn-premium px-8 py-4 text-lg font-semibold flex items-center gap-2">
+                  <RocketLaunchIcon className="h-5 w-5" />
+                  Start Your Journey
+                </button>
+              </Link>
+              <Link href="/upload">
+                <button className="btn-premium-outline px-8 py-4 text-lg font-semibold flex items-center gap-2">
+                  <PlayIcon className="h-5 w-5" />
+                  Upload Now
+                </button>
+              </Link>
+            </div>
           </div>
         </div>
-      </div>
-    </ProfessionalLayout>
+      </section>
+
+      {/* Premium Footer */}
+      <footer className="py-12 border-t border-gray-800">
+        <div className="container mx-auto px-6">
+          <div className="text-center">
+            <div className="text-2xl font-bold text-premium-green mb-4">KUSHTUNES</div>
+            <p className="text-gray-400 mb-6">From the Nile to the World</p>
+            <div className="flex justify-center gap-6">
+              <Link href="/login" className="text-gray-400 hover:text-premium-green transition-colors">
+                Sign In
+              </Link>
+              <Link href="/register" className="text-gray-400 hover:text-premium-green transition-colors">
+                Register
+              </Link>
+              <Link href="/upload" className="text-gray-400 hover:text-premium-green transition-colors">
+                Upload
+              </Link>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
   );
 }
