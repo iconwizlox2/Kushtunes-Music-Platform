@@ -169,7 +169,7 @@ function generateMockStreamData(releaseId: string | null, trackIds: string[], da
   const platforms = ['spotify', 'apple-music', 'youtube-music', 'amazon-music', 'deezer'];
   const countries = ['US', 'GB', 'CA', 'AU', 'DE', 'FR', 'IT', 'ES', 'NL', 'SE'];
   
-  const streamData = [];
+  const streamData: any[] = [];
   const startDate = dateFilter.gte || new Date(Date.now() - 90 * 24 * 60 * 60 * 1000); // 90 days ago
   const endDate = dateFilter.lte || new Date();
   
