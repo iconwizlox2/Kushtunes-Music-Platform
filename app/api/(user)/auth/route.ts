@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { email, username, password, firstName, lastName } = await request.json();
+    const { email, username, password, firstName, lastName, country, legalName } = await request.json();
 
     // Enhanced validation
     const validationErrors = validateRegistrationData({ email, username, password, firstName, lastName });
@@ -149,18 +149,39 @@ export async function POST(request: NextRequest) {
     // Hash password with higher salt rounds for better security
     const hashedPassword = await hashPassword(password);
 
-    // Create user
-    const user = await prisma.user.create({
-      data: {
-        email: email.toLowerCase(),
-        username: username ? username.toLowerCase() : null,
-        password: hashedPassword,
-        firstName: firstName || null,
-        lastName: lastName || null,
-        role: 'ARTIST',
-        isEmailVerified: false
+    // Create user and artist in transaction
+    const result = await prisma.$transaction(async (tx) => {
+      // Create user
+      const user = await tx.user.create({
+        data: {
+          email: email.toLowerCase(),
+          username: username ? username.toLowerCase() : null,
+          password: hashedPassword,
+          firstName: firstName || null,
+          lastName: lastName || null,
+          role: 'ARTIST',
+          isEmailVerified: false
+        }
+      });
+
+      // Create artist profile if country and legalName are provided
+      let artist = null;
+      if (country && legalName) {
+        artist = await tx.artist.create({
+          data: {
+            name: `${firstName || ''} ${lastName || ''}`.trim(),
+            legalName: legalName,
+            country: country,
+            email: email.toLowerCase(),
+            kycStatus: 'PENDING'
+          }
+        });
       }
+
+      return { user, artist };
     });
+
+    const user = result.user;
 
     // Generate JWT token
     const token = generateToken({
