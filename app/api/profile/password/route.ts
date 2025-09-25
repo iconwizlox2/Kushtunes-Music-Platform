@@ -49,6 +49,13 @@ export async function PUT(request: NextRequest) {
     }
 
     // Verify current password
+    if (!user.password) {
+      return NextResponse.json(
+        { success: false, message: 'No password set for this account' },
+        { status: 400 }
+      );
+    }
+    
     const isCurrentPasswordValid = await verifyPassword(currentPassword, user.password);
     if (!isCurrentPasswordValid) {
       return NextResponse.json(
