@@ -222,11 +222,11 @@ export async function POST(request: NextRequest) {
       message: 'Payout request submitted successfully',
       data: {
         payoutId: payout.id,
-        amount: formatCurrency(payout.amount, payout.currency),
-        fee: formatCurrency(payout.fee, payout.currency),
-        netAmount: formatCurrency(payout.netAmount, payout.currency),
+        amount: formatCurrency(payout.amount, 'USD'),
+        fee: formatCurrency(fee, 'USD'),
+        netAmount: formatCurrency(netAmount, 'USD'),
         status: getPayoutStatusText(payout.status),
-        requestedAt: payout.requestedAt,
+        requestedAt: payout.createdAt,
         estimatedProcessingTime: '3-5 business days'
       }
     });
