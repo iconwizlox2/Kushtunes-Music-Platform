@@ -151,7 +151,8 @@ export default function PrivacyPolicy() {
                 <p className="text-slate-700">
                   <strong>Email:</strong> privacy@kushtunes.com<br />
                   <strong>Address:</strong> Kushtunes Privacy Officer<br />
-                  <strong>Phone:</strong> +1 (555) 123-4567<br />
+                  456 Sunset Boulevard, Los Angeles, CA 90028<br />
+                  <strong>Phone:</strong> +1 (323) 555-0123<br />
                   <strong>Data Protection Officer:</strong> dpo@kushtunes.com
                 </p>
               </div>

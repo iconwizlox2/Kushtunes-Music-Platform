@@ -21,6 +21,7 @@ Allow: /terms
 Allow: /privacy
 Allow: /dmca
 Allow: /analytics
+Allow: /support
 Allow: /artist/*
 
 # Sitemap location

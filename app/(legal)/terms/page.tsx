@@ -139,7 +139,8 @@ export default function TermsOfService() {
                 <p className="text-slate-700">
                   <strong>Email:</strong> legal@kushtunes.com<br />
                   <strong>Address:</strong> Kushtunes Legal Department<br />
-                  <strong>Phone:</strong> +1 (555) 123-4567
+                  456 Sunset Boulevard, Los Angeles, CA 90028<br />
+                  <strong>Phone:</strong> +1 (323) 555-0123
                 </p>
               </div>
             </section>

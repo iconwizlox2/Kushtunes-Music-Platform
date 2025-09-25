@@ -1,6 +1,7 @@
 "use client";
 
 import Link from 'next/link';
+import Head from 'next/head';
 import { MusicalNoteIcon, GlobeAltIcon, ChartBarIcon, ShieldCheckIcon, ArrowRightIcon, UsersIcon, PhotoIcon, PlayIcon, CurrencyDollarIcon, EyeIcon } from '@/components/ui/Icons';
 import { useEffect, useState } from 'react';
 import Header from '@/components/Header';
@@ -69,6 +70,30 @@ export default function Home() {
 
   return (
     <>
+      <Head>
+        <title>Kushtunes - Music Distribution Platform | Distribute Worldwide</title>
+        <meta name="description" content="Distribute your music worldwide with Kushtunes. Industry-low 10% commission, no setup fees, no annual contracts. Upload to Spotify, Apple Music, Amazon Music and more." />
+        <meta name="keywords" content="music distribution, Spotify, Apple Music, Amazon Music, music streaming, independent artists, music royalties" />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://kushtunes.com/" />
+        <meta property="og:title" content="Kushtunes - Music Distribution Platform" />
+        <meta property="og:description" content="Distribute your music worldwide with Kushtunes. Industry-low 10% commission, no setup fees, no annual contracts." />
+        <meta property="og:image" content="https://kushtunes.com/og-image.jpg" />
+        
+        {/* Twitter */}
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content="https://kushtunes.com/" />
+        <meta property="twitter:title" content="Kushtunes - Music Distribution Platform" />
+        <meta property="twitter:description" content="Distribute your music worldwide with Kushtunes. Industry-low 10% commission, no setup fees, no annual contracts." />
+        <meta property="twitter:image" content="https://kushtunes.com/og-image.jpg" />
+        
+        {/* Additional SEO */}
+        <meta name="robots" content="index, follow" />
+        <meta name="author" content="Kushtunes" />
+        <link rel="canonical" href="https://kushtunes.com/" />
+      </Head>
       <Header />
       <div className="min-h-screen bg-white">
         {/* Hero Section */}

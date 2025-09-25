@@ -1,5 +1,23 @@
 export const dynamic = "force-static";
 
+export const metadata = {
+  title: "Analytics - Kushtunes Music Distribution",
+  description: "Track your music performance with detailed analytics. View streams, revenue, and audience insights across all platforms.",
+  keywords: "music analytics, streaming analytics, music revenue, Spotify analytics, Apple Music analytics",
+  openGraph: {
+    title: "Analytics - Kushtunes Music Distribution",
+    description: "Track your music performance with detailed analytics. View streams, revenue, and audience insights across all platforms.",
+    url: "https://kushtunes.com/analytics",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Analytics - Kushtunes Music Distribution",
+    description: "Track your music performance with detailed analytics. View streams, revenue, and audience insights across all platforms.",
+  },
+  robots: "index, follow",
+};
+
 export default function AnalyticsComingSoon() {
   return (
     <main style={{maxWidth:880,margin:"48px auto",padding:"0 16px",fontFamily:"system-ui"}}>
