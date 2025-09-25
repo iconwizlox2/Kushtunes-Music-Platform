@@ -3,6 +3,7 @@ import "./globals.css";
 import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
 import { NotificationSystem } from "@/components/NotificationSystem";
 import { AppProvider } from "@/lib/store";
+import { Providers } from "@/components/Providers";
 
 export const metadata: Metadata = {
   title: "Kushtunes — From the Nile to the World",
@@ -48,13 +49,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="msapplication-tap-highlight" content="no" />
       </head>
       <body className="min-h-dvh bg-black text-white antialiased">
-        <AppProvider>
-          <div className="flex min-h-dvh flex-col">
-            {children}
-          </div>
-          <ServiceWorkerRegistration />
-          <NotificationSystem />
-        </AppProvider>
+        <Providers>
+          <AppProvider>
+            <div className="flex min-h-dvh flex-col">
+              {children}
+            </div>
+            <ServiceWorkerRegistration />
+            <NotificationSystem />
+          </AppProvider>
+        </Providers>
       </body>
     </html>
   );
