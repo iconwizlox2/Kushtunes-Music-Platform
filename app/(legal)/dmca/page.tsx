@@ -84,12 +84,12 @@ export default function DMCA() {
                 <h3 className="text-lg font-semibold text-slate-900 mb-3">Designated Copyright Agent</h3>
                 <p className="text-slate-700 mb-2">
                   <strong>Name:</strong> Kushtunes Copyright Agent<br />
-                  <strong>Email:</strong> copyright@kushtunes.com<br />
-                  <strong>Phone:</strong> +1 (555) 123-4567<br />
+                  <strong>Email:</strong> dmca@kushtunes.com<br />
+                  <strong>Phone:</strong> +1 (323) 555-0123<br />
                   <strong>Address:</strong><br />
                   Kushtunes Copyright Department<br />
-                  123 Music Street<br />
-                  Los Angeles, CA 90210<br />
+                  456 Sunset Boulevard<br />
+                  Los Angeles, CA 90028<br />
                   United States
                 </p>
                 <p className="text-sm text-slate-600 mt-4">

@@ -28,9 +28,9 @@ export default function Home() {
     },
     {
       icon: <CurrencyDollarIcon className="h-12 w-12 text-white" />,
-      title: "Keep 100%",
-      description: "All the royalties you earn go straight into your pocket.",
-      highlight: "We believe artists should stay independent and keep complete control"
+      title: "Clear Pricing",
+      description: "Simple plan with industry-low 10% commission on royalties—no setup fees, no annual contracts.",
+      highlight: "Distribute worldwide with transparent pricing and no hidden fees"
     },
     {
       icon: <ChartBarIcon className="h-12 w-12 text-white" />,
@@ -96,7 +96,7 @@ export default function Home() {
               </h1>
               
               <p className="text-2xl md:text-3xl text-white/80 mb-16 animate-fade-in max-w-4xl mx-auto leading-relaxed font-light">
-                Upload to all the biggest platforms, access our industry tools & keep <span className="font-bold text-white">100%</span> of your royalties.
+                Upload to all the biggest platforms, access our industry tools with an <span className="font-bold text-white">industry-low 10% commission</span> on royalties.
               </p>
               
               <div className="flex flex-col sm:flex-row justify-center gap-8 animate-fade-in-up mb-20">
@@ -176,7 +176,7 @@ export default function Home() {
                   <MusicalNoteIcon className="h-8 w-8 text-white" />
                 </div>
                 <h3 className="text-3xl font-black text-gray-900 mb-4">STARTER</h3>
-                <p className="text-gray-600 mb-8 text-lg">Upload as much music as you like to every music platform and keep 100% of your royalties.</p>
+                <p className="text-gray-600 mb-8 text-lg">Upload as much music as you like to every music platform with our industry-low 10% commission.</p>
                 <div className="text-6xl font-black text-gray-900 mb-8">$0<span className="text-2xl text-gray-500">/year</span></div>
                 <ul className="text-left space-y-4 mb-12">
                   <li className="flex items-center text-gray-700">
@@ -185,7 +185,7 @@ export default function Home() {
                   </li>
                   <li className="flex items-center text-gray-700">
                     <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
-                    Keep 100% royalties
+                    10% commission on royalties
                   </li>
                   <li className="flex items-center text-gray-700">
                     <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
