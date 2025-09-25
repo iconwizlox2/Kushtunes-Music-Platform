@@ -151,6 +151,14 @@ export async function PUT(request: NextRequest) {
     const token = generateToken({
       id: user.id,
       email: user.email,
+      username: user.username,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      bio: user.bio,
+      website: user.website,
+      location: user.location,
+      avatar: user.avatar,
+      isEmailVerified: user.isEmailVerified,
       role: user.role
     });
 
