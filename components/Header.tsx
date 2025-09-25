@@ -95,6 +95,18 @@ export default function Header() {
               <span className="relative z-10">Earnings</span>
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </Link>
+            <Link href="/statements" className="px-4 py-2 text-gray-700 hover:text-blue-600 font-semibold transition-all duration-300 rounded-xl hover:bg-blue-50 relative group">
+              <span className="relative z-10">Statements</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            </Link>
+            <Link href="/payouts" className="px-4 py-2 text-gray-700 hover:text-blue-600 font-semibold transition-all duration-300 rounded-xl hover:bg-blue-50 relative group">
+              <span className="relative z-10">Payouts</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            </Link>
+            <Link href="/settings" className="px-4 py-2 text-gray-700 hover:text-blue-600 font-semibold transition-all duration-300 rounded-xl hover:bg-blue-50 relative group">
+              <span className="relative z-10">Settings</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            </Link>
             <Link href="/marketing" className="px-4 py-2 text-gray-700 hover:text-blue-600 font-semibold transition-all duration-300 rounded-xl hover:bg-blue-50 relative group">
               <span className="relative z-10">Marketing</span>
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -222,6 +234,36 @@ export default function Header() {
                   <MusicalNoteIcon className="h-4 w-4 text-white" />
                 </div>
                 <span>Earnings</span>
+              </Link>
+              <Link 
+                href="/statements" 
+                className="px-4 py-3 text-gray-700 hover:text-blue-600 font-semibold transition-all duration-300 rounded-xl hover:bg-blue-50 flex items-center space-x-3"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                  <MusicalNoteIcon className="h-4 w-4 text-white" />
+                </div>
+                <span>Statements</span>
+              </Link>
+              <Link 
+                href="/payouts" 
+                className="px-4 py-3 text-gray-700 hover:text-blue-600 font-semibold transition-all duration-300 rounded-xl hover:bg-blue-50 flex items-center space-x-3"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <div className="w-8 h-8 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-lg flex items-center justify-center">
+                  <MusicalNoteIcon className="h-4 w-4 text-white" />
+                </div>
+                <span>Payouts</span>
+              </Link>
+              <Link 
+                href="/settings" 
+                className="px-4 py-3 text-gray-700 hover:text-blue-600 font-semibold transition-all duration-300 rounded-xl hover:bg-blue-50 flex items-center space-x-3"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <div className="w-8 h-8 bg-gradient-to-br from-gray-500 to-slate-500 rounded-lg flex items-center justify-center">
+                  <Cog6ToothIcon className="h-4 w-4 text-white" />
+                </div>
+                <span>Settings</span>
               </Link>
               <Link 
                 href="/marketing" 
