@@ -1,13 +1,5 @@
 import { cookies } from "next/headers";
-
-export function requireUser() {
-  // Replace with NextAuth/Clerk/etc. as needed.
-  const jar = cookies();
-  const sid = jar.get("session")?.value;
-  if (!sid) throw new UnauthorizedError("Missing session");
-  // You might decode the cookie to a user id/email here.
-  return { userId: "demo-user-001", email: "artist@example.com" };
-}
+import { prisma } from "./db";
 
 export class UnauthorizedError extends Error {}
 export class BadRequestError extends Error {}
@@ -26,4 +18,28 @@ export function onError(e: unknown) {
   if (e instanceof NotFoundError) return json({ error: e.message }, 404);
   console.error(e);
   return json({ error: "Internal Server Error" }, 500);
+}
+
+/**
+ * Replace with NextAuth/Clerk/etc. This demo:
+ * - reads "session" cookie
+ * - if present, upserts a demo artist record (so DB writes work right away)
+ */
+export async function requireArtist() {
+  const sid = cookies().get("session")?.value;
+  if (!sid) throw new UnauthorizedError("Missing session");
+
+  // DEMO: tie the cookie to a deterministic email
+  const email = `artist+${sid}@example.com`;
+  const artist = await prisma.artist.upsert({
+    where: { email },
+    update: {},
+    create: { 
+      name: "Demo Artist", 
+      legalName: "Demo Artist Legal Name",
+      email, 
+      country: "GB" 
+    },
+  });
+  return artist; // { id, name, email, ... }
 }

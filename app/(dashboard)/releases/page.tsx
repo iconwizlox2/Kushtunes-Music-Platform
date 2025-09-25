@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { siteUrl } from "@/lib/env";
+import { prisma } from "@/lib/db";
+import { requireArtist } from "@/lib/api";
 
 export const metadata: Metadata = {
   title: "Releases",
@@ -13,11 +15,24 @@ type ReleaseRow = {
 };
 
 async function fetchReleases(): Promise<ReleaseRow[]> {
-  // TODO: API
-  return [
-    { id: "rel_abc", upc: "012345678901", title: "Midnight Drive", primaryArtist: "Your Artist", releaseDate: "2025-10-20", status: "submitted" },
-    { id: "rel_def", upc: null, title: "Rain City EP", primaryArtist: "Your Artist", releaseDate: "2025-08-15", status: "live" }
-  ];
+  // If you protect this page with middleware, you can rely on session cookie
+  const artist = await requireArtist();
+  const rows = await prisma.release.findMany({
+    where: { primaryArtistId: artist.id },
+    orderBy: { createdAt: "desc" },
+    select: {
+      id: true, upc: true, title: true, releaseDate: true, status: true,
+      primaryArtist: { select: { name: true } },
+    },
+  });
+  return rows.map(r => ({
+    id: r.id,
+    upc: r.upc,
+    title: r.title,
+    primaryArtist: r.primaryArtist.name,
+    releaseDate: r.releaseDate.toISOString().slice(0,10),
+    status: r.status as any,
+  }));
 }
 
 export default async function ReleasesPage() {

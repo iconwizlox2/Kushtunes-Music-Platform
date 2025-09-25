@@ -1,25 +1,18 @@
-import { BadRequestError, json, onError, requireUser } from "@/lib/api";
+import { json, onError, requireArtist } from "@/lib/api";
+import { parseJsonOrForm, payoutMethodSchema } from "@/lib/validators";
+import { prisma } from "@/lib/db";
 
 export async function POST(req: Request) {
   try {
-    const { userId } = requireUser();
-    const ct = req.headers.get("content-type") || "";
-    let method: "stripe"|"paypal"|"crypto" | undefined;
+    const artist = await requireArtist();
+    const { method } = await parseJsonOrForm(req, payoutMethodSchema);
 
-    if (ct.includes("application/json")) {
-      const b = await req.json();
-      method = b.method;
-    } else {
-      const fd = await req.formData();
-      method = fd.get("method") as any;
-    }
+    await prisma.artist.update({
+      where: { id: artist.id },
+      data: { payoutMethod: method },
+    });
 
-    if (!["stripe","paypal","crypto"].includes(method as any)) {
-      throw new BadRequestError("Invalid method");
-    }
-
-    // TODO: persist payout method
-    return json({ ok: true, userId, method });
+    return json({ ok: true, method });
   } catch (e) {
     return onError(e);
   }

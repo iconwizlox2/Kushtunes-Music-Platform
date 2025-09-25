@@ -1,19 +1,38 @@
-import { BadRequestError, json, onError, requireUser, NotFoundError } from "@/lib/api";
+import { json, onError, requireArtist, NotFoundError } from "@/lib/api";
+import { prisma } from "@/lib/db";
 
 export async function POST(_req: Request, ctx: { params: { id: string } }) {
   try {
-    const { userId } = requireUser();
-    const releaseId = ctx.params.id;
-    if (!releaseId) throw new BadRequestError("Missing release id");
+    const artist = await requireArtist();
+    const { id } = ctx.params;
 
-    // TODO: verify ownership: release belongs to userId; fetch from DB
-    const exists = true; // mock
-    if (!exists) throw new NotFoundError("Release not found");
+    const release = await prisma.release.findFirst({
+      where: { id, primaryArtistId: artist.id },
+      select: { id: true, status: true },
+    });
+    if (!release) throw new NotFoundError("Release not found");
 
-    // TODO: enqueue resubmission job (QC + delivery)
-    const jobId = `job_resubmit_${Date.now()}`;
+    // Example: set status back to 'queued' and create a Delivery row for ALL
+    await prisma.release.update({
+      where: { id: release.id },
+      data: { status: "UNDER_REVIEW" },
+    });
+    await prisma.delivery.create({
+      data: { releaseId: release.id, store: "ALL", status: "PENDING", message: "Resubmission requested" },
+    });
 
-    return json({ ok: true, jobId, releaseId, userId });
+    // Audit
+    const log = await prisma.auditLog.create({
+      data: {
+        artistId: artist.id,
+        action: "release.resubmit",
+        entity: "release",
+        entityId: release.id,
+        newValues: {},
+      },
+    });
+
+    return json({ ok: true, jobId: log.id });
   } catch (e) {
     return onError(e);
   }

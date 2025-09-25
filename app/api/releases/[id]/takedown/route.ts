@@ -1,19 +1,35 @@
-import { BadRequestError, json, onError, requireUser, NotFoundError } from "@/lib/api";
+import { json, onError, requireArtist, NotFoundError } from "@/lib/api";
+import { prisma } from "@/lib/db";
 
 export async function POST(_req: Request, ctx: { params: { id: string } }) {
   try {
-    const { userId } = requireUser();
-    const releaseId = ctx.params.id;
-    if (!releaseId) throw new BadRequestError("Missing release id");
+    const artist = await requireArtist();
+    const { id } = ctx.params;
 
-    // TODO: verify ownership and current status
-    const exists = true; // mock
-    if (!exists) throw new NotFoundError("Release not found");
+    const release = await prisma.release.findFirst({
+      where: { id, primaryArtistId: artist.id },
+      select: { id: true, status: true },
+    });
+    if (!release) throw new NotFoundError("Release not found");
 
-    // TODO: create takedown request in DB / call distributor
-    const ticketId = `tk_${Date.now()}`;
+    await prisma.release.update({
+      where: { id: release.id },
+      data: { status: "REJECTED" },
+    });
+    await prisma.delivery.create({
+      data: { releaseId: release.id, store: "ALL", status: "REJECTED", message: "Takedown requested" },
+    });
 
-    return json({ ok: true, ticketId, releaseId, userId });
+    await prisma.auditLog.create({
+      data: {
+        artistId: artist.id,
+        action: "release.takedown",
+        entity: "release",
+        entityId: release.id,
+      },
+    });
+
+    return json({ ok: true });
   } catch (e) {
     return onError(e);
   }

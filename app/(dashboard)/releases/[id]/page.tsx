@@ -1,5 +1,7 @@
 import type { Metadata, ResolvingMetadata } from "next";
 import { siteUrl } from "@/lib/env";
+import { prisma } from "@/lib/db";
+import { requireArtist } from "@/lib/api";
 
 type Delivery = { store: string; status: "queued"|"sent"|"ingested"|"live"|"error"|"takedown"; message?: string; link?: string };
 type Track = { trackNumber: number; title: string; isrc?: string | null; explicit?: boolean };
@@ -10,16 +12,33 @@ type Release = {
 };
 
 async function fetchRelease(id: string): Promise<Release | null> {
-  // TODO: API call to your backend
+  const artist = await requireArtist();
+  const r = await prisma.release.findFirst({
+    where: { id, primaryArtistId: artist.id },
+    include: {
+      Tracks: { select: { trackNumber: true, title: true, isrc: true, explicit: true } },
+      Deliveries: { select: { store: true, status: true, message: true } },
+      primaryArtist: { select: { name: true } },
+    },
+  });
+  if (!r) return null;
   return {
-    id, title: "Midnight Drive", primaryArtist: "Your Artist", upc: "012345678901",
-    releaseDate: "2025-10-20", coverUrl: "/cover-sample.jpg", status: "submitted",
-    tracks: [{ trackNumber: 1, title: "Midnight Drive", isrc: "GBABC25001", explicit: false }],
-    deliveries: [
-      { store: "Spotify", status: "sent" },
-      { store: "Apple Music", status: "queued" },
-      { store: "YouTube", status: "queued" }
-    ]
+    id: r.id,
+    title: r.title,
+    primaryArtist: r.primaryArtist.name,
+    upc: r.upc,
+    releaseDate: r.releaseDate.toISOString().slice(0,10),
+    coverUrl: r.coverUrl,
+    status: r.status,
+    tracks: r.Tracks.map(t => ({
+      trackNumber: t.trackNumber,
+      title: t.title,
+      isrc: t.isrc,
+      explicit: t.explicit,
+    })),
+    deliveries: r.Deliveries.map(d => ({
+      store: d.store, status: d.status as any, message: d.message ?? undefined
+    })),
   };
 }
 

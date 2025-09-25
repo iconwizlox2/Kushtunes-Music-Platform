@@ -1,30 +1,31 @@
-import { BadRequestError, json, onError, requireUser } from "@/lib/api";
+import { BadRequestError, json, onError, requireArtist } from "@/lib/api";
+import { prisma } from "@/lib/db";
 
-export const runtime = "nodejs"; // ensure Node runtime for file handling
+export const runtime = "nodejs";
 
 export async function POST(req: Request) {
   try {
-    const { userId } = requireUser();
+    const artist = await requireArtist();
     const fd = await req.formData();
     const file = fd.get("kycFile");
+    if (!(file instanceof File)) throw new BadRequestError("kycFile is required");
+    if (file.size > 10 * 1024 * 1024) throw new BadRequestError("File too large (max 10MB)");
 
-    if (!(file instanceof File)) {
-      throw new BadRequestError("kycFile is required");
-    }
-    if (file.size > 10 * 1024 * 1024) {
-      throw new BadRequestError("File too large (max 10MB)");
-    }
-    if (!/\.(pdf|jpg|jpeg|png)$/i.test((file as any).name || "")) {
-      // Some runtimes don't expose name; keep it soft
-    }
+    // TODO: upload to storage (S3/R2) and capture URL
+    const storageUrl = `uploaded://${Date.now()}-${(file as any).name ?? "kyc"}`;
 
-    // TODO: stream file to your storage (S3/R2/etc.)
-    // const arrayBuffer = await file.arrayBuffer();
+    // Save as an audit log so you can track review in admin
+    const log = await prisma.auditLog.create({
+      data: {
+        artistId: artist.id,
+        action: "kyc.upload",
+        entity: "artist",
+        entityId: artist.id,
+        newValues: { storageUrl, size: file.size, type: (file as any).type ?? null },
+      },
+    });
 
-    const ticketId = `kyc_${Date.now()}`;
-    // TODO: create KYC review ticket in DB
-
-    return json({ ok: true, ticketId, userId });
+    return json({ ok: true, ticketId: log.id });
   } catch (e) {
     return onError(e);
   }
