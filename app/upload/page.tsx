@@ -2,16 +2,6 @@
 
 import { useState, useRef } from 'react';
 import Link from 'next/link';
-import { ProfessionalLayout } from '@/components/ProfessionalLayout';
-import {
-  ProfessionalCard,
-  ProfessionalButton,
-  FileUpload,
-  ProgressBar,
-  Alert,
-  LoadingSpinner
-} from '@/components/ProfessionalUI';
-import DSPDistribution from '@/components/DSPDistribution';
 import {
   CloudArrowUpIcon,
   ArrowLeftIcon,
@@ -19,12 +9,12 @@ import {
   ExclamationTriangleIcon,
   PhotoIcon,
   PlayIcon,
-  PauseIcon,
-  TrashIcon,
   MusicalNoteIcon,
   GlobeAltIcon,
-  PlusIcon
+  PlusIcon,
+  TrashIcon
 } from '@/components/ui/Icons';
+import DSPDistribution from '@/components/DSPDistribution';
 
 interface Track {
   id: string;
@@ -104,191 +94,131 @@ export default function UploadPage() {
   };
 
   const removeTrack = (trackId: string) => {
-    if (state.tracks.length <= 1) return; // Don't allow removing the last track
-    setState(prev => ({
-      ...prev,
-      tracks: prev.tracks.filter(track => track.id !== trackId)
-    }));
+    if (state.tracks.length > 1) {
+      setState(prev => ({
+        ...prev,
+        tracks: prev.tracks.filter(track => track.id !== trackId)
+      }));
+    }
   };
 
-  const updateTrack = (trackId: string, field: keyof Track, value: any) => {
+  const updateTrack = (trackId: string, updates: Partial<Track>) => {
     setState(prev => ({
       ...prev,
-      tracks: prev.tracks.map(track => 
-        track.id === trackId ? { ...track, [field]: value } : track
+      tracks: prev.tracks.map(track =>
+        track.id === trackId ? { ...track, ...updates } : track
       )
     }));
   };
 
   const handleTrackAudioFile = (trackId: string, file: File) => {
     const validation = validateAudioFile(file);
-    updateTrack(trackId, 'audioFile', file);
-    updateTrack(trackId, 'validation', validation);
+    updateTrack(trackId, { audioFile: file, validation });
   };
 
   const handleTrackTitleChange = (trackId: string, title: string) => {
-    updateTrack(trackId, 'title', title);
+    updateTrack(trackId, { title });
   };
 
   // File validation functions
   const validateAudioFile = (file: File) => {
-    const maxSize = 50 * 1024 * 1024; // 50MB (standard limit)
-    const allowedTypes = ['audio/mpeg', 'audio/wav', 'audio/flac', 'audio/mp3'];
-    
-    if (file.size > maxSize) {
-      return { valid: false, error: 'Audio file too large. Maximum size: 50MB' };
+    const MAX_AUDIO_SIZE = 50 * 1024 * 1024; // 50MB
+    const ALLOWED_AUDIO_TYPES = ['audio/mpeg', 'audio/wav', 'audio/flac'];
+
+    if (!ALLOWED_AUDIO_TYPES.includes(file.type)) {
+      return { valid: false, error: 'Please upload MP3, WAV, or FLAC files only' };
     }
-    
-    if (!allowedTypes.includes(file.type)) {
-      return { valid: false, error: 'Invalid audio format. Allowed: MP3, WAV, FLAC' };
+
+    if (file.size > MAX_AUDIO_SIZE) {
+      return { valid: false, error: 'File size must be less than 50MB' };
     }
-    
+
     return { valid: true };
   };
 
   const validateImageFile = (file: File) => {
-    const maxSize = 2 * 1024 * 1024; // 2MB (standard cover art limit)
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-    
-    if (file.size > maxSize) {
-      return { valid: false, error: 'Cover art too large. Maximum size: 2MB' };
+    const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB
+    const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      return { valid: false, error: 'Please upload JPG, PNG, or WebP files only' };
     }
-    
-    if (!allowedTypes.includes(file.type)) {
-      return { valid: false, error: 'Invalid image format. Allowed: JPEG, PNG, WebP' };
+
+    if (file.size > MAX_IMAGE_SIZE) {
+      return { valid: false, error: 'File size must be less than 2MB' };
     }
-    
+
     return { valid: true };
   };
 
   const handleArtworkFile = (file: File) => {
     const validation = validateImageFile(file);
-    setState(prev => ({ 
-      ...prev, 
-      artworkFile: file, 
-      error: null,
-      fileValidation: { ...prev.fileValidation, artwork: validation }
+    setState(prev => ({
+      ...prev,
+      artworkFile: file,
+      fileValidation: {
+        ...prev.fileValidation,
+        artwork: validation
+      }
     }));
   };
 
   const handleMetadataChange = (field: string, value: string) => {
     setState(prev => ({
       ...prev,
-      metadata: { ...prev.metadata, [field]: value }
+      metadata: {
+        ...prev.metadata,
+        [field]: value
+      }
     }));
   };
 
   const handleUpload = async () => {
-    // Validate files
-    if (!state.artworkFile) {
-      setState(prev => ({ ...prev, error: 'Please upload artwork file' }));
-      return;
-    }
-
-    if (!state.fileValidation.artwork.valid) {
-      setState(prev => ({ ...prev, error: 'Please fix artwork validation errors before uploading' }));
-      return;
-    }
-
-    // Validate tracks
-    const hasValidTracks = state.tracks.every(track => 
-      track.audioFile && track.validation.valid && track.title.trim()
-    );
-
-    if (!hasValidTracks) {
-      setState(prev => ({ ...prev, error: 'Please upload audio files and add titles for all tracks' }));
-      return;
-    }
-
-    if (!state.metadata.title || !state.metadata.artist) {
-      setState(prev => ({ ...prev, error: 'Please fill in all required fields' }));
-      return;
-    }
-
-    setState(prev => ({ 
-      ...prev, 
-      isProcessing: true, 
-      step: 3, 
-      progress: 0,
-      uploadProgress: { audio: 0, artwork: 0, processing: 0 }
-    }));
+    setState(prev => ({ ...prev, isProcessing: true, error: null }));
 
     try {
       const formData = new FormData();
       
-      // Add artwork
-      formData.append('artwork', state.artworkFile);
-      
-      // Add release metadata
-      formData.append('title', state.metadata.title);
-      formData.append('artist', state.metadata.artist);
-      formData.append('type', state.metadata.type);
-      formData.append('genre', state.metadata.genre);
-      formData.append('language', state.metadata.language);
-      formData.append('releaseDate', state.metadata.releaseDate);
-      
       // Add tracks
       state.tracks.forEach((track, index) => {
         if (track.audioFile) {
-          formData.append(`track_${index}_audio`, track.audioFile);
+          formData.append(`track_${index}`, track.audioFile);
           formData.append(`track_${index}_title`, track.title);
         }
       });
-      
-      formData.append('trackCount', state.tracks.length.toString());
 
-      // Simulate upload progress
-      const progressInterval = setInterval(() => {
-        setState(prev => {
-          const newProgress = prev.progress + Math.random() * 10;
-          const audioProgress = Math.min(prev.uploadProgress.audio + Math.random() * 5, 100);
-          const artworkProgress = Math.min(prev.uploadProgress.artwork + Math.random() * 5, 100);
-          const processingProgress = Math.min(prev.uploadProgress.processing + Math.random() * 3, 100);
-          
-          if (newProgress >= 100) {
-            clearInterval(progressInterval);
-            return { 
-              ...prev, 
-              progress: 100, 
-              step: 4,
-              uploadProgress: { audio: 100, artwork: 100, processing: 100 }
-            };
-          }
-          
-          return { 
-            ...prev, 
-            progress: newProgress,
-            uploadProgress: { audio: audioProgress, artwork: artworkProgress, processing: processingProgress }
-          };
-        });
-      }, 300);
+      // Add artwork
+      if (state.artworkFile) {
+        formData.append('artwork', state.artworkFile);
+      }
 
-      // Make actual API call
+      // Add metadata
+      formData.append('title', state.metadata.title);
+      formData.append('artist', state.metadata.artist);
+      formData.append('releaseDate', state.metadata.releaseDate);
+      formData.append('genre', state.metadata.genre);
+      formData.append('language', state.metadata.language);
+      formData.append('type', state.metadata.type);
+      formData.append('userId', 'demo-user-id');
+
       const response = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
       });
 
-      const result = await response.json();
-
-      if (result.success) {
-        setState(prev => ({
-          ...prev,
-          progress: 100,
-          step: 4,
-          isProcessing: false,
-          uploadProgress: { audio: 100, artwork: 100, processing: 100 }
-        }));
-      } else {
-        throw new Error(result.message || 'Upload failed');
+      if (!response.ok) {
+        throw new Error('Upload failed');
       }
 
+      const result = await response.json();
+      console.log('Upload successful:', result);
+      
+      setState(prev => ({ ...prev, step: 4, isProcessing: false }));
     } catch (error) {
       setState(prev => ({
         ...prev,
-        error: error instanceof Error ? error.message : 'Upload failed. Please try again.',
-        isProcessing: false,
-        step: 2
+        error: error instanceof Error ? error.message : 'Upload failed',
+        isProcessing: false
       }));
     }
   };
@@ -298,280 +228,248 @@ export default function UploadPage() {
       case 1:
         return (
           <div className="space-y-8">
-            <div className="text-center">
-              <div className="mx-auto h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                <CloudArrowUpIcon className="h-6 w-6 text-blue-600" />
+            {/* Release Type Selection */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                <MusicalNoteIcon className="h-5 w-5 mr-2 text-primary-blue" />
+                Release Type
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {[
+                  { type: 'SINGLE', label: 'Single', description: '1 track', icon: MusicalNoteIcon },
+                  { type: 'EP', label: 'EP', description: '2-6 tracks', icon: GlobeAltIcon },
+                  { type: 'ALBUM', label: 'Album', description: '7+ tracks', icon: GlobeAltIcon }
+                ].map(({ type, label, description, icon: Icon }) => (
+                  <div
+                    key={type}
+                    className={`p-6 rounded-xl border-2 cursor-pointer transition-all duration-200 hover:shadow-lg ${
+                      state.metadata.type === type
+                        ? 'border-primary-blue bg-blue-50'
+                        : 'border-gray-200 bg-white hover:border-gray-300'
+                    }`}
+                    onClick={() => handleMetadataChange('type', type)}
+                  >
+                    <div className="text-center">
+                      <Icon className={`h-8 w-8 mx-auto mb-3 ${
+                        state.metadata.type === type ? 'text-primary-blue' : 'text-gray-400'
+                      }`} />
+                      <h4 className="font-semibold text-gray-900">{label}</h4>
+                      <p className="text-sm text-gray-600">{description}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
-              <h2 className="text-2xl font-bold text-gray-900">Upload Your Music</h2>
-              <p className="text-gray-600 mt-2">Get your music distributed to 180+ platforms worldwide</p>
             </div>
 
-            <div className="space-y-6">
-              {/* Release Type Selection */}
-              <ProfessionalCard>
-                <div className="flex items-center mb-4">
-                  <MusicalNoteIcon className="h-5 w-5 text-blue-600 mr-2" />
-                  <h3 className="text-lg font-medium text-gray-900">Release Type</h3>
-                </div>
-                <div className="grid grid-cols-3 gap-4">
-                  {(['SINGLE', 'EP', 'ALBUM'] as const).map((type) => (
-                    <button
-                      key={type}
-                      onClick={() => handleMetadataChange('type', type)}
-                      className={`p-4 rounded-lg border-2 transition-all ${
-                        state.metadata.type === type
-                          ? 'border-blue-500 bg-blue-50 text-blue-700'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <div className="text-center">
-                        <div className="text-2xl mb-2">
-                          {type === 'SINGLE' ? '🎵' : type === 'EP' ? '📀' : '💿'}
-                        </div>
-                        <div className="font-medium">{type}</div>
-                        <div className="text-xs text-gray-500 mt-1">
-                          {type === 'SINGLE' ? '1 track' : type === 'EP' ? '2-6 tracks' : '7+ tracks'}
-                        </div>
+            {/* Tracks Section */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                  <PlayIcon className="h-5 w-5 mr-2 text-primary-blue" />
+                  Tracks ({state.tracks.length})
+                </h3>
+                <button
+                  onClick={addTrack}
+                  className="btn-primary flex items-center"
+                >
+                  <PlusIcon className="h-4 w-4 mr-1" />
+                  Add Track
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                {state.tracks.map((track, index) => (
+                  <div key={track.id} className="card">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="font-medium text-gray-900">Track {index + 1}</h4>
+                      {state.tracks.length > 1 && (
+                        <button
+                          onClick={() => removeTrack(track.id)}
+                          className="text-red-500 hover:text-red-700 p-1"
+                        >
+                          <TrashIcon className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Track Title *
+                        </label>
+                        <input
+                          type="text"
+                          value={track.title}
+                          onChange={(e) => handleTrackTitleChange(track.id, e.target.value)}
+                          placeholder="Enter track title"
+                          className="form-input"
+                        />
                       </div>
-                    </button>
-                  ))}
-                </div>
-              </ProfessionalCard>
 
-              {/* Tracks Section */}
-              <ProfessionalCard>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center">
-                    <PlayIcon className="h-5 w-5 text-blue-600 mr-2" />
-                    <h3 className="text-lg font-medium text-gray-900">Tracks ({state.tracks.length})</h3>
-                  </div>
-                  <ProfessionalButton
-                    variant="outline"
-                    size="sm"
-                    onClick={addTrack}
-                    disabled={state.tracks.length >= 20}
-                  >
-                    <PlusIcon className="h-4 w-4 mr-1" />
-                    Add Track
-                  </ProfessionalButton>
-                </div>
-
-                <div className="space-y-4">
-                  {state.tracks.map((track, index) => (
-                    <div key={track.id} className="p-4 border border-gray-200 rounded-lg">
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="font-medium text-gray-900">Track {index + 1}</h4>
-                        {state.tracks.length > 1 && (
-                          <ProfessionalButton
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeTrack(track.id)}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Audio File *
+                        </label>
+                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary-blue transition-colors">
+                          <CloudArrowUpIcon className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                          <p className="text-gray-600 mb-2">
+                            Drop files here, or <span className="text-primary-blue font-medium">browse</span>
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            .mp3, .wav, .flac (max 50MB)
+                          </p>
+                          <input
+                            type="file"
+                            accept="audio/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleTrackAudioFile(track.id, file);
+                            }}
+                            className="hidden"
+                            id={`audio-${track.id}`}
+                          />
+                          <label
+                            htmlFor={`audio-${track.id}`}
+                            className="btn-secondary mt-4 cursor-pointer"
                           >
-                            <TrashIcon className="h-4 w-4" />
-                          </ProfessionalButton>
+                            Choose File
+                          </label>
+                        </div>
+                        {track.audioFile && (
+                          <p className="text-sm text-green-600 mt-2">
+                            ✓ {track.audioFile.name}
+                          </p>
+                        )}
+                        {!track.validation.valid && (
+                          <p className="text-sm text-red-600 mt-2">
+                            {track.validation.error}
+                          </p>
                         )}
                       </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Track Title *
-                          </label>
-                          <input
-                            type="text"
-                            value={track.title}
-                            onChange={(e) => handleTrackTitleChange(track.id, e.target.value)}
-                            className="form-input"
-                            placeholder="Enter track title"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Audio File *
-                          </label>
-                          <FileUpload
-                            onFileSelect={(file) => handleTrackAudioFile(track.id, file)}
-                            accept=".mp3,.wav,.flac"
-                            maxSize={50}
-                          />
-                        </div>
-                      </div>
-
-                      {!track.validation.valid && (
-                        <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
-                          <div className="flex items-center">
-                            <ExclamationTriangleIcon className="h-4 w-4 text-red-500 mr-2" />
-                            <p className="text-sm text-red-700">{track.validation.error}</p>
-                          </div>
-                        </div>
-                      )}
-
-                      {track.audioFile && track.validation.valid && (
-                        <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center">
-                              <MusicalNoteIcon className="h-5 w-5 text-green-600 mr-2" />
-                              <div>
-                                <p className="text-sm font-medium text-gray-900">{track.audioFile.name}</p>
-                                <p className="text-xs text-gray-500">
-                                  {(track.audioFile.size / (1024 * 1024)).toFixed(2)} MB
-                                </p>
-                              </div>
-                            </div>
-                            <ProfessionalButton
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => updateTrack(track.id, 'audioFile', null)}
-                            >
-                              <TrashIcon className="h-4 w-4" />
-                            </ProfessionalButton>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </ProfessionalCard>
-
-              {/* Artwork Upload */}
-              <ProfessionalCard>
-                <div className="flex items-center mb-4">
-                  <PhotoIcon className="h-5 w-5 text-blue-600 mr-2" />
-                  <h3 className="text-lg font-medium text-gray-900">Cover Art</h3>
-                </div>
-                <FileUpload
-                  onFileSelect={handleArtworkFile}
-                  accept=".jpg,.jpeg,.png,.webp"
-                  maxSize={2}
-                />
-                <div className="mt-2 text-sm text-gray-500">
-                  <p>📏 <strong>Standard Requirements:</strong></p>
-                  <ul className="mt-1 ml-4 space-y-1">
-                    <li>• Square aspect ratio (1:1)</li>
-                    <li>• Minimum 3000x3000 pixels</li>
-                    <li>• Maximum 2MB file size</li>
-                    <li>• JPEG, PNG, or WebP format</li>
-                  </ul>
-                </div>
-                {!state.fileValidation.artwork.valid && (
-                  <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
-                    <div className="flex items-center">
-                      <ExclamationTriangleIcon className="h-4 w-4 text-red-500 mr-2" />
-                      <p className="text-sm text-red-700">{state.fileValidation.artwork.error}</p>
                     </div>
                   </div>
-                )}
-                {state.artworkFile && state.fileValidation.artwork.valid && (
-                  <div className="mt-4">
-                    <img
-                      src={URL.createObjectURL(state.artworkFile)}
-                      alt="Cover art preview"
-                      className="w-full h-48 object-cover rounded-lg"
-                    />
-                    <div className="mt-2 flex items-center justify-between">
-                      <p className="text-sm text-gray-600">{state.artworkFile.name}</p>
-                      <ProfessionalButton
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setState(prev => ({ ...prev, artworkFile: null }))}
-                      >
-                        <TrashIcon className="h-4 w-4" />
-                      </ProfessionalButton>
-                    </div>
-                  </div>
-                )}
-              </ProfessionalCard>
+                ))}
+              </div>
             </div>
 
-            <div className="flex justify-center">
-              <ProfessionalButton
-                variant="primary"
-                size="lg"
+            {/* Cover Art Section */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                <PhotoIcon className="h-5 w-5 mr-2 text-primary-blue" />
+                Cover Art
+              </h3>
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary-blue transition-colors">
+                <PhotoIcon className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                <p className="text-gray-600 mb-2">
+                  Drop files here, or <span className="text-primary-blue font-medium">browse</span>
+                </p>
+                <p className="text-sm text-gray-500">
+                  .jpg, .jpeg, .png, .webp (max 2MB)
+                </p>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleArtworkFile(file);
+                  }}
+                  className="hidden"
+                  id="artwork"
+                />
+                <label
+                  htmlFor="artwork"
+                  className="btn-secondary mt-4 cursor-pointer"
+                >
+                  Choose File
+                </label>
+              </div>
+              {state.artworkFile && (
+                <p className="text-sm text-green-600">
+                  ✓ {state.artworkFile.name}
+                </p>
+              )}
+              {!state.fileValidation.artwork.valid && (
+                <p className="text-sm text-red-600">
+                  {state.fileValidation.artwork.error}
+                </p>
+              )}
+            </div>
+
+            <div className="flex justify-end">
+              <button
                 onClick={() => setState(prev => ({ ...prev, step: 2 }))}
-                disabled={
-                  !state.artworkFile || 
-                  !state.tracks.some(track => track.audioFile && track.validation.valid)
-                }
+                disabled={!state.tracks.some(t => t.audioFile && t.title)}
+                className="btn-primary"
               >
                 Continue to Metadata
-              </ProfessionalButton>
+              </button>
             </div>
           </div>
         );
 
       case 2:
         return (
-          <div className="space-y-8">
-            <div className="text-center">
-              <div className="mx-auto h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                <MusicalNoteIcon className="h-6 w-6 text-blue-600" />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900">Release Information</h2>
-              <p className="text-gray-600 mt-2">Provide details about your release</p>
-            </div>
-
-            <div className="max-w-2xl mx-auto space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Release Title *
-                  </label>
-                  <input
-                    type="text"
-                    value={state.metadata.title}
-                    onChange={(e) => handleMetadataChange('title', e.target.value)}
-                    className="form-input"
-                    placeholder="Enter release title"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Artist Name *
-                  </label>
-                  <input
-                    type="text"
-                    value={state.metadata.artist}
-                    onChange={(e) => handleMetadataChange('artist', e.target.value)}
-                    className="form-input"
-                    placeholder="Enter artist name"
-                  />
-                </div>
+          <div className="space-y-6">
+            <h3 className="text-xl font-semibold text-gray-900 mb-6">Release Information</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Release Title *
+                </label>
+                <input
+                  type="text"
+                  value={state.metadata.title}
+                  onChange={(e) => handleMetadataChange('title', e.target.value)}
+                  placeholder="Enter release title"
+                  className="form-input"
+                />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Release Date
-                  </label>
-                  <input
-                    type="date"
-                    value={state.metadata.releaseDate}
-                    onChange={(e) => handleMetadataChange('releaseDate', e.target.value)}
-                    className="form-input"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Genre
-                  </label>
-                  <select
-                    value={state.metadata.genre}
-                    onChange={(e) => handleMetadataChange('genre', e.target.value)}
-                    className="form-input"
-                  >
-                    <option value="">Select genre</option>
-                    <option value="pop">Pop</option>
-                    <option value="rock">Rock</option>
-                    <option value="hip-hop">Hip-Hop</option>
-                    <option value="electronic">Electronic</option>
-                    <option value="jazz">Jazz</option>
-                    <option value="classical">Classical</option>
-                    <option value="country">Country</option>
-                    <option value="r&b">R&B</option>
-                    <option value="reggae">Reggae</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Artist Name *
+                </label>
+                <input
+                  type="text"
+                  value={state.metadata.artist}
+                  onChange={(e) => handleMetadataChange('artist', e.target.value)}
+                  placeholder="Enter artist name"
+                  className="form-input"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Release Date *
+                </label>
+                <input
+                  type="date"
+                  value={state.metadata.releaseDate}
+                  onChange={(e) => handleMetadataChange('releaseDate', e.target.value)}
+                  className="form-input"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Genre
+                </label>
+                <select
+                  value={state.metadata.genre}
+                  onChange={(e) => handleMetadataChange('genre', e.target.value)}
+                  className="form-input"
+                >
+                  <option value="">Select genre</option>
+                  <option value="Pop">Pop</option>
+                  <option value="Rock">Rock</option>
+                  <option value="Hip-Hop">Hip-Hop</option>
+                  <option value="Electronic">Electronic</option>
+                  <option value="Jazz">Jazz</option>
+                  <option value="Classical">Classical</option>
+                  <option value="Country">Country</option>
+                  <option value="R&B">R&B</option>
+                </select>
               </div>
 
               <div>
@@ -584,128 +482,90 @@ export default function UploadPage() {
                   className="form-input"
                 >
                   <option value="">Select language</option>
-                  <option value="en">English</option>
-                  <option value="es">Spanish</option>
-                  <option value="fr">French</option>
-                  <option value="de">German</option>
-                  <option value="it">Italian</option>
-                  <option value="pt">Portuguese</option>
-                  <option value="ar">Arabic</option>
-                  <option value="zh">Chinese</option>
-                  <option value="ja">Japanese</option>
-                  <option value="ko">Korean</option>
+                  <option value="English">English</option>
+                  <option value="Spanish">Spanish</option>
+                  <option value="French">French</option>
+                  <option value="German">German</option>
+                  <option value="Italian">Italian</option>
+                  <option value="Portuguese">Portuguese</option>
+                  <option value="Other">Other</option>
                 </select>
               </div>
             </div>
 
-            <div className="flex justify-center space-x-4">
-              <ProfessionalButton
-                variant="outline"
+            <div className="flex justify-between">
+              <button
                 onClick={() => setState(prev => ({ ...prev, step: 1 }))}
+                className="btn-secondary"
               >
-                Back
-              </ProfessionalButton>
-              <ProfessionalButton
-                variant="primary"
-                onClick={handleUpload}
-                disabled={!state.metadata.title || !state.metadata.artist}
+                Back to Files
+              </button>
+              <button
+                onClick={() => setState(prev => ({ ...prev, step: 3 }))}
+                disabled={!state.metadata.title || !state.metadata.artist || !state.metadata.releaseDate}
+                className="btn-primary"
               >
-                Upload Release
-              </ProfessionalButton>
+                Continue to Processing
+              </button>
             </div>
           </div>
         );
 
       case 3:
         return (
-          <div className="text-center space-y-8">
-            <div className="mx-auto h-16 w-16 bg-yellow-100 rounded-full flex items-center justify-center">
-              <ExclamationTriangleIcon className="h-8 w-8 text-yellow-600" />
+          <div className="text-center space-y-6">
+            <div className="w-16 h-16 bg-primary-blue rounded-full flex items-center justify-center mx-auto">
+              <CheckCircleIcon className="h-8 w-8 text-white" />
             </div>
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">Processing Your Release</h2>
-              <p className="text-gray-600 mt-2">We're preparing your music for distribution</p>
-            </div>
-            
-            {/* Enhanced Progress Tracking */}
-            <div className="max-w-md mx-auto space-y-4">
-              <div className="space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Audio Upload</span>
-                  <span className="text-gray-900">{Math.round(state.uploadProgress.audio)}%</span>
-                </div>
-                <ProgressBar progress={state.uploadProgress.audio} />
-              </div>
-              
-              <div className="space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Image Processing</span>
-                  <span className="text-gray-900">{Math.round(state.uploadProgress.artwork)}%</span>
-                </div>
-                <ProgressBar progress={state.uploadProgress.artwork} />
-              </div>
-              
-              <div className="space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Database Processing</span>
-                  <span className="text-gray-900">{Math.round(state.uploadProgress.processing)}%</span>
-                </div>
-                <ProgressBar progress={state.uploadProgress.processing} />
-              </div>
-              
-              <div className="pt-4 border-t">
-                <div className="flex justify-between text-sm font-medium">
-                  <span className="text-gray-600">Overall Progress</span>
-                  <span className="text-blue-600">{Math.round(state.progress)}%</span>
-                </div>
-                <ProgressBar progress={state.progress} />
-              </div>
-            </div>
-            
-            <div className="text-sm text-gray-500">
-              {state.progress < 30 && "Uploading files..."}
-              {state.progress >= 30 && state.progress < 70 && "Processing metadata..."}
-              {state.progress >= 70 && state.progress < 100 && "Finalizing release..."}
-              {state.progress === 100 && "Complete!"}
+            <h3 className="text-xl font-semibold text-gray-900">Ready to Upload</h3>
+            <p className="text-gray-600 max-w-md mx-auto">
+              Your release is ready for distribution. Click the button below to upload your music to all platforms.
+            </p>
+            <div className="flex justify-center">
+              <button
+                onClick={handleUpload}
+                disabled={state.isProcessing}
+                className="btn-primary"
+              >
+                {state.isProcessing ? 'Uploading...' : 'Upload & Distribute'}
+              </button>
             </div>
           </div>
         );
 
       case 4:
         return (
-          <div className="space-y-8">
-            <div className="text-center">
-              <div className="mx-auto h-12 w-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                <CheckCircleIcon className="h-6 w-6 text-green-600" />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900">Release Uploaded Successfully!</h2>
-              <p className="text-gray-600 mt-2">Now choose how to distribute your music to 100+ platforms</p>
+          <div className="space-y-6">
+            <h3 className="text-xl font-semibold text-gray-900">Distribution</h3>
+            <DSPDistribution />
+            <div className="flex justify-end">
+              <button
+                onClick={() => setState(prev => ({ ...prev, step: 5 }))}
+                className="btn-primary"
+              >
+                Complete Upload
+              </button>
             </div>
-            
-            <DSPDistribution 
-              releaseId={`release_${Date.now()}`}
-              onDistributionComplete={() => setState(prev => ({ ...prev, step: 5 }))}
-            />
           </div>
         );
 
       case 5:
         return (
-          <div className="text-center space-y-8">
-            <div className="mx-auto h-16 w-16 bg-green-100 rounded-full flex items-center justify-center">
-              <GlobeAltIcon className="h-8 w-8 text-green-600" />
+          <div className="text-center space-y-6">
+            <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto">
+              <CheckCircleIcon className="h-8 w-8 text-white" />
             </div>
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">Distribution Complete!</h2>
-              <p className="text-gray-600 mt-2">Your music is now being distributed to all selected platforms</p>
-            </div>
+            <h3 className="text-xl font-semibold text-gray-900">Upload Complete!</h3>
+            <p className="text-gray-600 max-w-md mx-auto">
+              Your music has been successfully uploaded and is being distributed to all platforms. You'll receive an email confirmation shortly.
+            </p>
             <div className="flex justify-center space-x-4">
-              <ProfessionalButton variant="primary" asChild>
-                <Link href="/dashboard">View Dashboard</Link>
-              </ProfessionalButton>
-              <ProfessionalButton variant="outline" onClick={() => window.location.reload()}>
+              <Link href="/dashboard" className="btn-primary">
+                View Dashboard
+              </Link>
+              <Link href="/upload" className="btn-secondary">
                 Upload Another
-              </ProfessionalButton>
+              </Link>
             </div>
           </div>
         );
@@ -716,11 +576,11 @@ export default function UploadPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen clean-bg-gray">
       <div className="max-w-4xl mx-auto p-6">
         {/* Header */}
         <div className="mb-8">
-          <Link href="/dashboard" className="inline-flex items-center text-primary-blue hover:text-primary-blue/80 transition-colors mb-4">
+          <Link href="/dashboard" className="inline-flex items-center text-primary-blue hover:text-primary-blue-dark transition-colors mb-4">
             <ArrowLeftIcon className="h-4 w-4 mr-2" />
             Back to Dashboard
           </Link>
@@ -735,7 +595,7 @@ export default function UploadPage() {
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
                   state.step > index + 1
-                    ? 'bg-accent-green text-white'
+                    ? 'bg-green-500 text-white'
                     : state.step === index + 1
                       ? 'bg-primary-blue text-white'
                       : 'bg-gray-200 text-gray-600'
@@ -746,7 +606,7 @@ export default function UploadPage() {
               <span className="ml-2 text-sm font-medium text-gray-700">{step}</span>
               {index < 4 && (
                 <div className={`w-16 h-0.5 mx-4 ${
-                  state.step > index + 1 ? 'bg-accent-green' : 'bg-gray-200'
+                  state.step > index + 1 ? 'bg-green-500' : 'bg-gray-200'
                 }`} />
               )}
             </div>
