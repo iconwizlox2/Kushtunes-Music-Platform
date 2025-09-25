@@ -72,7 +72,7 @@ export default function Home() {
       <Header />
       <div className="min-h-screen bg-white">
         {/* Hero Section */}
-        <section className="relative py-32 px-4 overflow-hidden bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 min-h-screen flex items-center">
+        <section className="relative pt-32 pb-32 px-4 overflow-hidden bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 min-h-screen flex items-center">
           {/* Animated Background Elements */}
           <div className="absolute inset-0">
             <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>

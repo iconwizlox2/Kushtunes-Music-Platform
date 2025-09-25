@@ -692,3 +692,74 @@ html, body {
     border-color: rgba(59, 130, 246, 0.3);
   }
 }
+
+/* Premium Header Styles */
+.header-glass {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.header-transparent {
+  background: transparent;
+}
+
+.header-nav-item {
+  position: relative;
+  overflow: hidden;
+}
+
+.header-nav-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+  transition: left 0.5s;
+}
+
+.header-nav-item:hover::before {
+  left: 100%;
+}
+
+/* Mobile menu animations */
+.mobile-menu-enter {
+  animation: slideDown 0.3s ease-out;
+}
+
+.mobile-menu-exit {
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+/* Logo glow effect */
+.logo-glow {
+  filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.3));
+}
+
+.logo-glow:hover {
+  filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.5));
+}
