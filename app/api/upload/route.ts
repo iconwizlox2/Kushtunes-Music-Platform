@@ -185,10 +185,7 @@ export async function POST(request: NextRequest) {
             isrc,
             audioUrl: `https://kushtunes-storage.com/audio/${trackId}.${track.audioFile.name.split('.').pop()}`,
             duration: audioMetadata.duration || 180,
-            language: metadata.language,
-            bitrate: audioMetadata.bitrate,
-            sampleRate: audioMetadata.sampleRate,
-            channels: audioMetadata.channels
+            language: metadata.language
           }
         });
         
@@ -196,7 +193,14 @@ export async function POST(request: NextRequest) {
       }
 
       // Calculate release duration
-      const totalDuration = calculateReleaseDuration(trackRecords.map(t => ({ duration: t.duration })));
+      const totalDuration = calculateReleaseDuration(trackRecords.map(t => ({
+        id: t.id,
+        title: t.title,
+        trackNumber: t.trackNumber,
+        duration: t.duration,
+        filePath: t.audioUrl,
+        isrc: t.isrc || undefined
+      })));
 
       return NextResponse.json({
         success: true,
@@ -298,7 +302,14 @@ export async function GET(request: NextRequest) {
       }
 
       // Calculate release analytics
-      const totalDuration = calculateReleaseDuration(release.tracks.map(t => ({ duration: t.duration })));
+      const totalDuration = calculateReleaseDuration(release.tracks.map(t => ({
+        id: t.id,
+        title: t.title,
+        trackNumber: t.trackNumber,
+        duration: t.duration,
+        filePath: t.audioUrl,
+        isrc: t.isrc || undefined
+      })));
 
       return NextResponse.json({
         success: true,
@@ -307,7 +318,6 @@ export async function GET(request: NextRequest) {
           summary: {
             trackCount: release.tracks.length,
             totalDuration: formatDuration(totalDuration),
-            releaseType: release.releaseType || 'SINGLE'
           },
           tracks: release.tracks.map(track => ({
             ...track,
@@ -332,14 +342,20 @@ export async function GET(request: NextRequest) {
 
       // Add summary data to each release
       const releasesWithSummary = releases.map(release => {
-        const totalDuration = calculateReleaseDuration(release.tracks.map(t => ({ duration: t.duration })));
+        const totalDuration = calculateReleaseDuration(release.tracks.map(t => ({
+          id: t.id,
+          title: t.title,
+          trackNumber: t.trackNumber,
+          duration: t.duration,
+          filePath: t.audioUrl,
+          isrc: t.isrc || undefined
+        })));
         
         return {
           ...release,
           summary: {
             trackCount: release.tracks.length,
             totalDuration: formatDuration(totalDuration),
-            releaseType: release.releaseType || 'SINGLE'
           },
           tracks: release.tracks.map(track => ({
             ...track,
