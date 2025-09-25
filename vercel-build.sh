@@ -9,6 +9,6 @@ npx prisma generate
 
 # Build with custom Next.js configuration that skips build traces
 echo "🏗️ Building with custom configuration..."
-NODE_OPTIONS="--max-old-space-size=4096" npx next build --no-lint
+NODE_OPTIONS="--max-old-space-size=8192" NEXT_DISABLE_BUILD_TRACE=1 npx next build --no-lint --no-mangling
 
 echo "✅ Custom build complete!"
