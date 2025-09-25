@@ -1,8 +1,53 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { randomUUID } from 'crypto';
+import sharp from 'sharp';
 
 const prisma = new PrismaClient();
+
+// File size limits (in bytes)
+const MAX_AUDIO_SIZE = 100 * 1024 * 1024; // 100MB
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024;  // 10MB
+
+// Allowed file types
+const ALLOWED_AUDIO_TYPES = ['audio/mpeg', 'audio/wav', 'audio/flac', 'audio/mp3'];
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+
+// Validate file type and size
+function validateFile(file: File, type: 'audio' | 'image') {
+  const maxSize = type === 'audio' ? MAX_AUDIO_SIZE : MAX_IMAGE_SIZE;
+  const allowedTypes = type === 'audio' ? ALLOWED_AUDIO_TYPES : ALLOWED_IMAGE_TYPES;
+  
+  if (file.size > maxSize) {
+    return {
+      valid: false,
+      error: `File too large. Maximum size: ${type === 'audio' ? '100MB' : '10MB'}`
+    };
+  }
+  
+  if (!allowedTypes.includes(file.type)) {
+    return {
+      valid: false,
+      error: `Invalid file type. Allowed: ${allowedTypes.join(', ')}`
+    };
+  }
+  
+  return { valid: true };
+}
+
+// Optimize image
+async function optimizeImage(buffer: Buffer): Promise<Buffer> {
+  return await sharp(buffer)
+    .resize(3000, 3000, { 
+      fit: 'inside',
+      withoutEnlargement: true 
+    })
+    .jpeg({ 
+      quality: 90,
+      progressive: true 
+    })
+    .toBuffer();
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,15 +68,40 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate audio file
+    const audioValidation = validateFile(audioFile, 'audio');
+    if (!audioValidation.valid) {
+      return NextResponse.json(
+        { success: false, message: audioValidation.error },
+        { status: 400 }
+      );
+    }
+
+    // Validate artwork file
+    const imageValidation = validateFile(artworkFile, 'image');
+    if (!imageValidation.valid) {
+      return NextResponse.json(
+        { success: false, message: imageValidation.error },
+        { status: 400 }
+      );
+    }
+
     // Generate unique IDs
     const releaseId = randomUUID();
     const audioId = randomUUID();
     const artworkId = randomUUID();
 
-    // In a real implementation, you would upload to S3/Backblaze here
-    // For now, we'll simulate the upload process
+    // Process and optimize image
+    const imageBuffer = Buffer.from(await artworkFile.arrayBuffer());
+    const optimizedImage = await optimizeImage(imageBuffer);
+    
+    // Convert audio file to buffer
+    const audioBuffer = Buffer.from(await audioFile.arrayBuffer());
+
+    // In production, you would upload to cloud storage here
+    // For now, we'll simulate the upload process with proper URLs
     const audioUrl = `https://kushtunes-storage.com/audio/${audioId}.${audioFile.name.split('.').pop()}`;
-    const artworkUrl = `https://kushtunes-storage.com/artwork/${artworkId}.${artworkFile.name.split('.').pop()}`;
+    const artworkUrl = `https://kushtunes-storage.com/artwork/${artworkId}.jpg`;
 
     // Generate ISRC and UPC codes
     const isrc = `USRC${Date.now().toString().slice(-8)}`;
@@ -81,7 +151,13 @@ export async function POST(request: NextRequest) {
         coverUrl: release.coverUrl,
         isrc: release.isrc,
         upc: release.upc,
-        uploadedAt: release.createdAt
+        uploadedAt: release.createdAt,
+        fileInfo: {
+          audioSize: audioFile.size,
+          imageSize: optimizedImage.length,
+          audioType: audioFile.type,
+          imageType: 'image/jpeg'
+        }
       }
     });
 

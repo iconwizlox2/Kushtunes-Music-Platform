@@ -39,6 +39,15 @@ interface UploadState {
   progress: number;
   isProcessing: boolean;
   error: string | null;
+  uploadProgress: {
+    audio: number;
+    artwork: number;
+    processing: number;
+  };
+  fileValidation: {
+    audio: { valid: boolean; error?: string };
+    artwork: { valid: boolean; error?: string };
+  };
 }
 
 export default function UploadPage() {
@@ -55,18 +64,70 @@ export default function UploadPage() {
     },
     progress: 0,
     isProcessing: false,
-    error: null
+    error: null,
+    uploadProgress: {
+      audio: 0,
+      artwork: 0,
+      processing: 0,
+    },
+    fileValidation: {
+      audio: { valid: true },
+      artwork: { valid: true },
+    },
   });
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
+  // File validation functions
+  const validateAudioFile = (file: File) => {
+    const maxSize = 100 * 1024 * 1024; // 100MB
+    const allowedTypes = ['audio/mpeg', 'audio/wav', 'audio/flac', 'audio/mp3'];
+    
+    if (file.size > maxSize) {
+      return { valid: false, error: 'Audio file too large. Maximum size: 100MB' };
+    }
+    
+    if (!allowedTypes.includes(file.type)) {
+      return { valid: false, error: 'Invalid audio format. Allowed: MP3, WAV, FLAC' };
+    }
+    
+    return { valid: true };
+  };
+
+  const validateImageFile = (file: File) => {
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    
+    if (file.size > maxSize) {
+      return { valid: false, error: 'Image too large. Maximum size: 10MB' };
+    }
+    
+    if (!allowedTypes.includes(file.type)) {
+      return { valid: false, error: 'Invalid image format. Allowed: JPEG, PNG, WebP' };
+    }
+    
+    return { valid: true };
+  };
+
   const handleAudioFile = (file: File) => {
-    setState(prev => ({ ...prev, audioFile: file, error: null }));
+    const validation = validateAudioFile(file);
+    setState(prev => ({ 
+      ...prev, 
+      audioFile: file, 
+      error: null,
+      fileValidation: { ...prev.fileValidation, audio: validation }
+    }));
   };
 
   const handleArtworkFile = (file: File) => {
-    setState(prev => ({ ...prev, artworkFile: file, error: null }));
+    const validation = validateImageFile(file);
+    setState(prev => ({ 
+      ...prev, 
+      artworkFile: file, 
+      error: null,
+      fileValidation: { ...prev.fileValidation, artwork: validation }
+    }));
   };
 
   const handleMetadataChange = (field: string, value: string) => {
@@ -88,8 +149,14 @@ export default function UploadPage() {
   };
 
   const handleUpload = async () => {
+    // Validate files
     if (!state.audioFile || !state.artworkFile) {
       setState(prev => ({ ...prev, error: 'Please upload both audio and artwork files' }));
+      return;
+    }
+
+    if (!state.fileValidation.audio.valid || !state.fileValidation.artwork.valid) {
+      setState(prev => ({ ...prev, error: 'Please fix file validation errors before uploading' }));
       return;
     }
 
@@ -98,28 +165,75 @@ export default function UploadPage() {
       return;
     }
 
-    setState(prev => ({ ...prev, isProcessing: true, step: 3, progress: 0 }));
+    setState(prev => ({ 
+      ...prev, 
+      isProcessing: true, 
+      step: 3, 
+      progress: 0,
+      uploadProgress: { audio: 0, artwork: 0, processing: 0 }
+    }));
 
     try {
-      // Simulate file upload progress
+      const formData = new FormData();
+      formData.append('audio', state.audioFile);
+      formData.append('artwork', state.artworkFile);
+      formData.append('title', state.metadata.title);
+      formData.append('artist', state.metadata.artist);
+      formData.append('genre', state.metadata.genre);
+      formData.append('language', state.metadata.language);
+      formData.append('releaseDate', state.metadata.releaseDate);
+      formData.append('releaseType', 'SINGLE');
+
+      // Simulate upload progress
       const progressInterval = setInterval(() => {
         setState(prev => {
-          const newProgress = prev.progress + Math.random() * 15;
+          const newProgress = prev.progress + Math.random() * 10;
+          const audioProgress = Math.min(prev.uploadProgress.audio + Math.random() * 5, 100);
+          const artworkProgress = Math.min(prev.uploadProgress.artwork + Math.random() * 5, 100);
+          const processingProgress = Math.min(prev.uploadProgress.processing + Math.random() * 3, 100);
+          
           if (newProgress >= 100) {
             clearInterval(progressInterval);
-            return { ...prev, progress: 100, step: 4 };
+            return { 
+              ...prev, 
+              progress: 100, 
+              step: 4,
+              uploadProgress: { audio: 100, artwork: 100, processing: 100 }
+            };
           }
-          return { ...prev, progress: newProgress };
+          
+          return { 
+            ...prev, 
+            progress: newProgress,
+            uploadProgress: { audio: audioProgress, artwork: artworkProgress, processing: processingProgress }
+          };
         });
-      }, 200);
+      }, 300);
 
-      // In a real app, you would upload files here
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      // Make actual API call
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setState(prev => ({
+          ...prev,
+          progress: 100,
+          step: 4,
+          isProcessing: false,
+          uploadProgress: { audio: 100, artwork: 100, processing: 100 }
+        }));
+      } else {
+        throw new Error(result.message || 'Upload failed');
+      }
 
     } catch (error) {
       setState(prev => ({
         ...prev,
-        error: 'Upload failed. Please try again.',
+        error: error instanceof Error ? error.message : 'Upload failed. Please try again.',
         isProcessing: false,
         step: 2
       }));
@@ -151,11 +265,19 @@ export default function UploadPage() {
                   accept=".mp3,.wav,.flac"
                   maxSize={100}
                 />
-                {state.audioFile && (
-                  <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                {!state.fileValidation.audio.valid && (
+                  <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <div className="flex items-center">
+                      <ExclamationTriangleIcon className="h-4 w-4 text-red-500 mr-2" />
+                      <p className="text-sm text-red-700">{state.fileValidation.audio.error}</p>
+                    </div>
+                  </div>
+                )}
+                {state.audioFile && state.fileValidation.audio.valid && (
+                  <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
-                        <MusicalNoteIcon className="h-5 w-5 text-gray-400 mr-2" />
+                        <MusicalNoteIcon className="h-5 w-5 text-green-600 mr-2" />
                         <div>
                           <p className="text-sm font-medium text-gray-900">{state.audioFile.name}</p>
                           <p className="text-xs text-gray-500">
@@ -194,10 +316,18 @@ export default function UploadPage() {
                 </div>
                 <FileUpload
                   onFileSelect={handleArtworkFile}
-                  accept=".jpg,.jpeg,.png"
+                  accept=".jpg,.jpeg,.png,.webp"
                   maxSize={10}
                 />
-                {state.artworkFile && (
+                {!state.fileValidation.artwork.valid && (
+                  <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <div className="flex items-center">
+                      <ExclamationTriangleIcon className="h-4 w-4 text-red-500 mr-2" />
+                      <p className="text-sm text-red-700">{state.fileValidation.artwork.error}</p>
+                    </div>
+                  </div>
+                )}
+                {state.artworkFile && state.fileValidation.artwork.valid && (
                   <div className="mt-4">
                     <img
                       src={URL.createObjectURL(state.artworkFile)}
@@ -359,11 +489,47 @@ export default function UploadPage() {
               <h2 className="text-2xl font-bold text-gray-900">Processing Your Release</h2>
               <p className="text-gray-600 mt-2">We're preparing your music for distribution</p>
             </div>
-            <div className="max-w-md mx-auto">
-              <ProgressBar progress={state.progress} />
+            
+            {/* Enhanced Progress Tracking */}
+            <div className="max-w-md mx-auto space-y-4">
+              <div className="space-y-3">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Audio Upload</span>
+                  <span className="text-gray-900">{Math.round(state.uploadProgress.audio)}%</span>
+                </div>
+                <ProgressBar progress={state.uploadProgress.audio} />
+              </div>
+              
+              <div className="space-y-3">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Image Processing</span>
+                  <span className="text-gray-900">{Math.round(state.uploadProgress.artwork)}%</span>
+                </div>
+                <ProgressBar progress={state.uploadProgress.artwork} />
+              </div>
+              
+              <div className="space-y-3">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Database Processing</span>
+                  <span className="text-gray-900">{Math.round(state.uploadProgress.processing)}%</span>
+                </div>
+                <ProgressBar progress={state.uploadProgress.processing} />
+              </div>
+              
+              <div className="pt-4 border-t">
+                <div className="flex justify-between text-sm font-medium">
+                  <span className="text-gray-600">Overall Progress</span>
+                  <span className="text-blue-600">{Math.round(state.progress)}%</span>
+                </div>
+                <ProgressBar progress={state.progress} />
+              </div>
             </div>
+            
             <div className="text-sm text-gray-500">
-              This may take a few minutes...
+              {state.progress < 30 && "Uploading files..."}
+              {state.progress >= 30 && state.progress < 70 && "Processing metadata..."}
+              {state.progress >= 70 && state.progress < 100 && "Finalizing release..."}
+              {state.progress === 100 && "Complete!"}
             </div>
           </div>
         );
