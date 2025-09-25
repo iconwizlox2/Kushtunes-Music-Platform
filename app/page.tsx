@@ -57,12 +57,12 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="hero-distrokid py-20 px-4">
+      <section className="premium-bg py-24 px-4 relative">
         <div className="container mx-auto text-center">
           <div className="max-w-4xl mx-auto">
             <h1 className="heading-xl text-gray-900 mb-6 animate-fade-in">
               Get Your Music on{' '}
-              <span className="text-gradient">Every Platform</span>
+              <span className="luxury-text-gradient animate-glow">Every Platform</span>
             </h1>
             <p className="text-xl text-gray-600 mb-10 animate-fade-in">
               Upload once, distribute everywhere. Keep 100% of your rights and royalties.
@@ -120,9 +120,12 @@ export default function Home() {
             {features.map((feature, index) => (
               <div
                 key={index}
-                className="stats-distrokid hover-lift"
+                className={`card hover-lift animate-fade-in ${
+                  index % 2 === 0 ? 'animate-slide-in-left' : 'animate-slide-in-right'
+                }`}
+                style={{ animationDelay: `${index * 0.1}s` }}
               >
-                <div className="mb-4 flex justify-center">
+                <div className="mb-4 flex justify-center animate-float">
                   {feature.icon}
                 </div>
                 <h3 className="heading-sm text-gray-900 mb-3 text-center">
@@ -138,20 +141,20 @@ export default function Home() {
       </section>
 
       {/* Pricing Section */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20 premium-bg premium-pattern">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="heading-lg text-gray-900 mb-4">
+            <h2 className="heading-lg text-gray-900 mb-4 animate-fade-in">
               Simple, Transparent Pricing
             </h2>
-            <p className="text-xl text-gray-600">
+            <p className="text-xl text-gray-600 animate-fade-in">
               No hidden fees. No long-term contracts. Just great value.
             </p>
           </div>
           
           <div className="max-w-4xl mx-auto grid md:grid-cols-3 gap-8">
             {/* Free Plan */}
-            <div className="card text-center">
+            <div className="card text-center animate-slide-in-left">
               <h3 className="heading-sm text-gray-900 mb-4">Free</h3>
               <div className="text-4xl font-bold text-gray-900 mb-6">
                 $0<span className="text-lg text-gray-500">/year</span>
@@ -176,12 +179,12 @@ export default function Home() {
             </div>
 
             {/* Musician Plan */}
-            <div className="card-premium text-center relative">
-              <div className="badge-primary absolute -top-3 left-1/2 transform -translate-x-1/2">
+            <div className="card-premium text-center relative animate-fade-in animate-pulse">
+              <div className="badge-primary absolute -top-3 left-1/2 transform -translate-x-1/2 animate-glow">
                 Most Popular
               </div>
               <h3 className="heading-sm text-gray-900 mb-4">Musician</h3>
-              <div className="text-4xl font-bold text-gray-900 mb-6">
+              <div className="text-4xl font-bold luxury-text-gradient mb-6">
                 $20<span className="text-lg text-gray-500">/year</span>
               </div>
               <ul className="text-left space-y-3 mb-8">
@@ -202,13 +205,13 @@ export default function Home() {
                   HyperFollow pages
                 </li>
               </ul>
-              <button className="btn-primary w-full">
+              <button className="btn-primary w-full animate-shimmer">
                 Choose Musician
               </button>
             </div>
 
             {/* Label Plan */}
-            <div className="card text-center">
+            <div className="card text-center animate-slide-in-right">
               <h3 className="heading-sm text-gray-900 mb-4">Label</h3>
               <div className="text-4xl font-bold text-gray-900 mb-6">
                 $80<span className="text-lg text-gray-500">/year</span>

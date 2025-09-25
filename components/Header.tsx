@@ -33,15 +33,15 @@ export default function Header() {
   };
 
   return (
-    <header className="nav-distrokid sticky top-0 z-50">
+    <header className="nav-distrokid sticky top-0 z-50 backdrop-blur-xl bg-white/90 border-b border-gray-200/50">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-primary-blue rounded-lg flex items-center justify-center">
+          <Link href="/" className="flex items-center space-x-2 group">
+            <div className="w-8 h-8 luxury-gradient rounded-lg flex items-center justify-center group-hover:animate-pulse">
               <MusicalNoteIcon className="h-5 w-5 text-white" />
             </div>
-            <span className="text-xl font-bold text-gray-900">Kushtunes</span>
+            <span className="text-xl font-bold text-gray-900 group-hover:luxury-text-gradient transition-all duration-300">Kushtunes</span>
           </Link>
 
           {/* Desktop Navigation */}
