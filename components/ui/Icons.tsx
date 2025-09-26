@@ -185,6 +185,14 @@ export function PauseIcon(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
+export function StarIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" {...props}>
+      <path fill="currentColor" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+    </svg>
+  );
+}
+
 export function SparklesIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" {...props}>
@@ -197,6 +205,22 @@ export function RocketLaunchIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" {...props}>
       <path fill="currentColor" d="M12 2.5c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zm0 19c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zm-7-7c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zm14 0c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2z" />
+    </svg>
+  );
+}
+
+export function TrophyIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" {...props}>
+      <path fill="currentColor" d="M7 4V2C7 1.45 7.45 1 8 1H16C16.55 1 17 1.45 17 2V4H20C20.55 4 21 4.45 21 5S20.55 6 20 6H19V7C19 8.1 18.1 9 17 9H16V11.07C18.84 11.43 21 13.97 21 17V19C21 19.55 20.55 20 20 20H4C3.45 20 3 19.55 3 19V17C3 13.97 5.16 11.43 8 11.07V9H7C5.9 9 5 8.1 5 7V6H4C3.45 6 3 5.55 3 5S3.45 4 4 4H7ZM9 3V4H15V3H9ZM7 6V7C7 7.55 7.45 8 8 8H16C16.55 8 17 7.55 17 7V6H7ZM5 17C5 14.79 6.79 13 9 13H15C17.21 13 19 14.79 19 17V18H5V17Z" />
+    </svg>
+  );
+}
+
+export function FireIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" {...props}>
+      <path fill="currentColor" d="M17.66 11.2C17.43 10.9 17.15 10.64 16.89 10.38C16.22 9.78 15.46 9.35 14.82 8.72C13.33 7.26 13 4.85 13.95 3C13.74 3.25 13.53 3.5 13.33 3.76C13.12 4.01 12.92 4.27 12.73 4.54C11.5 6.16 10.73 8.05 10.5 10.05C10.27 12.05 10.5 14.15 11.2 16.05C11.9 17.95 13.05 19.65 14.5 21.05C15.95 22.45 17.7 23.5 19.5 24.05C21.3 24.6 23.2 24.6 25 24.05C24.5 22.25 23.8 20.55 22.9 19.05C22 17.55 20.9 16.25 19.6 15.15C18.3 14.05 16.8 13.15 15.2 12.45C16.6 11.75 17.66 11.2Z" />
     </svg>
   );
 }
