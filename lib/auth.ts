@@ -49,8 +49,11 @@ export function isValidEmail(email: string): boolean {
   return emailRegex.test(email);
 }
 
-export function isValidPassword(password: string): boolean {
-  return password.length >= 8;
+export function isValidPassword(password: string): { valid: boolean; message?: string } {
+  if (password.length < 8) {
+    return { valid: false, message: 'Password must be at least 8 characters long' };
+  }
+  return { valid: true };
 }
 
 export function isValidUsername(username: string): boolean {
