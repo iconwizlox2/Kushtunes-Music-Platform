@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/db";
-import NextAuth from "@/lib/auth";
+import { authOptions } from "@/lib/auth";
 
 export class UnauthorizedError extends Error {}
 export class BadRequestError extends Error {}
@@ -25,7 +25,7 @@ export function onError(e: unknown) {
  * Replaces the old cookie-based requireArtist()
  */
 export async function requireArtist() {
-  const session = await getServerSession(NextAuth);
+  const session = await getServerSession(authOptions);
   if (!session?.user?.email) throw new UnauthorizedError("Not signed in");
   const user = await prisma.user.findUnique({ where: { email: session.user.email } });
   if (!user) throw new UnauthorizedError("User not found");

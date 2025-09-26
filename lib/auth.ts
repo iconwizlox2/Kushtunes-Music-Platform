@@ -1,4 +1,4 @@
-import NextAuth from "next-auth";
+import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcrypt";
 import { prisma } from "@/lib/db";
@@ -20,7 +20,7 @@ export function extractTokenFromHeader(authHeader: string | null): string | null
 export async function verifyToken(token: string): Promise<any> {
   // For now, return a mock user - in production you'd verify the JWT
   // This is a temporary solution for legacy API routes
-  return { id: 'legacy-user', email: 'legacy@example.com' };
+  return { id: 'legacy-user', email: 'legacy@example.com', role: 'ADMIN' }; // Added role for admin checks
 }
 
 export function generateToken(user: any): string {
@@ -66,7 +66,7 @@ export function isValidUsername(username: string): { valid: boolean; message?: s
   return { valid: true };
 }
 
-export default NextAuth({
+const authOptions: NextAuthOptions = {
   debug: process.env.NODE_ENV === "development",
   session: {
     strategy: "jwt",
@@ -133,4 +133,7 @@ export default NextAuth({
       return session;
     },
   },
-});
+};
+
+export default NextAuth(authOptions);
+export { authOptions };
