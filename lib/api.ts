@@ -8,9 +8,8 @@ export class NotFoundError extends Error {}
 
 export function json(data: any, init?: ResponseInit | number) {
   const status = typeof init === "number" ? init : (init as ResponseInit)?.status ?? 200;
-  const headers = new Headers(typeof init === "number" ? {} : (init as ResponseInit)?.headers);
-  if (!headers.has("content-type")) headers.set("content-type", "application/json; charset=utf-8");
-  return new Response(JSON.stringify(data), { status, headers });
+  const headers = typeof init === "number" ? {} : (init as ResponseInit)?.headers;
+  return Response.json(data, { status, headers });
 }
 
 export function onError(e: unknown) {
