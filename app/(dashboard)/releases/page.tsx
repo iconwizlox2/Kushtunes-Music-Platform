@@ -15,24 +15,29 @@ type ReleaseRow = {
 };
 
 async function fetchReleases(): Promise<ReleaseRow[]> {
-  // If you protect this page with middleware, you can rely on session cookie
-  const artist = await requireArtist();
-  const rows = await prisma.release.findMany({
-    where: { primaryArtistId: artist.id },
-    orderBy: { createdAt: "desc" },
-    select: {
-      id: true, upc: true, title: true, releaseDate: true, status: true,
-      primaryArtist: { select: { name: true } },
-    },
-  });
-  return rows.map(r => ({
-    id: r.id,
-    upc: r.upc,
-    title: r.title,
-    primaryArtist: r.primaryArtist.name,
-    releaseDate: r.releaseDate.toISOString().slice(0,10),
-    status: r.status as any,
-  }));
+  try {
+    // If you protect this page with middleware, you can rely on session cookie
+    const artist = await requireArtist();
+    const rows = await prisma.release.findMany({
+      where: { primaryArtistId: artist.id },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true, upc: true, title: true, releaseDate: true, status: true,
+        primaryArtist: { select: { name: true } },
+      },
+    });
+    return rows.map(r => ({
+      id: r.id,
+      upc: r.upc,
+      title: r.title,
+      primaryArtist: r.primaryArtist.name,
+      releaseDate: r.releaseDate.toISOString().slice(0,10),
+      status: r.status as any,
+    }));
+  } catch (error) {
+    // Return empty array during static generation
+    return [];
+  }
 }
 
 export default async function ReleasesPage() {

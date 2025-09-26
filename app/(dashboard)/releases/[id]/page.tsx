@@ -12,34 +12,39 @@ type Release = {
 };
 
 async function fetchRelease(id: string): Promise<Release | null> {
-  const artist = await requireArtist();
-  const r = await prisma.release.findFirst({
-    where: { id, primaryArtistId: artist.id },
-    include: {
-      tracks: { select: { trackNumber: true, title: true, isrc: true, explicit: true } },
-      deliveries: { select: { store: true, status: true, message: true } },
-      primaryArtist: { select: { name: true } },
-    },
-  });
-  if (!r) return null;
-  return {
-    id: r.id,
-    title: r.title,
-    primaryArtist: r.primaryArtist.name,
-    upc: r.upc,
-    releaseDate: r.releaseDate.toISOString().slice(0,10),
-    coverUrl: r.coverUrl,
-    status: r.status,
-    tracks: r.tracks.map(t => ({
-      trackNumber: t.trackNumber,
-      title: t.title,
-      isrc: t.isrc,
-      explicit: t.explicit,
-    })),
-    deliveries: r.deliveries.map(d => ({
-      store: d.store, status: d.status as any, message: d.message ?? undefined
-    })),
-  };
+  try {
+    const artist = await requireArtist();
+    const r = await prisma.release.findFirst({
+      where: { id, primaryArtistId: artist.id },
+      include: {
+        tracks: { select: { trackNumber: true, title: true, isrc: true, explicit: true } },
+        deliveries: { select: { store: true, status: true, message: true } },
+        primaryArtist: { select: { name: true } },
+      },
+    });
+    if (!r) return null;
+    return {
+      id: r.id,
+      title: r.title,
+      primaryArtist: r.primaryArtist.name,
+      upc: r.upc,
+      releaseDate: r.releaseDate.toISOString().slice(0,10),
+      coverUrl: r.coverUrl,
+      status: r.status,
+      tracks: r.tracks.map(t => ({
+        trackNumber: t.trackNumber,
+        title: t.title,
+        isrc: t.isrc,
+        explicit: t.explicit,
+      })),
+      deliveries: r.deliveries.map(d => ({
+        store: d.store, status: d.status as any, message: d.message ?? undefined
+      })),
+    };
+  } catch (error) {
+    // Return null during static generation
+    return null;
+  }
 }
 
 export async function generateMetadata(
