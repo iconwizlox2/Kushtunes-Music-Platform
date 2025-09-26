@@ -9,14 +9,14 @@ export const metadata: Metadata = {
 };
 
 async function fetchRoster() {
-  const base = process.env.NEXT_PUBLIC_SITE_URL || "";
+  const base = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
   const res = await fetch(`${base}/api/label/roster`, { cache: "no-store" });
   if (!res.ok) return { label: null, roster: [] };
   return await res.json();
 }
 
 async function fetchBalances(searchParams: { start?: string; end?: string }) {
-  const base = process.env.NEXT_PUBLIC_SITE_URL || "";
+  const base = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
   const qs = new URLSearchParams();
   if (searchParams.start) qs.set("start", searchParams.start);
   if (searchParams.end) qs.set("end", searchParams.end);

@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 async function fetchData() {
   // Fetch both resources
-  const base = process.env.NEXT_PUBLIC_SITE_URL || "";
+  const base = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
   const [adv, cost] = await Promise.all([
     fetch(`${base}/api/admin/advances`, { cache: "no-store" }).then(r=>r.json()),
     fetch(`${base}/api/admin/costs`, { cache: "no-store" }).then(r=>r.json()),
@@ -18,7 +18,16 @@ async function fetchData() {
 }
 
 export default async function AdminRecoupPage() {
-  await requireAdmin(); // server-side guard
+  try {
+    await requireAdmin(); // server-side guard
+  } catch {
+    return (
+      <main style={{maxWidth:980, margin:"48px auto", padding:"0 16px"}}>
+        <h1>Access Denied</h1>
+        <p>Admin access required.</p>
+      </main>
+    );
+  }
   const { advances, costs } = await fetchData();
 
   return (
