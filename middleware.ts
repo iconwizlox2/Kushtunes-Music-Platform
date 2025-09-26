@@ -21,6 +21,15 @@ export default withAuth(
       return NextResponse.redirect(url);
     }
     
+    // Check if user is authenticated but email is not verified
+    if (isProtected && req.nextauth.token && !req.nextauth.token.emailVerified) {
+      const url = req.nextUrl.clone();
+      url.pathname = "/verify-email";
+      url.searchParams.set("email", req.nextauth.token.email || "");
+      url.searchParams.set("message", "Please verify your email address to access this page.");
+      return NextResponse.redirect(url);
+    }
+    
     return NextResponse.next();
   },
   {

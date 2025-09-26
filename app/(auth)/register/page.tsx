@@ -83,7 +83,9 @@ export default function RegisterPage() {
       const data = await response.json();
 
       if (data.success) {
-        router.push('/login?message=Account created successfully');
+        // Redirect to verification page with email info
+        const email = formData.email;
+        router.push(`/verify-email?email=${encodeURIComponent(email)}&message=${encodeURIComponent(data.message)}`);
       } else {
         setError(data.error || 'Registration failed');
       }

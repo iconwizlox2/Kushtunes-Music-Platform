@@ -52,7 +52,11 @@ export default function LoginPage() {
       if (result?.ok) {
         router.push(next);
       } else {
-        setError('Invalid email or password');
+        if (result?.error === 'EMAIL_NOT_VERIFIED') {
+          setError('Please verify your email address before logging in. Check your inbox for a verification link.');
+        } else {
+          setError('Invalid email or password');
+        }
       }
     } catch (error) {
       setError('An error occurred. Please try again.');

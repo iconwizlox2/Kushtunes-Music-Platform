@@ -90,6 +90,12 @@ const authOptions: NextAuthOptions = {
         if (!user?.passwordHash) return null;
         const ok = await bcrypt.compare(String(creds.password), user.passwordHash);
         if (!ok) return null;
+        
+        // Check if email is verified
+        if (!user.emailVerified) {
+          throw new Error("EMAIL_NOT_VERIFIED");
+        }
+        
         return { id: user.id, email: user.email, name: user.name || null };
       },
     }),
@@ -100,6 +106,13 @@ const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.email = user.email;
         token.name = user.name;
+        
+        // Get user's email verification status
+        const dbUser = await prisma.user.findUnique({
+          where: { id: user.id },
+          select: { emailVerified: true }
+        });
+        token.emailVerified = dbUser?.emailVerified;
       }
       return token;
     },
@@ -108,6 +121,7 @@ const authOptions: NextAuthOptions = {
         (session.user as any).id = token.id as string;
         (session.user as any).email = token.email as string;
         (session.user as any).name = token.name as string;
+        (session.user as any).emailVerified = token.emailVerified;
         
         // Get artist info
         if (session.user?.email) {
