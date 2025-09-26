@@ -6,7 +6,7 @@ export default withAuth(
     const { pathname } = req.nextUrl;
     
     // Define protected routes
-    const protectedRoutes = ["/dashboard", "/releases", "/marketing", "/community", "/upload", "/analytics", "/earnings", "/payouts", "/settings"];
+    const protectedRoutes = ["/dashboard", "/releases", "/marketing", "/community", "/upload", "/earnings", "/payouts", "/settings"];
     
     // Check if the current path is protected
     const isProtected = protectedRoutes.some(route => 
@@ -37,7 +37,6 @@ export const config = {
     "/marketing/:path*",
     "/community/:path*",
     "/upload/:path*",
-    "/analytics/:path*",
     "/earnings/:path*",
     "/payouts/:path*",
     "/settings/:path*",
