@@ -22,6 +22,7 @@ export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = searchParams?.get("next") || "/dashboard";
+  const message = searchParams?.get("message");
   
   const [formData, setFormData] = useState<LoginFormData>({
     email: '',
@@ -95,6 +96,11 @@ export default function LoginPage() {
         {/* Login Form */}
         <div className="bg-white/10 backdrop-blur-md rounded-3xl shadow-2xl border border-white/20 p-8">
           <form className="space-y-6" onSubmit={handleSubmit}>
+            {message && (
+              <div className="p-6 bg-green-500/20 backdrop-blur-sm border border-green-400/30 rounded-2xl animate-fade-in">
+                <p className="text-green-200 font-semibold text-center">{message}</p>
+              </div>
+            )}
             {error && (
               <div className="p-6 bg-red-500/20 backdrop-blur-sm border border-red-400/30 rounded-2xl animate-fade-in">
                 <p className="text-red-200 font-semibold text-center">{error}</p>
