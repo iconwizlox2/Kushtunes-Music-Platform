@@ -2,6 +2,9 @@ import { json, onError, requireLabelOwner, BadRequestError } from "@/lib/api";
 import { prisma } from "@/lib/db";
 import { getArtistBalanceUSD } from "@/lib/balance";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: Request) {
   try {
     const { label } = await requireLabelOwner();

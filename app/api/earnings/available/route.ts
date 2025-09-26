@@ -1,6 +1,9 @@
 import { json, onError, requireArtist, BadRequestError } from "@/lib/api";
 import { getArtistBalanceUSD, getOpenRecoupUSD } from "@/lib/balance";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: Request) {
   try {
     const artist = await requireArtist();

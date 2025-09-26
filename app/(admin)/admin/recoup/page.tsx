@@ -7,14 +7,21 @@ export const metadata: Metadata = {
   alternates: { canonical: `${siteUrl()}/admin/recoup` }
 };
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 async function fetchData() {
-  // Fetch both resources
-  const base = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-  const [adv, cost] = await Promise.all([
-    fetch(`${base}/api/admin/advances`, { cache: "no-store" }).then(r=>r.json()),
-    fetch(`${base}/api/admin/costs`, { cache: "no-store" }).then(r=>r.json()),
-  ]);
-  return { advances: adv.items || [], costs: cost.items || [] };
+  try {
+    // Fetch both resources
+    const base = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+    const [adv, cost] = await Promise.all([
+      fetch(`${base}/api/admin/advances`, { cache: "no-store" }).then(r=>r.json()),
+      fetch(`${base}/api/admin/costs`, { cache: "no-store" }).then(r=>r.json()),
+    ]);
+    return { advances: adv.items || [], costs: cost.items || [] };
+  } catch {
+    return { advances: [], costs: [] };
+  }
 }
 
 export default async function AdminRecoupPage() {

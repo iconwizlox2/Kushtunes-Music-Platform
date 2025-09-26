@@ -4,6 +4,9 @@ import { verifyToken } from '@/lib/auth';
 
 const prisma = new PrismaClient();
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 // GET /api/admin/releases/review - Get releases for review
 export async function GET(request: NextRequest) {
   try {
