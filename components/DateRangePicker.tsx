@@ -6,24 +6,24 @@ import { useState, useEffect } from "react";
 export default function DateRangePicker({ compact = false }: { compact?: boolean }) {
   const router = useRouter();
   const sp = useSearchParams();
-  const [start, setStart] = useState<string>(sp.get("start") || "");
-  const [end, setEnd] = useState<string>(sp.get("end") || "");
+  const [start, setStart] = useState<string>(sp?.get("start") || "");
+  const [end, setEnd] = useState<string>(sp?.get("end") || "");
 
   useEffect(() => {
-    setStart(sp.get("start") || "");
-    setEnd(sp.get("end") || "");
+    setStart(sp?.get("start") || "");
+    setEnd(sp?.get("end") || "");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sp.toString()]);
+  }, [sp?.toString()]);
 
   function apply() {
-    const params = new URLSearchParams(sp.toString());
+    const params = new URLSearchParams(sp?.toString() || "");
     if (start) params.set("start", start); else params.delete("start");
     if (end) params.set("end", end); else params.delete("end");
     router.push(`?${params.toString()}`);
   }
 
   function clearAll() {
-    const params = new URLSearchParams(sp.toString());
+    const params = new URLSearchParams(sp?.toString() || "");
     params.delete("start");
     params.delete("end");
     setStart(""); setEnd("");

@@ -104,10 +104,10 @@ const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ session, token }) {
-      if (token) {
-        session.user.id = token.id as string;
-        session.user.email = token.email as string;
-        session.user.name = token.name as string;
+      if (token && session.user) {
+        (session.user as any).id = token.id as string;
+        (session.user as any).email = token.email as string;
+        (session.user as any).name = token.name as string;
         
         // Get artist info
         if (session.user?.email) {

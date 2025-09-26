@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const user = verifyToken(token);
+    const user = await verifyToken(token);
     if (!user) {
       return NextResponse.json(
         { success: false, message: 'Invalid authentication token' },
@@ -140,7 +140,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const user = verifyToken(token);
+    const user = await verifyToken(token);
     if (!user) {
       return NextResponse.json(
         { success: false, message: 'Invalid authentication token' },

@@ -38,7 +38,7 @@ export async function PUT(request: NextRequest) {
     // Get user with password
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
-      select: { id: true, password: true }
+      select: { id: true, passwordHash: true }
     });
 
     if (!user) {
@@ -49,14 +49,14 @@ export async function PUT(request: NextRequest) {
     }
 
     // Verify current password
-    if (!user.password) {
+    if (!user.passwordHash) {
       return NextResponse.json(
         { success: false, message: 'No password set for this account' },
         { status: 400 }
       );
     }
     
-    const isCurrentPasswordValid = await verifyPassword(currentPassword, user.password);
+    const isCurrentPasswordValid = await verifyPassword(currentPassword, user.passwordHash);
     if (!isCurrentPasswordValid) {
       return NextResponse.json(
         { success: false, message: 'Current password is incorrect' },
@@ -79,7 +79,7 @@ export async function PUT(request: NextRequest) {
     await prisma.user.update({
       where: { id: decoded.id },
       data: {
-        password: hashedNewPassword,
+        passwordHash: hashedNewPassword,
         updatedAt: new Date()
       }
     });

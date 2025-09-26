@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
     await prisma.user.update({
       where: { id: decoded.id },
       data: {
-        avatar: avatarUrl,
+        image: avatarUrl,
         updatedAt: new Date()
       }
     });

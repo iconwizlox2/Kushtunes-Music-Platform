@@ -30,16 +30,10 @@ export async function GET(request: NextRequest) {
       select: {
         id: true,
         email: true,
-        username: true,
-        firstName: true,
-        lastName: true,
-        bio: true,
-        website: true,
-        location: true,
-        avatar: true,
+        name: true,
+        image: true,
         createdAt: true,
-        updatedAt: true,
-        isEmailVerified: true
+        updatedAt: true
       }
     });
 
@@ -85,50 +79,22 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { firstName, lastName, username, bio, website, location } = body;
-
-    // Validate username uniqueness if provided
-    if (username) {
-      const existingUser = await prisma.user.findFirst({
-        where: {
-          username: username.toLowerCase(),
-          id: { not: decoded.id }
-        }
-      });
-
-      if (existingUser) {
-        return NextResponse.json(
-          { success: false, message: 'Username is already taken' },
-          { status: 400 }
-        );
-      }
-    }
+    const { name } = body;
 
     // Update user profile
     const updatedUser = await prisma.user.update({
       where: { id: decoded.id },
       data: {
-        firstName: firstName || null,
-        lastName: lastName || null,
-        username: username ? username.toLowerCase() : null,
-        bio: bio || null,
-        website: website || null,
-        location: location || null,
+        name: name || null,
         updatedAt: new Date()
       },
       select: {
         id: true,
         email: true,
-        username: true,
-        firstName: true,
-        lastName: true,
-        bio: true,
-        website: true,
-        location: true,
-        avatar: true,
+        name: true,
+        image: true,
         createdAt: true,
-        updatedAt: true,
-        isEmailVerified: true
+        updatedAt: true
       }
     });
 

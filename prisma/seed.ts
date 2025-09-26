@@ -62,7 +62,7 @@ async function seedArtist(spec: ArtistSpec) {
   });
 
   // Tracks + 100% splits to the artist (recoup flag per track)
-  const trackRecords = [];
+  const trackRecords: any[] = [];
   for (const t of spec.release.tracks) {
     const track = await prisma.track.create({
       data: {
@@ -133,9 +133,9 @@ async function seedArtist(spec: ArtistSpec) {
   try {
     await prisma.delivery.createMany({
       data: [
-        { releaseId: release.id, store: "Spotify",     status: "live",     message: "Live" },
-        { releaseId: release.id, store: "Apple Music", status: "ingested", message: "Processing" },
-        { releaseId: release.id, store: "YouTube",     status: "live",     message: "Live" },
+        { releaseId: release.id, store: "Spotify",     status: "LIVE",     message: "Live" },
+        { releaseId: release.id, store: "Apple Music", status: "PROCESSING", message: "Processing" },
+        { releaseId: release.id, store: "YouTube",     status: "LIVE",     message: "Live" },
       ],
     });
   } catch {}

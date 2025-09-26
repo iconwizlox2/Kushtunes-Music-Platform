@@ -31,15 +31,8 @@ export const authOptions: AuthOptions = {
             select: {
               id: true,
               email: true,
-              username: true,
-              firstName: true,
-              lastName: true,
-              role: true,
-              avatar: true,
-              bio: true,
-              website: true,
-              location: true,
-              isEmailVerified: true,
+              name: true,
+              image: true,
             },
           });
           
@@ -65,13 +58,8 @@ export const authOptions: AuthOptions = {
             await prisma.user.create({
               data: {
                 email: user.email!,
-                username: user.email!.split('@')[0],
-                firstName: user.name?.split(' ')[0] || null,
-                lastName: user.name?.split(' ').slice(1).join(' ') || null,
-                avatar: user.image,
-                isEmailVerified: true,
-                role: 'ARTIST',
-                isActive: true,
+                name: user.name,
+                image: user.image,
               },
             });
           } else {
@@ -79,8 +67,7 @@ export const authOptions: AuthOptions = {
             await prisma.user.update({
               where: { email: user.email! },
               data: {
-                avatar: user.image,
-                isEmailVerified: true,
+                image: user.image,
               },
             });
           }

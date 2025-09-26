@@ -61,7 +61,7 @@ interface Track {
 
 export default function ArtistProfilePage() {
   const params = useParams();
-  const artistId = params.id as string;
+  const artistId = params?.id as string;
   
   const [artist, setArtist] = useState<Artist | null>(null);
   const [releases, setReleases] = useState<Release[]>([]);

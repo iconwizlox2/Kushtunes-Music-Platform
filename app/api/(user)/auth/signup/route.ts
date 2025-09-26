@@ -38,16 +38,15 @@ export async function POST(request: NextRequest) {
       const user = await tx.user.create({
         data: {
           email,
-          password: hashedPassword,
-          firstName,
-          lastName,
-          role: 'ARTIST'
+          passwordHash: hashedPassword,
+          name: `${firstName} ${lastName}`
         }
       });
 
       // Create artist profile
       const artist = await tx.artist.create({
         data: {
+          userId: user.id,
           name: `${firstName} ${lastName}`,
           legalName,
           country,
@@ -63,15 +62,7 @@ export async function POST(request: NextRequest) {
     const token = generateToken({
       id: result.user.id,
       email: result.user.email,
-      username: result.user.username,
-      firstName: result.user.firstName,
-      lastName: result.user.lastName,
-      bio: result.user.bio,
-      website: result.user.website,
-      location: result.user.location,
-      avatar: result.user.avatar,
-      isEmailVerified: result.user.isEmailVerified,
-      role: result.user.role
+      name: result.user.name
     });
 
     return NextResponse.json({
@@ -81,9 +72,7 @@ export async function POST(request: NextRequest) {
         user: {
           id: result.user.id,
           email: result.user.email,
-          firstName: result.user.firstName,
-          lastName: result.user.lastName,
-          role: result.user.role
+          name: result.user.name
         },
         artist: {
           id: result.artist.id,
@@ -123,7 +112,7 @@ export async function PUT(request: NextRequest) {
       }
     });
 
-    if (!user || !user.password) {
+    if (!user || !user.passwordHash) {
       return NextResponse.json(
         { success: false, message: 'Invalid credentials' },
         { status: 401 }
@@ -131,7 +120,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // Verify password
-    const isPasswordValid = await verifyPassword(password, user.password);
+    const isPasswordValid = await verifyPassword(password, user.passwordHash);
     if (!isPasswordValid) {
       return NextResponse.json(
         { success: false, message: 'Invalid credentials' },
@@ -139,27 +128,13 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    // Check if account is active
-    if (!user.isActive) {
-      return NextResponse.json(
-        { success: false, message: 'Account is deactivated' },
-        { status: 401 }
-      );
-    }
+    // Account is active by default in our schema
 
     // Generate JWT token
     const token = generateToken({
       id: user.id,
       email: user.email,
-      username: user.username,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      bio: user.bio,
-      website: user.website,
-      location: user.location,
-      avatar: user.avatar,
-      isEmailVerified: user.isEmailVerified,
-      role: user.role
+      name: user.name
     });
 
     // Get artist profile
@@ -174,9 +149,7 @@ export async function PUT(request: NextRequest) {
         user: {
           id: user.id,
           email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          role: user.role
+          name: user.name
         },
         artist: artist ? {
           id: artist.id,
