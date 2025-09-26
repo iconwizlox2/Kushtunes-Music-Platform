@@ -17,7 +17,7 @@ export default withAuth(
       // Redirect to login if not authenticated
       const url = req.nextUrl.clone();
       url.pathname = "/login";
-      url.searchParams.set("callbackUrl", pathname);
+      url.searchParams.set("next", pathname);
       return NextResponse.redirect(url);
     }
     

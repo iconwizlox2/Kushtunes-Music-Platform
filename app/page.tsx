@@ -82,7 +82,7 @@ export default function Home() {
             
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row justify-center gap-6 mb-16">
-              <Link href="/register">
+              <Link href="/register?plan=starter">
                 <button className="group relative px-12 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold text-lg rounded-2xl shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300 overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   <span className="relative z-10 flex items-center space-x-3">
@@ -225,7 +225,7 @@ export default function Home() {
                   Basic analytics
                 </li>
               </ul>
-              <Link href="/register">
+              <Link href="/register?plan=starter">
                 <button className="w-full py-3 bg-gray-900 text-white font-bold text-lg rounded-xl hover:bg-gray-800 transition-all duration-300 hover:scale-105">
                   Sign Up
                 </button>
@@ -265,7 +265,7 @@ export default function Home() {
                   HyperFollow pages
                 </li>
               </ul>
-              <Link href="/register">
+              <Link href="/register?plan=pro">
                 <button className="w-full py-3 bg-white text-blue-600 font-bold text-lg rounded-xl hover:bg-gray-100 transition-all duration-300 hover:scale-105">
                   Upgrade Now
                 </button>
@@ -302,7 +302,7 @@ export default function Home() {
                   Custom label pages
                 </li>
               </ul>
-              <Link href="/register">
+              <Link href="/register?plan=label">
                 <button className="w-full py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-lg rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 hover:scale-105">
                   Launch a Label
                 </button>
@@ -412,7 +412,7 @@ export default function Home() {
           <p className="text-xl text-white/80 mb-12 max-w-3xl mx-auto">
             Join thousands of artists who trust Kushtunes for their music distribution
           </p>
-          <Link href="/register">
+          <Link href="/register?plan=starter">
             <button className="group relative px-12 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold text-lg rounded-2xl shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300 overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <span className="relative z-10 flex items-center space-x-3">

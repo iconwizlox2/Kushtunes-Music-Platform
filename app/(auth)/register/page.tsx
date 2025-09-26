@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   EyeIcon,
   EyeSlashIcon,
@@ -22,10 +22,14 @@ interface RegisterFormData {
   artistType: 'artist' | 'label';
   legalName: string;
   phone?: string;
+  plan: 'starter' | 'pro' | 'label';
 }
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const planParam = searchParams.get('plan') as 'starter' | 'pro' | 'label' | null;
+  
   const [formData, setFormData] = useState<RegisterFormData>({
     name: '',
     email: '',
@@ -34,8 +38,20 @@ export default function RegisterPage() {
     country: 'GB',
     artistType: 'artist',
     legalName: '',
-    phone: ''
+    phone: '',
+    plan: planParam || 'starter'
   });
+
+  // Update artistType based on plan
+  useEffect(() => {
+    if (planParam === 'label') {
+      setFormData(prev => ({ ...prev, artistType: 'label', plan: 'label' }));
+    } else if (planParam === 'pro') {
+      setFormData(prev => ({ ...prev, artistType: 'artist', plan: 'pro' }));
+    } else {
+      setFormData(prev => ({ ...prev, artistType: 'artist', plan: 'starter' }));
+    }
+  }, [planParam]);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -77,6 +93,7 @@ export default function RegisterPage() {
           artistType: formData.artistType,
           legalName: formData.legalName,
           phone: formData.phone,
+          plan: formData.plan,
         }),
       });
 
@@ -137,6 +154,35 @@ export default function RegisterPage() {
               </div>
             )}
 
+            {/* Plan Selection */}
+            <div>
+              <label className="block text-sm font-bold text-white mb-3">
+                Selected Plan: <span className="text-blue-400">{formData.plan.toUpperCase()}</span>
+              </label>
+              <div className="p-4 bg-white/5 backdrop-blur-sm border border-white/20 rounded-2xl">
+                <div className="text-center">
+                  {formData.plan === 'starter' && (
+                    <>
+                      <div className="text-lg font-bold text-white">STARTER</div>
+                      <div className="text-sm text-white/80">$0/year • 10% commission • Unlimited singles</div>
+                    </>
+                  )}
+                  {formData.plan === 'pro' && (
+                    <>
+                      <div className="text-lg font-bold text-white">PRO</div>
+                      <div className="text-sm text-white/80">$20/year • 10% commission • Albums & EPs</div>
+                    </>
+                  )}
+                  {formData.plan === 'label' && (
+                    <>
+                      <div className="text-lg font-bold text-white">LABEL</div>
+                      <div className="text-sm text-white/80">$80/year • 10% commission • Up to 100 artists</div>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+
             {/* Artist Type Selection */}
             <div>
               <label className="block text-sm font-bold text-white mb-3">
@@ -145,7 +191,12 @@ export default function RegisterPage() {
               <div className="grid grid-cols-2 gap-4">
                 <button
                   type="button"
-                  onClick={() => handleInputChange('artistType', 'artist')}
+                  onClick={() => {
+                    handleInputChange('artistType', 'artist');
+                    if (formData.plan === 'label') {
+                      handleInputChange('plan', 'pro');
+                    }
+                  }}
                   className={`py-3 px-4 rounded-xl border-2 transition-all duration-300 ${
                     formData.artistType === 'artist'
                       ? 'border-blue-500 bg-blue-500/20 text-white'
@@ -159,7 +210,10 @@ export default function RegisterPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleInputChange('artistType', 'label')}
+                  onClick={() => {
+                    handleInputChange('artistType', 'label');
+                    handleInputChange('plan', 'label');
+                  }}
                   className={`py-3 px-4 rounded-xl border-2 transition-all duration-300 ${
                     formData.artistType === 'label'
                       ? 'border-blue-500 bg-blue-500/20 text-white'
