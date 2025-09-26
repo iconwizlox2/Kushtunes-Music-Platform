@@ -56,8 +56,14 @@ export function isValidPassword(password: string): { valid: boolean; message?: s
   return { valid: true };
 }
 
-export function isValidUsername(username: string): boolean {
-  return username.length >= 3 && /^[a-zA-Z0-9_]+$/.test(username);
+export function isValidUsername(username: string): { valid: boolean; message?: string } {
+  if (username.length < 3) {
+    return { valid: false, message: 'Username must be at least 3 characters long' };
+  }
+  if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+    return { valid: false, message: 'Username can only contain letters, numbers, and underscores' };
+  }
+  return { valid: true };
 }
 
 export default NextAuth({
