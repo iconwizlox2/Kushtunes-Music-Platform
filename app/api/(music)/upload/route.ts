@@ -24,7 +24,7 @@ import {
   calculateReleaseDuration,
   formatDuration
 } from '@/lib/release-logic';
-import { extractTokenFromHeader, verifyToken } from '@/lib/auth';
+import { auth } from '@/lib/auth';
 
 const prisma = new PrismaClient();
 
@@ -45,22 +45,23 @@ async function optimizeImage(buffer: Buffer): Promise<Buffer> {
 
 export async function POST(request: NextRequest) {
   try {
-    // Extract and verify authentication token
-    const authHeader = request.headers.get('authorization');
-    const token = extractTokenFromHeader(authHeader);
-    
-    if (!token) {
+    // Get authenticated user
+    const session = await auth();
+    if (!session?.user?.email) {
       return NextResponse.json(
         { success: false, message: 'Authentication required' },
         { status: 401 }
       );
     }
 
-    const user = await verifyToken(token);
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email }
+    });
+
     if (!user) {
       return NextResponse.json(
-        { success: false, message: 'Invalid authentication token' },
-        { status: 401 }
+        { success: false, message: 'User not found' },
+        { status: 404 }
       );
     }
 
@@ -257,22 +258,23 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    // Extract and verify authentication token
-    const authHeader = request.headers.get('authorization');
-    const token = extractTokenFromHeader(authHeader);
-    
-    if (!token) {
+    // Get authenticated user
+    const session = await auth();
+    if (!session?.user?.email) {
       return NextResponse.json(
         { success: false, message: 'Authentication required' },
         { status: 401 }
       );
     }
 
-    const user = await verifyToken(token);
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email }
+    });
+
     if (!user) {
       return NextResponse.json(
-        { success: false, message: 'Invalid authentication token' },
-        { status: 401 }
+        { success: false, message: 'User not found' },
+        { status: 404 }
       );
     }
 

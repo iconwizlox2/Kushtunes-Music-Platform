@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 
 interface Release {
   id: string;
@@ -43,11 +44,21 @@ interface Payout {
 
 export default function BackofficeAdmin() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [activeTab, setActiveTab] = useState('content-review');
   const [releases, setReleases] = useState<Release[]>([]);
   const [reports, setReports] = useState<Report[]>([]);
   const [payouts, setPayouts] = useState<Payout[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Check if user is admin
+  useEffect(() => {
+    if (status === 'loading') return;
+    if (!session || (session.user as any)?.role !== 'admin') {
+      router.push('/');
+      return;
+    }
+  }, [session, status, router]);
 
   useEffect(() => {
     loadAdminData();
@@ -106,11 +117,9 @@ export default function BackofficeAdmin() {
 
   const handleReleaseApproval = async (releaseId: string, approved: boolean) => {
     try {
-      const token = localStorage.getItem('token');
       const response = await fetch(`/api/admin/releases/${releaseId}/review`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ approved })
@@ -127,11 +136,9 @@ export default function BackofficeAdmin() {
 
   const handlePayoutApproval = async (payoutId: string, approved: boolean) => {
     try {
-      const token = localStorage.getItem('token');
       const response = await fetch(`/api/admin/payouts/${payoutId}/approve`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ approved })

@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { useSession, signOut } from 'next-auth/react';
 import {
   MusicalNoteIcon,
   ArrowRightOnRectangleIcon,
@@ -13,23 +14,10 @@ import {
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState<any>(null);
   const [isScrolled, setIsScrolled] = useState(false);
+  const { data: session, status } = useSession();
 
   useEffect(() => {
-    const token = localStorage.getItem('kushtunes_token');
-    if (token) {
-      setIsLoggedIn(true);
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        setUser(payload);
-      } catch (e) {
-        localStorage.removeItem('kushtunes_token');
-        setIsLoggedIn(false);
-      }
-    }
-
     // Handle scroll effect
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
@@ -38,11 +26,8 @@ export default function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem('kushtunes_token');
-    setIsLoggedIn(false);
-    setUser(null);
-    window.location.href = '/';
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: '/' });
   };
 
   return (
@@ -115,7 +100,7 @@ export default function Header() {
               <span className="relative z-10">Community</span>
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </Link>
-            {isLoggedIn && user?.role === 'ADMIN' && (
+            {session?.user && (session.user as any).role === 'admin' && (
               <Link href="/admin" className="px-4 py-2 text-gray-700 hover:text-blue-600 font-semibold transition-all duration-300 rounded-xl hover:bg-blue-50 relative group">
                 <span className="relative z-10">Admin</span>
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -125,13 +110,13 @@ export default function Header() {
 
           {/* User Actions */}
           <div className="hidden lg:flex items-center space-x-3">
-            {isLoggedIn ? (
+            {session ? (
               <div className="flex items-center space-x-3">
                 <Link href="/profile" className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:text-blue-600 font-semibold transition-all duration-300 rounded-xl hover:bg-blue-50 group">
                   <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
                     <UserIcon className="h-4 w-4 text-white" />
                   </div>
-                  <span className="relative z-10">{user?.username || user?.email?.split('@')[0]}</span>
+                  <span className="relative z-10">{session.user?.name || session.user?.email?.split('@')[0]}</span>
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </Link>
                 <button
@@ -285,7 +270,7 @@ export default function Header() {
                 </div>
                 <span>Community</span>
               </Link>
-              {isLoggedIn && user?.role === 'ADMIN' && (
+              {session?.user && (session.user as any).role === 'admin' && (
                 <Link 
                   href="/admin" 
                   className="px-4 py-3 text-gray-700 hover:text-blue-600 font-semibold transition-all duration-300 rounded-xl hover:bg-blue-50 flex items-center space-x-3"
@@ -300,7 +285,7 @@ export default function Header() {
               
               {/* Mobile User Actions */}
               <div className="pt-4 border-t border-gray-200 mt-4">
-                {isLoggedIn ? (
+                {session ? (
                   <div className="space-y-2">
                     <Link 
                       href="/profile" 
@@ -310,7 +295,7 @@ export default function Header() {
                       <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
                         <UserIcon className="h-4 w-4 text-white" />
                       </div>
-                      <span>{user?.username || user?.email?.split('@')[0]}</span>
+                      <span>{session.user?.name || session.user?.email?.split('@')[0]}</span>
                     </Link>
                     <button
                       onClick={() => {
